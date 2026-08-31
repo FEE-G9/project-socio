@@ -21,6 +21,14 @@ export default [
     rules: {
       ...reactHooks.configs.recommended.rules,
       ...reactRefresh.configs.vite.rules,
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_|React|[A-Z].*', // Allow React and component names (starting with uppercase)
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 ]
