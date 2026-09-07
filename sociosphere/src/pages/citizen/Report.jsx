@@ -143,9 +143,10 @@ export default function Report() {
 									onChange={(event) => setDescription(event.target.value)}
 									placeholder="Describe the issue, its impact, and anything your community team should know..."
 									rows="5"
+									maxLength={1000}
 									className="w-full resize-y rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm leading-6 text-slate-100 outline-none placeholder:text-slate-500 transition-all duration-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
 								/>
-								<span className="mt-2 block text-right text-xs text-slate-500">{description.length}/500</span>
+								<span className="mt-2 block text-right text-xs text-slate-500">{description.length}/1000</span>
 							</label>
 
 							<label className="block">
@@ -163,7 +164,20 @@ export default function Report() {
 									<span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-slate-300"><ImagePlus size={19} /></span>
 									<span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-slate-200">{photoName || "Upload an image of the issue"}</span><span className="mt-1 block text-xs text-slate-500">JPG or PNG, up to 10 MB</span></span>
 									<Camera size={18} className="text-slate-500" />
-									<input type="file" accept="image/png,image/jpeg" className="sr-only" onChange={(event) => setPhotoName(event.target.files?.[0]?.name || "")} />
+									<input
+										type="file"
+										accept="image/*"
+										className="sr-only"
+										onChange={(event) => {
+											const file = event.target.files?.[0];
+											if (file && file.type.startsWith("image/")) {
+												setPhotoName(file.name);
+											} else {
+												setPhotoName("");
+												event.target.value = "";
+											}
+										}}
+									/>
 								</label>
 							</div>
 						</div>
