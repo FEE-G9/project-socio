@@ -194,7 +194,7 @@ export default function Home() {
             <span className="online-dot" />
           </div>
 
-          <nav className="main-nav">
+          {/* <nav className="main-nav">
             <button className="nav-item active">
               <Building2 size={17} />
               Home
@@ -223,10 +223,10 @@ export default function Home() {
               <Bell size={17} />
               Announcements
             </button>
-          </nav>
+          </nav> */}
 
           <div className="navbar-actions">
-            <button
+            {/* <button
               className={`theme-toggle-btn ${isDarkMode ? "dark" : "light"}`}
               onClick={toggleTheme}
               title={`Switch to ${isDarkMode ? "Light" : "Dark"} mode`}
@@ -241,7 +241,7 @@ export default function Home() {
                   )}
                 </div>
               </div>
-            </button>
+            </button> */}
 
             <button
               className="notification-button"
@@ -277,6 +277,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+        
       </header>
 
       {showNotifications && (
