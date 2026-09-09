@@ -4,61 +4,110 @@ import "./landing.css";
 export default function Landing() {
   return (
     <div className="landing-shell">
-      <div className="ambient ambient-one" />
-      <div className="ambient ambient-two" />
-      <div className="ambient ambient-three" />
 
       <header className="landing-header">
+
         <div className="brand-wrap">
           <div className="brand-mark">
-            <Shield size={18} />
+            <Shield size={19} />
           </div>
-          <div className="brand-text">SocioSphere</div>
-        </div>
 
-        <nav className="landing-nav" aria-label="Main navigation">
-          <button className="nav-pill active">Home</button>
-          <button className="nav-pill">Explore</button>
-        </nav>
+          <div>
+            <div className="brand-text">
+              Socio<span>Sphere</span>
+            </div>
 
-        <div className="header-actions">
-          <button className="sign-in-btn">Sign In</button>
-          <button className="start-btn">Get Started</button>
-        </div>
-      </header>
-
-      <main className="landing-hero">
-        <div className="photo-grid" aria-hidden="true">
-          <div className="photo photo-fireworks" />
-          <div className="photo photo-community" />
-          <div className="photo photo-festival" />
-        </div>
-
-        <div className="hero-content">
-          <div className="floating-tag">Join Stronger Communities Together</div>
-
-          <h1 className="hero-title">
-            <span>Connect. Collaborate.</span>
-            <span className="accent">Community.</span>
-          </h1>
-
-          <div className="hero-text-block">
-            <p>
-              SocioSphere brings your neighborhood together — report issues,
-              join events, chat with neighbors, and build the community you’ve
-              always wanted.
-            </p>
-
-            <div className="cta-row">
-              <button className="primary-cta">
-                Get Started Free
-                <ArrowRight size={18} />
-              </button>
-              <button className="secondary-cta">Sign In</button>
+            <div className="brand-tagline">
+              One Community. Everything Connected.
             </div>
           </div>
         </div>
+
+        <nav className="landing-nav">
+          <button className="nav-link active">Home</button>
+          <button className="nav-link">About Us</button>
+          <button className="nav-link">Dashboard</button>
+          <button className="nav-link">Services</button>
+          <button className="nav-link">Community</button>
+          <button className="nav-link">Contact</button>
+        </nav>
+
+        <div className="header-actions">
+          <button className="language-btn">EN</button>
+          <button className="login-btn">Login</button>
+          <button className="signup-btn">Sign Up</button>
+        </div>
+
+      </header>
+
+
+      <main className="landing-hero">
+
+        <video
+          className="hero-video"
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source src="/bg-animated.mp4" type="video/mp4" />
+        </video>
+
+        <div className="image-overlay"></div>
+
+
+        <div className="hero-content">
+
+          <div className="hero-label">
+            BUILDING BETTER COMMUNITIES
+          </div>
+
+          <h1 className="hero-title">
+            One Community.
+            <span>Everything Connected.</span>
+          </h1>
+
+          <p className="hero-description">
+            SocioSphere brings your neighborhood together with
+            community updates, local services, events, issue reporting,
+            and meaningful connections.
+          </p>
+
+          <div className="cta-row">
+
+            <button className="primary-cta">
+              Join Your Community
+              <ArrowRight size={18} />
+            </button>
+
+            <button className="secondary-cta">
+              Explore SocioSphere
+            </button>
+
+          </div>
+
+        </div>
+
       </main>
+
+
+      <section className="intro-section">
+
+        <p className="section-label">
+          EVERYTHING YOU NEED
+        </p>
+
+        <h2>
+          All in One Place.
+        </h2>
+
+        <p className="section-description">
+          Stay informed, stay connected, and take an active part
+          in the community around you.
+        </p>
+
+      </section>
+
     </div>
   );
 }
