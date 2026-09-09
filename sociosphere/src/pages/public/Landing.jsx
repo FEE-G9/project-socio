@@ -1,6 +1,5 @@
-import { ArrowRight, Shield } from "lucide-react";
+ import { Shield, ArrowRight } from "lucide-react";
 import "./landing.css";
-
 export default function Landing() {
   return (
     <div className="landing-shell">
@@ -111,3 +110,4 @@ export default function Landing() {
     </div>
   );
 }
+
