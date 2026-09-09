@@ -25,10 +25,10 @@ export default function Landing() {
 
         <nav className="landing-nav">
           <button className="nav-link active">Home</button>
-          <button className="nav-link">About Us</button>
           <button className="nav-link">Dashboard</button>
           <button className="nav-link">Services</button>
           <button className="nav-link">Community</button>
+          <button className="nav-link">About Us</button>
           <button className="nav-link">Contact</button>
         </nav>
 
