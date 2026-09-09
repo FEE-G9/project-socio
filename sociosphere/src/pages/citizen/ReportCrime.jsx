@@ -55,6 +55,8 @@ const severityLevels = [
 	},
 ];
 
+const headingClass="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-300";
+
 export default function ReportCrime() {
 	const [category, setCategory] = useState("");
 	const [severity, setSeverity] = useState("high");
@@ -226,7 +228,7 @@ export default function ReportCrime() {
 						<div className="space-y-6">
 							{/* Category */}
 							<label className="block">
-								<span className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-300">
+								<span className={headingClass}>
 									Incident Category <span className="text-rose-400">*</span>
 								</span>
 								<span className="relative block">
@@ -248,7 +250,7 @@ export default function ReportCrime() {
 
 							{/* Severity Level */}
 							<div>
-								<span className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-300">
+								<span className={headingClass}>
 									Severity / Threat Level <span className="text-rose-400">*</span>
 								</span>
 								<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -259,7 +261,7 @@ export default function ReportCrime() {
 											onClick={() => setSeverity(lvl.id)}
 											className={`flex flex-col text-left rounded-xl border p-3.5 transition-all duration-200 ${
 												severity === lvl.id
-													? "border-rose-500 bg-rose-500/10 ring-2 ring-rose-500/20"
+													? lvl.badgeClass
 													: "border-slate-800 bg-slate-900/60 hover:border-slate-700"
 											}`}
 										>
@@ -273,7 +275,7 @@ export default function ReportCrime() {
 							{/* Incident Time & Date */}
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 								<label className="block">
-									<span className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-300">
+									<span className={headingClass}>
 										When did this occur?
 									</span>
 									<span className="relative block">
@@ -288,7 +290,7 @@ export default function ReportCrime() {
 									</span>
 								</label>
 								<label className="block">
-									<span className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-300">
+									<span className={headingClass}>
 										Specific Landmark / Area
 									</span>
 									<input
@@ -302,8 +304,9 @@ export default function ReportCrime() {
 							</div>
 
 							{/* Location */}
+							{/* 7/09/2026 -> To change the Location to Current colony person is in later */}
 							<label className="block">
-								<span className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-300">
+								<span className={headingClass}>
 									Location <span className="text-rose-400">*</span>
 								</span>
 								<span className="relative block">
@@ -325,7 +328,7 @@ export default function ReportCrime() {
 
 							{/* Description */}
 							<label className="block">
-								<span className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-300">
+								<span className={headingClass}>
 									Detailed Description <span className="text-rose-400">*</span>
 								</span>
 								<textarea
@@ -343,7 +346,7 @@ export default function ReportCrime() {
 
 							{/* Suspect / Vehicle Details */}
 							<label className="block">
-								<span className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-300">
+								<span className={headingClass}>
 									Suspect / Vehicle Details <span className="font-normal normal-case text-slate-500">(optional)</span>
 								</span>
 								<input
@@ -357,10 +360,11 @@ export default function ReportCrime() {
 
 							{/* Evidence / Photo / Video Upload */}
 							<div>
-								<span className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-300">
+								<span className={headingClass}>
 									Photo / Video Evidence <span className="font-normal normal-case text-slate-500">(image only)</span>
 								</span>
 								<label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-slate-700 bg-slate-900/60 px-4 py-4 transition-colors duration-200 hover:border-rose-500/60 hover:bg-slate-900">
+									{/* This means background is slate (blue/greyish) with 60% opacity ,px means horizontal padding and py means vertical padding both of 4*(0.25rem) =1 rem (16px) */}
 									<span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-slate-300">
 										<ImagePlus size={19} />
 									</span>
@@ -392,6 +396,7 @@ export default function ReportCrime() {
 
 							{/* Anonymous Toggle & Contact Info */}
 							<div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-4">
+							{/* space-y-4 gives vertical space of 1 rem in child elements */}
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-3">
 										<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-slate-300">
@@ -405,13 +410,13 @@ export default function ReportCrime() {
 									<button
 										type="button"
 										onClick={() => setIsAnonymous(!isAnonymous)}
-										className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+										className={`relative inline-flex h-6 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
 											isAnonymous ? "bg-rose-600" : "bg-slate-700"
 										}`}
 									>
 										<span
 											className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-												isAnonymous ? "translate-x-5" : "translate-x-0"
+												isAnonymous ? "translate-x-4" : "translate-x-0"
 											}`}
 										/>
 									</button>
@@ -449,7 +454,7 @@ export default function ReportCrime() {
 								disabled={!canSubmit}
 								className="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-6 py-3 text-sm font-bold text-white transition-all duration-200 hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-40 shadow-lg shadow-rose-600/20"
 							>
-								<Send size={17} />
+								<Send size={17}/>
 								Submit Crime Report
 							</button>
 						</div>
@@ -457,7 +462,7 @@ export default function ReportCrime() {
 
 					{/* Sidebar */}
 					<aside className="space-y-4">
-						<section className="rounded-2xl border border-rose-500/20 bg-[#0D1524] p-5">
+						<section className="rounded-2xl border border-rose-500/50 bg-slate-900/85 p-5">
 							<div className="mb-4 flex items-center gap-3">
 								<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-500/15 text-rose-400">
 									<PhoneCall size={19} />
