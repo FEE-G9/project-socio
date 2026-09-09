@@ -21,8 +21,9 @@ import {
   Phone,
   Calendar,
   MessageSquare,
+  Sun,
+  Moon,
 } from "lucide-react";
-import "./home.css";
 
 const issuesData = [
   {
@@ -133,6 +134,12 @@ export default function Home() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [toast, setToast] = useState("");
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => !prev);
+    showToast(`Switched to ${isDarkMode ? "Light" : "Dark"} mode`);
+  };
 
   //Toast-To remove in future
   const showToast = (message) => {
@@ -162,7 +169,7 @@ export default function Home() {
   });
 
   return (
-    <div className="home-page">
+    <div className={`home-page ${isDarkMode ? "dark-mode" : "light-mode"}`}>
       <header className="home-navbar">
         <div className="navbar-inner">
           <div className="brand-section">
@@ -219,6 +226,23 @@ export default function Home() {
           </nav>
 
           <div className="navbar-actions">
+            <button
+              className={`theme-toggle-btn ${isDarkMode ? "dark" : "light"}`}
+              onClick={toggleTheme}
+              title={`Switch to ${isDarkMode ? "Light" : "Dark"} mode`}
+              aria-label="Toggle Theme"
+            >
+              <div className="theme-toggle-track">
+                <div className="theme-toggle-thumb">
+                  {isDarkMode ? (
+                    <Sun size={15} className="theme-icon sun" />
+                  ) : (
+                    <Moon size={15} className="theme-icon moon" />
+                  )}
+                </div>
+              </div>
+            </button>
+
             <button
               className="notification-button"
               onClick={() => setShowNotifications(!showNotifications)}

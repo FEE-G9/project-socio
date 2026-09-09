@@ -10,9 +10,9 @@ function App() {
 
   // return <Landing />;
   // To preview Report, comment the line above and uncomment:
-  return <Report />;
+  // return <Report />;
   // return <ReportCrime />;
-  // return <Home/>
+  return <Home/>
   
 }
 
