@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./home.css";
 import Report from "./Report";
 import ReportCrime from "./ReportCrime";
+import Map from "./Map";
 import {
   Shield,
   MapPin,
@@ -144,6 +145,10 @@ export default function Home() {
     }
     if (title === "Report Crime") {
       setActiveModal("reportCrime");
+      return;
+    }
+    if (title === "View Map") {
+      setActiveModal("map");
       return;
     }
 
@@ -795,6 +800,63 @@ export default function Home() {
                 showToast("Crime report logged & security notified!");
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Connected Map Modal */}
+      {activeModal === "map" && (
+        <div
+          className="modal-overlay"
+          onClick={() => setActiveModal(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100,
+            backgroundColor: "rgba(3, 7, 18, 0.85)",
+            backdropFilter: "blur(8px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: "1140px",
+              maxHeight: "92vh",
+              overflowY: "auto",
+              borderRadius: "20px",
+              backgroundColor: "#070B14",
+              border: "1px solid #1E293B",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.6)",
+            }}
+          >
+            <button
+              onClick={() => setActiveModal(null)}
+              style={{
+                position: "absolute",
+                top: "16px",
+                right: "16px",
+                zIndex: 30,
+                padding: "8px",
+                borderRadius: "12px",
+                backgroundColor: "#1E293B",
+                color: "#94A3B8",
+                border: "none",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              aria-label="Close modal"
+            >
+              <X size={20} />
+            </button>
+            <Map onClose={() => setActiveModal(null)} isEmbedded={true} />
           </div>
         </div>
       )}
