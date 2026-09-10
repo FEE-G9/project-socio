@@ -1568,3 +1568,16 @@
     width: auto;
   }
 }
+
+/* Crime Section Styling */
+.count-badge.crime-badge {
+  background: rgba(251, 92, 114, 0.15);
+  color: #fb7085;
+  border: 1px solid rgba(251, 92, 114, 0.35);
+}
+
+.filter-tabs button.active-crime {
+  border-color: transparent;
+  background: #fb5c72;
+  color: #ffffff;
+}

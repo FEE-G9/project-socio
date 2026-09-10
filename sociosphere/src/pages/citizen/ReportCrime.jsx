@@ -57,7 +57,7 @@ const severityLevels = [
 
 const headingClass="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-300";
 
-export default function ReportCrime() {
+export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) {
 	const [category, setCategory] = useState("");
 	const [severity, setSeverity] = useState("high");
 	const [description, setDescription] = useState("");
@@ -67,6 +67,7 @@ export default function ReportCrime() {
 	const [incidentTime, setIncidentTime] = useState("Just now");
 	const [suspectDetails, setSuspectDetails] = useState("");
 	const [fileName, setFileName] = useState("");
+	const [fileUrl, setFileUrl] = useState("");
 	const [isAnonymous, setIsAnonymous] = useState(false);
 	const [reporterName, setReporterName] = useState("");
 	const [reporterPhone, setReporterPhone] = useState("");
@@ -78,15 +79,86 @@ export default function ReportCrime() {
 	const handleSubmit = (event) => {
 		event.preventDefault();
 		if (!canSubmit) return;
+
+		const now = new Date();
+		const dateString = now.toLocaleDateString("en-US", {
+			month: "short",
+			day: "numeric",
+			year: "numeric",
+		});
+		const timeString = now.toLocaleTimeString("en-US", {
+			hour: "2-digit",
+			minute: "2-digit",
+			hour12: true,
+		});
+
 		const randomNum = Math.floor(10000 + Math.random() * 90000);
-		setReportId(`CRM-2026-${randomNum}`);
+		const cId = `CRM-2026-${randomNum}`;
+		setReportId(cId);
+
+		const categoryObj = crimeCategories.find((c) => c.value === category);
+		const categoryLabel = categoryObj ? categoryObj.label : (category || "Crime & Safety");
+
+		const severityMap = {
+			critical: { priority: "CRITICAL PRIORITY", class: "critical" },
+			high: { priority: "HIGH PRIORITY", class: "high" },
+			moderate: { priority: "MEDIUM PRIORITY", class: "medium" },
+		};
+		const sevInfo = severityMap[severity] || severityMap.high;
+
+		const newCrimeIssue = {
+			id: cId,
+			title: `${categoryLabel} Incident`,
+			category: categoryLabel,
+			categoryValue: category,
+			description: description.trim(),
+			location: location.trim() + (landmark ? ` (${landmark})` : ""),
+			priority: sevInfo.priority,
+			priorityClass: sevInfo.class,
+			status: "In Progress",
+			statusClass: "progress",
+			date: `${dateString}, ${timeString}`,
+			time: timeString,
+			rawDate: dateString,
+			timestamp: now.toISOString(),
+			eta: "Security Dispatched",
+			fileName: fileName || null,
+			image: fileUrl || null,
+		};
+
+		try {
+			const stored = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
+			localStorage.setItem("sociosphere_user_reports", JSON.stringify([newCrimeIssue, ...stored]));
+		} catch (e) {
+			console.error("Failed to save crime report to localStorage:", e);
+		}
+
 		setSubmitted(true);
+
+		if (onSuccess) {
+			onSuccess(newCrimeIssue);
+		}
+	};
+
+	const handleFileChange = (event) => {
+		const file = event.target.files?.[0];
+		if (file && file.type.startsWith("image/")) {
+			setFileName(file.name);
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				setFileUrl(e.target.result);
+			};
+			reader.readAsDataURL(file);
+		} else {
+			setFileName("");
+			setFileUrl("");
+		}
 	};
 
 	if (submitted) {
 		return (
-			<main className="min-h-screen bg-[#070B14] px-4 py-6 text-[#F8FAFC] sm:px-6 lg:px-8">
-				<div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-3xl items-center justify-center">
+			<main className={`${isEmbedded ? "p-2" : "min-h-screen bg-[#070B14] px-4 py-6"} text-[#F8FAFC] sm:px-6 lg:px-8`}>
+				<div className={`mx-auto flex ${isEmbedded ? "min-h-auto" : "min-h-[calc(100vh-3rem)]"} max-w-3xl items-center justify-center`}>
 					<section className="w-full rounded-2xl border border-slate-800 bg-[#0D1524] p-6 text-center sm:p-12 shadow-2xl">
 						<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30">
 							<ShieldAlert size={34} strokeWidth={1.8} />
@@ -132,7 +204,7 @@ export default function ReportCrime() {
 							</button>
 							<button
 								type="button"
-								onClick={() => window.history.back()}
+								onClick={() => (onClose ? onClose() : window.history.back())}
 								className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-sm font-bold text-white transition-all duration-200 hover:bg-rose-500 shadow-lg shadow-rose-600/20"
 							>
 								<ArrowLeft size={17} />
@@ -146,33 +218,35 @@ export default function ReportCrime() {
 	}
 
 	return (
-		<main className="min-h-screen bg-[#070B14] text-[#F8FAFC]">
+		<main className={`${isEmbedded ? "p-0" : "min-h-screen bg-[#070B14]"} text-[#F8FAFC]`}>
 			{/* Header */}
-			<header className="border-b border-slate-800/80 bg-[#080E1A] sticky top-0 z-10 backdrop-blur-md bg-opacity-90">
-				<div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-					<button
-						type="button"
-						className="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 transition-colors duration-200 hover:text-rose-400"
-						onClick={() => window.history.back()}
-					>
-						<ArrowLeft size={18} />
-						Back to dashboard
-					</button>
-					<div className="flex items-center gap-3">
-						<a
-							href="tel:112"
-							className="inline-flex items-center gap-2 rounded-xl bg-rose-500/15 border border-rose-500/30 px-3.5 py-1.5 text-xs font-bold text-rose-400 hover:bg-rose-500/25 transition-colors"
+			{!isEmbedded && (
+				<header className="border-b border-slate-800/80 bg-[#080E1A] sticky top-0 z-10 backdrop-blur-md bg-opacity-90">
+					<div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+						<button
+							type="button"
+							className="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 transition-colors duration-200 hover:text-rose-400"
+							onClick={() => (onClose ? onClose() : window.history.back())}
 						>
-							<PhoneCall size={14} />
-							Emergency Hotline: 112
-						</a>
-						<div className="hidden items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-rose-400 sm:flex">
-							<ShieldAlert size={17} />
-							Crime & Safety Portal
+							<ArrowLeft size={18} />
+							Back to dashboard
+						</button>
+						<div className="flex items-center gap-3">
+							<a
+								href="tel:112"
+								className="inline-flex items-center gap-2 rounded-xl bg-rose-500/15 border border-rose-500/30 px-3.5 py-1.5 text-xs font-bold text-rose-400 hover:bg-rose-500/25 transition-colors"
+							>
+								<PhoneCall size={14} />
+								Emergency Hotline: 112
+							</a>
+							<div className="hidden items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-rose-400 sm:flex">
+								<ShieldAlert size={17} />
+								Crime & Safety Portal
+							</div>
 						</div>
 					</div>
-				</div>
-			</header>
+				</header>
+			)}
 
 			<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
 				{/* Emergency Banner */}
@@ -363,35 +437,49 @@ export default function ReportCrime() {
 								<span className={headingClass}>
 									Photo / Video Evidence <span className="font-normal normal-case text-slate-500">(image only)</span>
 								</span>
-								<label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-slate-700 bg-slate-900/60 px-4 py-4 transition-colors duration-200 hover:border-rose-500/60 hover:bg-slate-900">
-									{/* This means background is slate (blue/greyish) with 60% opacity ,px means horizontal padding and py means vertical padding both of 4*(0.25rem) =1 rem (16px) */}
-									<span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-slate-300">
-										<ImagePlus size={19} />
-									</span>
-									<span className="min-w-0 flex-1">
-										<span className="block text-sm font-semibold text-slate-200">
-											{fileName || "Upload photo of incident or evidence"}
+								{fileUrl ? (
+									<div className="relative rounded-xl border border-rose-500/40 bg-slate-900 p-2">
+										<div className="relative h-48 w-full overflow-hidden rounded-lg bg-slate-950">
+											<img src={fileUrl} alt="Evidence preview" className="h-full w-full object-cover" />
+											<button
+												type="button"
+												onClick={() => {
+													setFileName("");
+													setFileUrl("");
+												}}
+												className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-slate-950/80 text-slate-300 transition-colors hover:bg-rose-600 hover:text-white"
+												title="Remove evidence photo"
+											>
+												<X size={16} />
+											</button>
+										</div>
+										<div className="mt-2 flex items-center justify-between px-1 text-xs text-slate-400">
+											<span className="truncate font-mono">{fileName}</span>
+											<span className="font-semibold text-rose-400">Evidence Photo Loaded</span>
+										</div>
+									</div>
+								) : (
+									<label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-slate-700 bg-slate-900/60 px-4 py-4 transition-colors duration-200 hover:border-rose-500/60 hover:bg-slate-900">
+										<span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-slate-300">
+											<ImagePlus size={19} />
 										</span>
-										<span className="mt-1 block text-xs text-slate-500">
-											JPG or PNG, up to 10 MB
+										<span className="min-w-0 flex-1">
+											<span className="block text-sm font-semibold text-slate-200">
+												Upload photo of incident or evidence
+											</span>
+											<span className="mt-1 block text-xs text-slate-500">
+												JPG or PNG, up to 10 MB
+											</span>
 										</span>
-									</span>
-									<Camera size={18} className="text-slate-500" />
-									<input
-										type="file"
-										accept="image/*"
-										className="sr-only"
-										onChange={(event) => {
-											const file = event.target.files?.[0];
-											if (file && file.type.startsWith("image/")) {
-												setFileName(file.name);
-											} else {
-												setFileName("");
-												event.target.value = "";
-											}
-										}}
-									/>
-								</label>
+										<Camera size={18} className="text-slate-500" />
+										<input
+											type="file"
+											accept="image/*"
+											className="sr-only"
+											onChange={handleFileChange}
+										/>
+									</label>
+								)}
 							</div>
 
 							{/* Anonymous Toggle & Contact Info */}

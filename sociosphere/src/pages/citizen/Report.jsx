@@ -42,6 +42,7 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
 	const [description, setDescription] = useState("");
 	const [location, setLocation] = useState("Greenwood Heights, Sector 4");
 	const [photoName, setPhotoName] = useState("");
+	const [photoUrl, setPhotoUrl] = useState("");
 	const [submitted, setSubmitted] = useState(false);
 	const [submittedIssue, setSubmittedIssue] = useState(null);
 
@@ -83,9 +84,7 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
 			timestamp: now.toISOString(),
 			eta: "Pending Dispatch",
 			photoName: photoName || null,
-			image: photoName
-				? "https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=600&q=80"
-				: "https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=600&q=80",
+			image: photoUrl || null,
 		};
 
 		// Save to localStorage so Home.jsx can read user-submitted issues later
@@ -104,12 +103,28 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
 		}
 	};
 
+	const handleFileChange = (event) => {
+		const file = event.target.files?.[0];
+		if (file && file.type.startsWith("image/")) {
+			setPhotoName(file.name);
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				setPhotoUrl(e.target.result);
+			};
+			reader.readAsDataURL(file);
+		} else {
+			setPhotoName("");
+			setPhotoUrl("");
+		}
+	};
+
 	const resetForm = () => {
 		setTitle("");
 		setCategory("");
 		setPriority("MEDIUM PRIORITY");
 		setDescription("");
 		setPhotoName("");
+		setPhotoUrl("");
 		setSubmitted(false);
 		setSubmittedIssue(null);
 	};
@@ -309,28 +324,43 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
 							{/* Photo Upload */}
 							<div>
 								<span className={headingStyle}>Add a photo <span className="font-normal normal-case tracking-normal text-slate-500">(optional)</span></span>
-								<label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-slate-700 bg-slate-900/60 px-4 py-4 transition-colors duration-200 hover:border-emerald-500/60 hover:bg-slate-900">
-									<span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-slate-300"><ImagePlus size={19} /></span>
-									<span className="min-w-0 flex-1">
-										<span className="block text-sm font-semibold text-slate-200">{photoName || "Upload an image of the issue"}</span>
-										<span className="mt-1 block text-xs text-slate-500">JPG or PNG, up to 10 MB</span>
-									</span>
-									<Camera size={18} className="text-slate-500" />
-									<input
-										type="file"
-										accept="image/*"
-										className="sr-only"
-										onChange={(event) => {
-											const file = event.target.files?.[0];
-											if (file && file.type.startsWith("image/")) {
-												setPhotoName(file.name);
-											} else {
-												setPhotoName("");
-												event.target.value = "";
-											}
-										}}
-									/>
-								</label>
+								{photoUrl ? (
+									<div className="relative rounded-xl border border-emerald-500/40 bg-slate-900 p-2">
+										<div className="relative h-48 w-full overflow-hidden rounded-lg bg-slate-950">
+											<img src={photoUrl} alt="Issue preview" className="h-full w-full object-cover" />
+											<button
+												type="button"
+												onClick={() => {
+													setPhotoName("");
+													setPhotoUrl("");
+												}}
+												className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-slate-950/80 text-slate-300 transition-colors hover:bg-rose-600 hover:text-white"
+												title="Remove photo"
+											>
+												<X size={16} />
+											</button>
+										</div>
+										<div className="mt-2 flex items-center justify-between px-1 text-xs text-slate-400">
+											<span className="truncate font-mono">{photoName}</span>
+											<span className="font-semibold text-emerald-400">Image Loaded</span>
+										</div>
+									</div>
+								) : (
+									<label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-slate-700 bg-slate-900/60 px-4 py-4 transition-colors duration-200 hover:border-emerald-500/60 hover:bg-slate-900">
+										<span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-slate-300"><ImagePlus size={19} /></span>
+										<span className="min-w-0 flex-1">
+											<span className="block text-sm font-semibold text-slate-200">{photoName || "Upload an image of the issue"}</span>
+											<span className="mt-1 block text-xs text-slate-500">JPG or PNG, up to 10 MB</span>
+										</span>
+										<Camera size={18} className="text-slate-500" />
+										<input
+											type="file"
+											accept="image/*"
+											className="sr-only"
+											onChange={handleFileChange}
+										/>
+									</label>
+								)}
 							</div>
 						</div>
 
