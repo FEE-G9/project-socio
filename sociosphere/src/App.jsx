@@ -13,18 +13,10 @@ import Report from "./pages/citizen/Report";
 import ReportCrime from "./pages/citizen/ReportCrime";
 
 import Home from "./pages/citizen/Home";
-
-function App() {
-
-  // return <Landing />;
-  // To preview Report, comment the line above and uncomment:
-  // return <Report />;
-  // return <ReportCrime />;
-  return <Home/>
-  
 import Profile from "./pages/citizen/Profile";
-import Home from "./pages/citizen/Home";
-import Profile from "./pages/citizen/Profile";
+import Dashboard from "./pages/citizen/Dashboard";
+import Map from "./pages/citizen/Map";
+
 
 function App() {
   return (
@@ -39,6 +31,10 @@ function App() {
       <Route path="/citizen" element={<CitizenLayout />}>
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<Home />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="map" element={<Map />} />
+        <Route path="report" element={<Report />} />
+        <Route path="report-crime" element={<ReportCrime />} />
         <Route path="profile" element={<Profile />} />
       </Route>
 

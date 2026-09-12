@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTheme } from "../../context/ThemeContext";
 import {
 	AlertTriangle,
 	ArrowLeft,
@@ -36,6 +37,7 @@ const priorityOptions = [
 const headingStyle = "mb-2 block text-xs font-bold uppercase tracking-wide text-slate-300";
 
 export default function Report({ onClose, isEmbedded = false, onSuccess }) {
+	const { theme } = useTheme();
 	const [title, setTitle] = useState("");
 	const [category, setCategory] = useState("");
 	const [priority, setPriority] = useState("MEDIUM PRIORITY");
@@ -131,7 +133,7 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
 
 	if (submitted && submittedIssue) {
 		return (
-			<main className={`${isEmbedded ? "p-2" : "min-h-screen bg-[#070B14] px-4 py-6"} text-[#F8FAFC] sm:px-6 lg:px-8`}>
+			<main className={`${theme === "light" ? "theme-light" : "theme-dark"} ${isEmbedded ? "p-2" : "min-h-screen bg-[#070B14] px-4 py-6"} text-[#F8FAFC] sm:px-6 lg:px-8`}>
 				<div className={`mx-auto flex ${isEmbedded ? "min-h-auto" : "min-h-[calc(100vh-3rem)]"} max-w-3xl items-center justify-center`}>
 					<section className="w-full rounded-2xl border border-slate-800 bg-[#0D1524] p-6 text-center sm:p-10">
 						<div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
@@ -188,7 +190,7 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
 	}
 
 	return (
-		<main className={`${isEmbedded ? "p-0" : "min-h-screen bg-[#070B14]"} text-[#F8FAFC]`}>
+		<main className={`${theme === "light" ? "theme-light" : "theme-dark"} ${isEmbedded ? "p-0" : "min-h-screen bg-[#070B14]"} text-[#F8FAFC]`}>
 			{!isEmbedded && (
 				<header className="border-b border-slate-800/80 bg-[#080E1A]">
 					<div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
