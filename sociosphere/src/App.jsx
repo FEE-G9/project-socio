@@ -7,6 +7,20 @@ import CitizenLayout from "./components/layout/CitizenLayout";
 import Login from "./pages/public/Login";
 import Landing from "./pages/public/Landing";
 
+// Viewing portal for the citizen Report page:
+import Report from "./pages/citizen/Report";
+import ReportCrime from "./pages/citizen/ReportCrime";
+
+import Home from "./pages/citizen/Home";
+
+function App() {
+
+  // return <Landing />;
+  // To preview Report, comment the line above and uncomment:
+  // return <Report />;
+  // return <ReportCrime />;
+  return <Home/>
+  
 import Profile from "./pages/citizen/Profile";
 import Home from "./pages/citizen/Home";
 import Dashboard from "./pages/citizen/Dashboard";
