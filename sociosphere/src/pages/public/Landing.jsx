@@ -1,5 +1,6 @@
  import { Shield, ArrowRight } from "lucide-react";
 import "./landing.css";
+import { Link } from "react-router-dom";
 export default function Landing() {
   return (
     <div className="landing-shell">
@@ -7,8 +8,8 @@ export default function Landing() {
       <header className="landing-header">
 
         <div className="brand-wrap">
-          <div className="brand-mark">
-            <Shield size={19} />
+          <div style={{fontSize:"40px"}}>
+            🌿
           </div>
 
           <div>
@@ -34,7 +35,7 @@ export default function Landing() {
         <div className="header-actions">
           <button className="language-btn">EN</button>
           <button className="login-btn">Login</button>
-          <button className="signup-btn">Sign Up</button>
+          <Link to="/login" className="signup-btn">Sign Up</Link>
         </div>
 
       </header>
@@ -74,10 +75,10 @@ export default function Landing() {
 
           <div className="cta-row">
 
-            <button className="primary-cta">
+            <Link to="/login"className="primary-cta">
               Join Your Community
               <ArrowRight size={18} />
-            </button>
+            </Link>
 
             <button className="secondary-cta">
               Explore SocioSphere

@@ -29,6 +29,7 @@ const TrendArrow = ({ direction = "up" }) => {
       className={`h-10 w-14 ${
         isUp ? "text-emerald-400" : "text-rose-500"
       }`}
+      
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
