@@ -22,10 +22,473 @@
   box-sizing: border-box;
 }
 
-.home-page *,
-.home-page *::before,
-.home-page *::after {
-  box-sizing: border-box;
+/* Smooth global transitions for fast, fluid theme switching */
+.home-page,
+.home-navbar,
+.brand-name,
+.location-section,
+.main-nav,
+.nav-item,
+.notification-button,
+.emergency-button,
+.profile-info strong,
+.profile-info small,
+.section-header h2,
+.issues-heading h2,
+.quick-action-card,
+.issue-card,
+.issue-details h3,
+.issue-details p,
+.issue-footer,
+.overview-card,
+.overview-card strong,
+.overview-card p,
+.filter-tabs button,
+.count-badge,
+.home-footer,
+.notification-panel,
+.report-modal {
+  transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Fast animated Theme Toggle Button */
+.theme-toggle-btn {
+  height: 43px;
+  padding: 0 5px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: #0c1526;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-toggle-btn:hover {
+  border-color: #3b4c66;
+  transform: translateY(-1px);
+}
+
+.theme-toggle-track {
+  width: 48px;
+  height: 26px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.08);
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 3px;
+  transition: background 0.3s ease;
+}
+
+.theme-toggle-btn.dark .theme-toggle-track {
+  background: rgba(16, 215, 160, 0.15);
+  box-shadow: inset 0 0 8px rgba(16, 215, 160, 0.2);
+}
+
+.theme-toggle-btn.light .theme-toggle-track {
+  background: rgba(2, 132, 199, 0.15);
+  box-shadow: inset 0 0 8px rgba(2, 132, 199, 0.2);
+}
+
+.theme-toggle-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10d7a0, #087e91);
+  color: #04131a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 8px rgba(16, 215, 160, 0.4);
+}
+
+.theme-toggle-btn.dark .theme-toggle-thumb {
+  transform: translateX(0);
+}
+
+.theme-toggle-btn.light .theme-toggle-thumb {
+  transform: translateX(22px);
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+}
+
+.theme-icon {
+  transition: transform 0.35s ease;
+}
+
+.theme-toggle-btn:active .theme-icon {
+  transform: rotate(180deg) scale(0.85);
+}
+
+.theme-toggle-btn:hover .theme-icon {
+  transform: rotate(30deg) scale(1.1);
+}
+
+/* ==========================================================================
+   LIGHT MODE STYLES (Unique Frosty Slate & Mint Vibe - Not plain whitish)
+   ========================================================================== */
+.home-page.light-mode {
+  --bg: #eaf2f7;
+  --bg-secondary: #dfebf2;
+  --card: #ffffff;
+  --card-hover: #f3f7fa;
+  --border: #cbd5e1;
+  --text: #0f172a;
+  --muted: #475569;
+  --green: #059669;
+  --blue: #0284c7;
+  --red: #e11d48;
+  --purple: #7c3aed;
+  --yellow: #d97706;
+  background: linear-gradient(180deg, #eef4f8 0%, #e2ebf2 100%);
+  color: #0f172a;
+}
+
+.home-page.light-mode .home-navbar {
+  background: rgba(238, 244, 248, 0.88);
+  border-bottom-color: rgba(203, 213, 225, 0.8);
+}
+
+.home-page.light-mode .brand-name {
+  color: #0f172a;
+}
+
+.home-page.light-mode .brand-name span {
+  color: #059669;
+}
+
+.home-page.light-mode .citizen-badge {
+  background: rgba(5, 150, 105, 0.1);
+  border-color: rgba(5, 150, 105, 0.3);
+  color: #047857;
+}
+
+.home-page.light-mode .location-section {
+  color: #475569;
+  border-left-color: #cbd5e1;
+}
+
+.home-page.light-mode .main-nav {
+  background: rgba(223, 235, 242, 0.75);
+  border-color: #cbd5e1;
+}
+
+.home-page.light-mode .nav-item {
+  color: #475569;
+}
+
+.home-page.light-mode .nav-item:hover {
+  color: #0f172a;
+  background: rgba(203, 213, 225, 0.5);
+}
+
+.home-page.light-mode .nav-item.active {
+  color: #047857;
+  background: rgba(5, 150, 105, 0.12);
+  border-color: rgba(5, 150, 105, 0.3);
+}
+
+.home-page.light-mode .theme-toggle-btn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.home-page.light-mode .notification-button {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.home-page.light-mode .notification-button:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.home-page.light-mode .emergency-button {
+  background: rgba(225, 29, 72, 0.08);
+  border-color: rgba(225, 29, 72, 0.35);
+  color: #be123c;
+}
+
+.home-page.light-mode .profile-avatar {
+  border-color: #cbd5e1;
+}
+
+.home-page.light-mode .profile-info strong {
+  color: #0f172a;
+}
+
+.home-page.light-mode .profile-info small {
+  color: #64748b;
+}
+
+.home-page.light-mode .section-header span,
+.home-page.light-mode .issues-heading p {
+  color: #64748b;
+}
+
+.home-page.light-mode .section-header h2,
+.home-page.light-mode .issues-heading h2 {
+  color: #0f172a;
+}
+
+.home-page.light-mode .quick-action-card {
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+}
+
+.home-page.light-mode .quick-action-card:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.09);
+}
+
+.home-page.light-mode .action-green {
+  background: linear-gradient(135deg, #ffffff, #eefaf6);
+  border-color: rgba(5, 150, 105, 0.3);
+}
+
+.home-page.light-mode .action-red {
+  background: linear-gradient(135deg, #ffffff, #fef2f2);
+  border-color: rgba(225, 29, 72, 0.3);
+}
+
+.home-page.light-mode .action-blue {
+  background: linear-gradient(135deg, #ffffff, #f0f9ff);
+  border-color: rgba(2, 132, 199, 0.3);
+}
+
+.home-page.light-mode .action-purple {
+  background: linear-gradient(135deg, #ffffff, #f5f3ff);
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+.home-page.light-mode .action-yellow {
+  background: linear-gradient(135deg, #ffffff, #fffbeb);
+  border-color: rgba(217, 119, 6, 0.3);
+}
+
+.home-page.light-mode .action-icon {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.home-page.light-mode .action-content h3 {
+  color: #0f172a;
+}
+
+.home-page.light-mode .action-content p {
+  color: #64748b;
+}
+
+.home-page.light-mode .count-badge {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.home-page.light-mode .filter-tabs button {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.home-page.light-mode .filter-tabs button:hover {
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.home-page.light-mode .filter-tabs button.active {
+  background: #059669;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.home-page.light-mode .issue-card {
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.04);
+}
+
+.home-page.light-mode .issue-card:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+}
+
+.home-page.light-mode .issue-details h3 {
+  color: #0f172a;
+}
+
+.home-page.light-mode .issue-details p {
+  color: #475569;
+}
+
+.home-page.light-mode .issue-id {
+  color: #64748b;
+}
+
+.home-page.light-mode .issue-location {
+  color: #059669;
+}
+
+.home-page.light-mode .issue-footer {
+  border-top-color: #e2e8f0;
+}
+
+.home-page.light-mode .issue-time {
+  color: #64748b;
+}
+
+.home-page.light-mode .issue-time strong {
+  color: #334155;
+}
+
+.home-page.light-mode .timeline-button {
+  color: #059669;
+}
+
+.home-page.light-mode .timeline-button:hover {
+  color: #047857;
+}
+
+.home-page.light-mode .priority-badge.low {
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.home-page.light-mode .priority-badge.high,
+.home-page.light-mode .priority-badge.medium {
+  color: #b45309;
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+.home-page.light-mode .priority-badge.critical {
+  color: #be123c;
+  border-color: rgba(225, 29, 72, 0.4);
+}
+
+.home-page.light-mode .status-badge.progress {
+  color: #b45309;
+  border-color: rgba(217, 119, 6, 0.4);
+  background: rgba(217, 119, 6, 0.08);
+}
+
+.home-page.light-mode .status-badge.resolved {
+  color: #047857;
+  border-color: rgba(5, 150, 105, 0.4);
+  background: rgba(5, 150, 105, 0.08);
+}
+
+.home-page.light-mode .overview-card {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+}
+
+.home-page.light-mode .overview-icon {
+  background: rgba(5, 150, 105, 0.1);
+  color: #059669;
+}
+
+.home-page.light-mode .overview-card span {
+  color: #64748b;
+}
+
+.home-page.light-mode .overview-card strong {
+  color: #0f172a;
+}
+
+.home-page.light-mode .overview-card p {
+  color: #475569;
+}
+
+.home-page.light-mode .health-card strong {
+  color: #059669;
+}
+
+.home-page.light-mode .home-footer {
+  border-top-color: #e2e8f0;
+  color: #64748b;
+}
+
+.home-page.light-mode .home-footer strong {
+  color: #334155;
+}
+
+.home-page.light-mode .home-footer button {
+  color: #64748b;
+}
+
+.home-page.light-mode .home-footer button:hover {
+  color: #0f172a;
+}
+
+.home-page.light-mode .notification-panel {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+}
+
+.home-page.light-mode .notification-header {
+  border-bottom-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.home-page.light-mode .notification-header button {
+  color: #64748b;
+}
+
+.home-page.light-mode .notification-item {
+  border-bottom-color: #f1f5f9;
+  color: #334155;
+}
+
+.home-page.light-mode .modal-overlay {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.home-page.light-mode .report-modal {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.18);
+  color: #0f172a;
+}
+
+.home-page.light-mode .report-modal h2 {
+  color: #0f172a;
+}
+
+.home-page.light-mode .report-modal > p {
+  color: #64748b;
+}
+
+.home-page.light-mode .report-modal label {
+  color: #334155;
+}
+
+.home-page.light-mode .report-modal input,
+.home-page.light-mode .report-modal textarea,
+.home-page.light-mode .report-modal select {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.home-page.light-mode .modal-close {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #64748b;
+}
+
+.home-page.light-mode .home-toast {
+  background: #ffffff;
+  border-color: rgba(5, 150, 105, 0.4);
+  color: #047857;
+  box-shadow: 0 15px 40px rgba(15, 23, 42, 0.12);
 }
 
 .home-page button,
@@ -58,6 +521,7 @@
   padding: 0 24px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 20px;
 }
 
@@ -173,6 +637,7 @@
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .notification-button {
@@ -1102,4 +1567,17 @@
     left: 14px;
     width: auto;
   }
+}
+
+/* Crime Section Styling */
+.count-badge.crime-badge {
+  background: rgba(251, 92, 114, 0.15);
+  color: #fb7085;
+  border: 1px solid rgba(251, 92, 114, 0.35);
+}
+
+.filter-tabs button.active-crime {
+  border-color: transparent;
+  background: #fb5c72;
+  color: #ffffff;
 }
