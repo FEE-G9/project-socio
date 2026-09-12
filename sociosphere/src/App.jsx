@@ -39,6 +39,10 @@ function App() {
       <Route path="/citizen" element={<CitizenLayout />}>
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<Home />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="map" element={<Map />} />
+        <Route path="report" element={<Report />} />
+        <Route path="report-crime" element={<ReportCrime />} />
         <Route path="profile" element={<Profile />} />
       </Route>
 

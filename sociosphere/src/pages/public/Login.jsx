@@ -1,5 +1,7 @@
  
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import {
   User,
   Mail,
@@ -18,11 +20,33 @@ import {
 } from "lucide-react";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // Citizen is selected by default
   const [role, setRole] = useState("citizen");
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    login({
+      name: role === "authority" ? "Authority Administrator" : "Resident Citizen",
+      email:
+        role === "authority"
+          ? "authority@sociosphere.io"
+          : "citizen@sociosphere.io",
+      role: role,
+      communityId: "green-meadows",
+      unitNumber: role === "authority" ? "HQ Office" : "Block B - 201",
+    });
+
+    if (role === "authority") {
+      navigate("/authority");
+    } else {
+      navigate("/citizen/home");
+    }
+  };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#071410] text-white">
@@ -306,7 +330,10 @@ const Login = () => {
 
           {/* ================= FORM ================= */}
 
-          <form className="flex flex-col gap-3">
+         <form
+  onSubmit={handleLogin}
+  className="flex flex-col gap-3"
+>
 
 
             {/* ================= CITIZEN FORM ================= */}
@@ -610,6 +637,7 @@ const PasswordInput = ({
   setShowPassword,
 }) => {
 
+  
   return (
 
     <div className="flex h-12 items-center gap-3 rounded-xl border border-white/20 bg-black/20 px-4 transition focus-within:border-[#69dc87] focus-within:bg-[#0c2319]/60">
