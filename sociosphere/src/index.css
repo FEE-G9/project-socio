@@ -29,3 +29,81 @@
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
+
+/* Keep the custom citizen tools in sync with the shared theme provider. */
+.theme-light {
+  color: #0f172a !important;
+}
+
+.theme-light[class~="bg-[#070B14]"],
+.theme-light[class~="bg-[#080E1A]"],
+.theme-light [class~="bg-[#070B14]"],
+.theme-light [class~="bg-[#080E1A]"] {
+  background-color: #eef4f8 !important;
+}
+
+.theme-light[class~="bg-[#0D1524]"],
+.theme-light [class~="bg-[#0D1524]"] {
+  background-color: #ffffff !important;
+}
+
+.theme-light [class~="bg-slate-900/80"],
+.theme-light [class~="bg-slate-950/80"],
+.theme-light [class~="bg-slate-800"],
+.theme-light [class~="bg-slate-900"],
+.theme-light [class~="bg-slate-900/90"],
+.theme-light [class~="bg-slate-900/60"],
+.theme-light [class~="bg-[#080E1A]/90"],
+.theme-light [class~="bg-[#0D1524]/60"] {
+  background-color: #f8fafc !important;
+}
+
+.theme-light [class~="border-slate-800"],
+.theme-light [class~="border-slate-800/80"],
+.theme-light [class~="border-slate-700"] {
+  border-color: #cbd5e1 !important;
+}
+
+.theme-light svg [fill="#0D1524"] {
+  fill: #dbeafe !important;
+}
+
+.theme-light [class~="text-slate-100"],
+.theme-light [class~="text-slate-200"],
+.theme-light [class~="text-slate-300"],
+.theme-light [class~="text-slate-400"] {
+  color: #475569 !important;
+}
+
+.theme-light [class~="bg-rose-500/10"] {
+  background-color: #fff1f2 !important;
+}
+
+.theme-light [class~="bg-rose-500/20"] {
+  background-color: #ffe4e6 !important;
+}
+
+.theme-light [class~="text-rose-200"],
+.theme-light [class~="text-rose-200/80"] {
+  color: #9f1239 !important;
+}
+
+.theme-light aside[class~="bg-rose-500/10"] [class~="text-white"] {
+  color: #881337 !important;
+}
+
+.theme-light select option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+.theme-light input,
+.theme-light textarea,
+.theme-light select {
+  color: #0f172a !important;
+}
+
+.theme-light input::placeholder,
+.theme-light textarea::placeholder {
+  color: #64748b !important;
+}

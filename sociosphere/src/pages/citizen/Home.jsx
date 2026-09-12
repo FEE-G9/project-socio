@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./home.css";
 import Report from "./Report";
 import ReportCrime from "./ReportCrime";
+import { useTheme } from "../../context/ThemeContext";
 import Map from "./Map";
 import {
   Shield,
@@ -109,8 +110,8 @@ export default function Home() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // 'report' | 'reportCrime' | null
   const [toast, setToast] = useState("");
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [userReports, setUserReports] = useState([]);
+  const { theme } = useTheme();
 
   const loadUserReports = () => {
     try {
@@ -127,11 +128,6 @@ export default function Home() {
   useEffect(() => {
     loadUserReports();
   }, []);
-
-  const toggleTheme = () => {
-    setIsDarkMode((prev) => !prev);
-    showToast(`Switched to ${isDarkMode ? "Light" : "Dark"} mode`);
-  };
 
   const showToast = (message) => {
     setToast(message);
@@ -265,7 +261,7 @@ export default function Home() {
   ).length;
 
   return (
-    <div className={`home-page ${isDarkMode ? "dark-mode" : "light-mode"}`}>
+    <div className={`home-page ${theme === "dark" ? "dark-mode" : "light-mode"}`}>
       <header className="home-navbar">
         <div className="navbar-inner">
           <div className="brand-section">

@@ -2,10 +2,11 @@ import React from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
-  AlertCircle,
-  Megaphone,
-  Users,
+  LayoutDashboard,
   Map,
+  FileWarning,
+  ShieldAlert,
+  User,
 } from "lucide-react";
 
 import Navbar from "./Navbar";
@@ -23,24 +24,29 @@ const CitizenLayout = () => {
       icon: Home,
     },
     {
-      label: "Issues",
-      href: "/citizen/issues",
-      icon: AlertCircle,
+      label: "Dashboard",
+      href: "/citizen/dashboard",
+      icon: LayoutDashboard,
     },
     {
-      label: "Announcements",
-      href: "/citizen/announcements",
-      icon: Megaphone,
+      label: "Report Issue",
+      href: "/citizen/report",
+      icon: FileWarning,
     },
     {
-      label: "Community",
-      href: "/citizen/community",
-      icon: Users,
+      label: "Report Crime",
+      href: "/citizen/report-crime",
+      icon: ShieldAlert,
     },
     {
       label: "Map",
       href: "/citizen/map",
       icon: Map,
+    },
+    {
+      label: "Profile",
+      href: "/citizen/profile",
+      icon: User,
     },
   ];
 
