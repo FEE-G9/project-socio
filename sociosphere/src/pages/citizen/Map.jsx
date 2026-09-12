@@ -19,6 +19,7 @@ import {
   Compass,
 } from "lucide-react";
 
+  import { useTheme } from "../../context/ThemeContext";
 // Default neighborhood coordinates & mock pins if localStorage is empty
 const defaultMapPins = [
   {
@@ -29,7 +30,6 @@ const defaultMapPins = [
       "Continuous fresh water gushing from overhead pipe junction near ramp. Slippery floor causing safety hazard.",
     location: "Basement P2, Pillar B-14",
     priority: "HIGH PRIORITY",
-    priorityClass: "high",
     status: "In Progress",
     statusClass: "progress",
     date: "Today, 08:30 AM",
@@ -119,6 +119,7 @@ const defaultMapPins = [
 ];
 
 export default function Map({ onClose, isEmbedded = false }) {
+  const { theme } = useTheme();
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeStatus, setActiveStatus] = useState("all");
   const [mapMode, setMapMode] = useState("markers"); // 'markers' | 'heatmap'
@@ -224,7 +225,7 @@ export default function Map({ onClose, isEmbedded = false }) {
   ).length;
 
   return (
-    <main className={`${isEmbedded ? "p-0" : "min-h-screen bg-[#070B14]"} text-[#F8FAFC]`}>
+    <main className={`${theme === "light" ? "theme-light" : "theme-dark"} ${isEmbedded ? "p-0" : "min-h-screen bg-[#070B14]"} text-[#F8FAFC]`}>
       {/* Header (rendered if not embedded inside modal) */}
       {!isEmbedded && (
         <header className="sticky top-0 z-20 border-b border-slate-800/80 bg-[#080E1A] backdrop-blur-md">

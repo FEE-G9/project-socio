@@ -25,7 +25,7 @@ export default function Landing() {
 
         <nav className="landing-nav">
           <button className="nav-link active">Home</button>
-          <button className="nav-link">Dashboard</button>
+          <Link to="/citizen/dashboard" className="nav-link">Dashboard</Link>
           <button className="nav-link">Services</button>
           <button className="nav-link">Community</button>
           <button className="nav-link">About Us</button>
@@ -34,7 +34,7 @@ export default function Landing() {
 
         <div className="header-actions">
           <button className="language-btn">EN</button>
-          <button className="login-btn">Login</button>
+          <Link to="/login" className="login-btn">Login</Link>
           <Link to="/login" className="signup-btn">Sign Up</Link>
         </div>
 

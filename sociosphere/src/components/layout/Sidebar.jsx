@@ -17,7 +17,10 @@ const Sidebar = ({ links = [] }) => {
       return location.pathname === "/authority";
     }
 
-    return location.pathname.startsWith(href);
+    return (
+      location.pathname === href ||
+      location.pathname.startsWith(`${href}/`)
+    );
   };
 
   return (
