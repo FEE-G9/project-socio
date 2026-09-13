@@ -16,7 +16,15 @@ import Home from "./pages/citizen/Home";
 import Profile from "./pages/citizen/Profile";
 import Dashboard from "./pages/citizen/Dashboard";
 import Map from "./pages/citizen/Map";
+import Announcements from "./pages/citizen/Announcements";
 
+import AdminDashboard from "./pages/authority/Admin";
+import Analytics from "./pages/authority/Analytics";
+import Issues from "./pages/authority/Issues";
+import Members from "./pages/authority/Members";
+import ManageFees from "./pages/authority/ManageFees";
+import PostAnnouncement from "./pages/authority/PostAnnouncement";
+import AuthorityProfile from "./pages/authority/AuthorityProfile";
 
 function App() {
   return (
@@ -36,11 +44,19 @@ function App() {
         <Route path="report" element={<Report />} />
         <Route path="report-crime" element={<ReportCrime />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="announcements" element={<Announcements />} />
       </Route>
 
       {/* ================= AUTHORITY ================= */}
       <Route path="/authority" element={<AuthorityLayout />}>
         <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="issues" element={<Issues />} />
+        <Route path="members" element={<Members />} />
+        <Route path="fees" element={<ManageFees />} />
+        <Route path="announcements" element={<PostAnnouncement />} />
+        <Route path="profile" element={<AuthorityProfile />} />
       </Route>
 
       {/* ================= FALLBACK ================= */}
