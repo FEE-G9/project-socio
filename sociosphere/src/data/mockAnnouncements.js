@@ -42,3 +42,22 @@ export const getAnnouncements = () => {
   }
   return JSON.parse(stored);
 };
+
+export const saveAnnouncements = (announcements) => {
+  localStorage.setItem('sociosphere_announcements', JSON.stringify(announcements));
+  window.dispatchEvent(new Event('sociosphere_data_updated'));
+};
+
+export const addAnnouncement = (newAnnouncement) => {
+  const announcements = getAnnouncements();
+  const id = `ann-${Date.now()}`;
+  const announcementWithDefaults = {
+    id,
+    date: new Date().toISOString(),
+    ...newAnnouncement
+  };
+
+  const updated = [announcementWithDefaults, ...announcements];
+  saveAnnouncements(updated);
+  return updated;
+};

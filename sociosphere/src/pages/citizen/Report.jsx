@@ -89,10 +89,26 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
 			image: photoUrl || null,
 		};
 
-		// Save to localStorage so Home.jsx can read user-submitted issues later
+		// Save to mock storage so Authority gets it, and save to local user history
 		try {
+			// Save to citizen local storage (used by Home.jsx)
 			const stored = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
 			localStorage.setItem("sociosphere_user_reports", JSON.stringify([newIssue, ...stored]));
+			
+			// Sync to Authority Database
+			import("../../data/mockIssues").then(module => {
+				module.addIssue({
+				  title: newIssue.title,
+				  category: newIssue.category,
+				  severity: newIssue.priorityClass === "high" || newIssue.priorityClass === "critical" ? "High" : newIssue.priorityClass === "medium" ? "Medium" : "Low",
+				  location: newIssue.location,
+				  description: newIssue.description,
+				  reportedBy: "Resident Citizen",
+				  reportedByEmail: "citizen@sociosphere.io",
+				  reporterAvatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=150&q=80",
+				  image: newIssue.image,
+				});
+			});
 		} catch (e) {
 			console.error("Failed to save report to localStorage:", e);
 		}
