@@ -11,12 +11,15 @@
   --red: #fb5c72;
   --purple: #8b7cff;
   --yellow: #f5b83d;
+
   min-height: 100vh;
   width: 100%;
   min-width: 0;
   overflow-x: hidden;
-  background: var(--bg);
+
+  background: transparent;
   color: var(--text);
+
   font-family: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
   box-sizing: border-box;
@@ -147,13 +150,13 @@
   --red: #e11d48;
   --purple: #7c3aed;
   --yellow: #d97706;
-  background: linear-gradient(180deg, #eef4f8 0%, #e2ebf2 100%);
+  background: transparent;
   color: #0f172a;
 }
 
 .home-page.light-mode .home-navbar {
-  background: rgba(238, 244, 248, 0.88);
-  border-bottom-color: rgba(203, 213, 225, 0.8);
+  background: transparent;
+  border-bottom: none;
 }
 
 .home-page.light-mode .brand-name {
@@ -503,14 +506,11 @@
 }
 
 .home-navbar {
-  position: sticky;
-  top: 0;
-  z-index: 40;
   width: 100%;
-  height: 74px;
-  background: rgba(7, 13, 26, 0.94);
-  border-bottom: 1px solid rgba(30, 41, 59, 0.85);
-  backdrop-filter: blur(18px);
+  height: 64px;
+  background: transparent;
+  border-bottom: none;
+  backdrop-filter: none;
 }
 
 .navbar-inner {

@@ -285,68 +285,36 @@ export default function Home() {
   return (
     <div className={`home-page ${theme === "dark" ? "dark-mode" : "light-mode"}`}>
       <header className="home-navbar">
-        <div className="navbar-inner">
-          <div className="brand-section">
-            <div className="brand-logo">
-              <Shield size={22} />
-            </div>
+  <div className="navbar-inner">
 
-            <div className="brand-name">
-              Socio<span>Sphere</span>
-            </div>
+    <div className="location-section">
+      <MapPin size={16} />
 
-            <div className="citizen-badge">CITIZEN</div>
-          </div>
+      <span>
+        Greenwood Heights,
+        <br />
+        Sector 4
+      </span>
 
-          <div className="location-section">
-            <MapPin size={16} />
-            <span>
-              Greenwood Heights,
-              <br />
-              Sector 4
-            </span>
-            <span className="online-dot" />
-          </div>
+      <span className="online-dot" />
+    </div>
 
-          <div className="navbar-actions">
-            <button
-              className="notification-button"
-              onClick={() => setShowNotifications(!showNotifications)}
-            >
-              <Bell size={18} />
-              <span>3</span>
-            </button>
+    <div className="navbar-actions">
+      <button
+        className="emergency-button"
+        onClick={() => {
+          setActiveModal("reportCrime");
+          showToast("Emergency Crime & Safety portal opened");
+        }}
+      >
+        <span className="emergency-icon">!</span>
+        SOS
+        <strong>Emergency</strong>
+      </button>
+    </div>
 
-            <button
-              className="emergency-button"
-              onClick={() => {
-                setActiveModal("reportCrime");
-                showToast("Emergency Crime & Safety portal opened");
-              }}
-            >
-              <span className="emergency-icon">!</span>
-              SOS
-              <strong>Emergency</strong>
-            </button>
-
-            <div className="profile">
-              <div className="profile-avatar">
-                AS
-                <span />
-              </div>
-
-              <div className="profile-info">
-                <strong>Aarav Sharma</strong>
-                <small>
-                  Flat B-402 •
-                  <br />
-                  Resident
-                </small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+  </div>
+</header>
 
       {showNotifications && (
         <div className="notification-panel">

@@ -225,8 +225,7 @@ export default function Map({ onClose, isEmbedded = false }) {
   ).length;
 
   return (
-    <main className={`${theme === "light" ? "theme-light" : "theme-dark"} ${isEmbedded ? "p-0" : "min-h-screen bg-[#070B14]"} text-[#F8FAFC]`}>
-      {/* Header (rendered if not embedded inside modal) */}
+<main className={`${theme === "light" ? "theme-light" : "theme-dark"} ${isEmbedded ? "p-0" : "min-h-screen"} text-[#F8FAFC]`}>      {/* Header (rendered if not embedded inside modal) */}
       {!isEmbedded && (
         <header className="sticky top-0 z-20 border-b border-slate-800/80 bg-[#080E1A] backdrop-blur-md">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
