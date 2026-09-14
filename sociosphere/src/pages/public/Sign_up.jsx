@@ -80,7 +80,7 @@ const SignUp = () => {
         <Link to="/" className="flex items-center gap-3">
 
           <div className="text-4xl">
-            🌿
+            <img src="/logo_main.png" alt="SocioSphere" style={{ width: "40px", height: "40px" }} />
           </div>
 
           <div>
@@ -167,7 +167,7 @@ const SignUp = () => {
           <div className="mb-5 text-center">
 
             <div className="mb-1 text-3xl">
-              🌿
+              <img src="/logo_main.png" alt="SocioSphere" style={{ width: "40px", height: "40px", alignItems:"center" }} />
             </div>
 
             <h2 className="text-[27px] font-bold">
