@@ -219,9 +219,12 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 	}
 
 	return (
-		<main className={`${theme === "light" ? "theme-light" : "theme-dark"} ${isEmbedded ? "p-0" : "min-h-screen bg-[#070B14]"} text-[#F8FAFC]`}>
-			{/* Header */}
-			{!isEmbedded && (
+<main
+  className={`${theme === "light" ? "theme-light" : "theme-dark"} ${
+    isEmbedded ? "p-0" : ""
+  } text-[#F8FAFC]`}
+>			{/* Header */}
+			{/* {!isEmbedded && (
 				<header className="border-b border-slate-800/80 bg-[#080E1A] sticky top-0 z-10 backdrop-blur-md bg-opacity-90">
 					<div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
 						<button
@@ -247,7 +250,7 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 						</div>
 					</div>
 				</header>
-			)}
+			)} */}
 
 			<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
 				{/* Emergency Banner */}
