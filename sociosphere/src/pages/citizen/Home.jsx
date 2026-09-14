@@ -115,10 +115,30 @@ export default function Home() {
 
   const loadUserReports = () => {
     try {
-      const stored = JSON.parse(
+      // First, get crime reports from user local storage (since crime isn't fully integrated to admin mockIssues yet)
+      const storedLocal = JSON.parse(
         localStorage.getItem("sociosphere_user_reports") || "[]"
-      );
-      setUserReports(stored);
+      ).filter(r => r.id && r.id.startsWith("CRM-"));
+      
+      // Then get civic issues from the global mock data so they sync with admin!
+      const storedGlobal = JSON.parse(
+        localStorage.getItem("sociosphere_issues") || "[]"
+      ).map(iss => ({
+        id: iss.id,
+        title: iss.title,
+        category: iss.category,
+        description: iss.description,
+        location: iss.location,
+        priority: iss.severity + ' Priority',
+        priorityClass: (iss.severity || '').toLowerCase(),
+        status: iss.status,
+        statusClass: iss.status === 'Resolved' ? 'progress' : 'progress', // simplify
+        date: new Date(iss.createdAt).toLocaleDateString(),
+        eta: iss.aiAnalysis?.estimatedResolutionTime || "Pending",
+        image: iss.image
+      }));
+
+      setUserReports([...storedGlobal, ...storedLocal]);
     } catch (e) {
       console.error("Failed to load user reports:", e);
       setUserReports([]);
@@ -127,6 +147,8 @@ export default function Home() {
 
   useEffect(() => {
     loadUserReports();
+    window.addEventListener('sociosphere_data_updated', loadUserReports);
+    return () => window.removeEventListener('sociosphere_data_updated', loadUserReports);
   }, []);
 
   const showToast = (message) => {
