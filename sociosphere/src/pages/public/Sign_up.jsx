@@ -1,7 +1,5 @@
- 
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useNavigate, Link } from "react-router-dom";
 import {
   User,
   Mail,
@@ -19,28 +17,35 @@ import {
   Building2,
 } from "lucide-react";
 
-const Login = () => {
+const SignUp = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [role, setRole] = useState("citizen");
 
-  const handleLogin = (e) => {
+  const handleSignup = (e) => {
     e.preventDefault();
 
-    login({
-      name: role === "authority" ? "Authority Administrator" : "Resident Citizen",
-      email:
-        role === "authority"
-          ? "authority@sociosphere.io"
-          : "citizen@sociosphere.io",
-      role: role,
-      communityId: "green-meadows",
-      unitNumber: role === "authority" ? "HQ Office" : "Block B - 201",
-    });
+    const form = e.target;
 
+    // Check that all required fields are filled
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    // Get password values
+    const password = form.password.value;
+    const confirmPassword = form.confirmPassword.value;
+
+    // Check whether passwords match
+    if (password !== confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+
+    // Temporary navigation until backend/authentication is connected
     if (role === "authority") {
       navigate("/authority");
     } else {
@@ -72,7 +77,7 @@ const Login = () => {
 
         {/* Logo */}
 
-        <div className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3">
 
           <div className="text-4xl">
             🌿
@@ -88,41 +93,15 @@ const Login = () => {
             </p>
           </div>
 
-        </div>
+        </Link>
 
         {/* Navigation */}
 
         <div className="flex items-center gap-9">
-
-          <a
-            href="/"
-            className="text-sm text-white/75 transition hover:text-[#6be08a]"
-          >
-            Home
-          </a>
-
-          <a
-            href="#"
-            className="text-sm text-white/75 transition hover:text-[#6be08a]"
-          >
-            About
-          </a>
-
-          <a
-            href="#"
-            className="text-sm text-white/75 transition hover:text-[#6be08a]"
-          >
-            Contact
-          </a>
-
-          <button className="rounded-full border border-[#7de794]/60 bg-transparent px-7 py-2.5 text-sm transition hover:bg-[#64d984] hover:text-[#071410]">
-            Login
-          </button>
-
+          {/* Navigation buttons are currently hidden */}
         </div>
 
       </nav>
-
 
       {/* ================= MAIN CONTENT ================= */}
 
@@ -135,107 +114,49 @@ const Login = () => {
           <div className="mb-6 h-1 w-[75px] rounded-full bg-[#63dc85]" />
 
           <h1 className="mb-5 text-5xl font-bold leading-[1.05] tracking-tight lg:text-[64px]">
-
             Your community,
             <br />
-
             <span className="text-[#62dc85]">
               your space.
             </span>
-
           </h1>
 
           <p className="mb-9 max-w-[500px] text-lg leading-relaxed text-white/75">
-
             Connect, report, share and make your
             neighbourhood a better place — together.
-
           </p>
 
-
-          {/* ================= FEATURES ================= */}
+          {/* FEATURES */}
 
           <div className="flex flex-col gap-5">
 
-            <div className="flex items-center gap-4">
+            <Feature
+              icon={<Users size={23} />}
+              title="Community Connection"
+              description="Stay connected with people around you."
+            />
 
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#63dc85]/30 bg-[#53be69]/10 text-[#70e58e]">
-                <Users size={23} />
-              </div>
+            <Feature
+              icon={<MessageCircle size={23} />}
+              title="Community Chat"
+              description="Talk, share and stay informed."
+            />
 
-              <div>
-                <h3 className="text-base font-semibold">
-                  Community Connection
-                </h3>
+            <Feature
+              icon={<Bell size={23} />}
+              title="Reports & Notices"
+              description="Report issues and receive important updates."
+            />
 
-                <p className="text-[13px] text-white/60">
-                  Stay connected with people around you.
-                </p>
-              </div>
-
-            </div>
-
-
-            <div className="flex items-center gap-4">
-
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#63dc85]/30 bg-[#53be69]/10 text-[#70e58e]">
-                <MessageCircle size={23} />
-              </div>
-
-              <div>
-                <h3 className="text-base font-semibold">
-                  Community Chat
-                </h3>
-
-                <p className="text-[13px] text-white/60">
-                  Talk, share and stay informed.
-                </p>
-              </div>
-
-            </div>
-
-
-            <div className="flex items-center gap-4">
-
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#63dc85]/30 bg-[#53be69]/10 text-[#70e58e]">
-                <Bell size={23} />
-              </div>
-
-              <div>
-                <h3 className="text-base font-semibold">
-                  Reports & Notices
-                </h3>
-
-                <p className="text-[13px] text-white/60">
-                  Report issues and receive important updates.
-                </p>
-              </div>
-
-            </div>
-
-
-            <div className="flex items-center gap-4">
-
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#63dc85]/30 bg-[#53be69]/10 text-[#70e58e]">
-                <HeartHandshake size={23} />
-              </div>
-
-              <div>
-                <h3 className="text-base font-semibold">
-                  Local Services
-                </h3>
-
-                <p className="text-[13px] text-white/60">
-                  Find useful services within your community.
-                </p>
-              </div>
-
-            </div>
+            <Feature
+              icon={<HeartHandshake size={23} />}
+              title="Local Services"
+              description="Find useful services within your community."
+            />
 
           </div>
 
         </section>
-
 
         {/* ================= SIGNUP CARD ================= */}
 
@@ -258,7 +179,6 @@ const Login = () => {
             </p>
 
           </div>
-
 
           {/* ================= ROLE SELECTION ================= */}
 
@@ -296,7 +216,6 @@ const Login = () => {
 
               </button>
 
-
               {/* Authority */}
 
               <button
@@ -324,41 +243,35 @@ const Login = () => {
               </button>
 
             </div>
-
           </div>
-
 
           {/* ================= FORM ================= */}
 
-         <form
-  onSubmit={handleLogin}
-  className="flex flex-col gap-3"
->
-
+          <form
+            onSubmit={handleSignup}
+            className="flex flex-col gap-3"
+          >
 
             {/* ================= CITIZEN FORM ================= */}
 
             {role === "citizen" && (
               <>
 
-                {/* Row 1 */}
-
                 <div className="grid grid-cols-2 gap-3">
 
                   <Input
                     icon={<User size={19} />}
                     placeholder="Full Name"
+                    name="fullName"
                   />
 
                   <Input
                     icon={<User size={19} />}
                     placeholder="Username"
+                    name="username"
                   />
 
                 </div>
-
-
-                {/* Row 2 */}
 
                 <div className="grid grid-cols-2 gap-3">
 
@@ -366,28 +279,26 @@ const Login = () => {
                     icon={<Mail size={19} />}
                     placeholder="Email Address"
                     type="email"
+                    name="email"
                   />
 
                   <Input
                     icon={<Calendar size={19} />}
                     placeholder="Age"
                     type="number"
+                    name="age"
+                    min="1"
                   />
 
                 </div>
-
-
-                {/* Row 3 */}
 
                 <div className="grid grid-cols-2 gap-3">
 
                   <Input
                     icon={<Briefcase size={19} />}
                     placeholder="Job / Occupation"
+                    name="occupation"
                   />
-
-
-                  {/* Colony */}
 
                   <ColonySelect />
 
@@ -395,7 +306,6 @@ const Login = () => {
 
               </>
             )}
-
 
             {/* ================= AUTHORITY FORM ================= */}
 
@@ -405,14 +315,15 @@ const Login = () => {
                 <Input
                   icon={<User size={19} />}
                   placeholder="Full Name"
+                  name="fullName"
                 />
 
                 <Input
                   icon={<Mail size={19} />}
                   placeholder="Official Email Address"
                   type="email"
+                  name="email"
                 />
-
 
                 <div className="grid grid-cols-2 gap-3">
 
@@ -426,7 +337,9 @@ const Login = () => {
                     />
 
                     <select
+                      name="department"
                       defaultValue=""
+                      required
                       className="w-full cursor-pointer appearance-none bg-transparent text-sm text-white outline-none"
                     >
 
@@ -462,9 +375,6 @@ const Login = () => {
 
                   </div>
 
-
-                  {/* Area */}
-
                   <ColonySelect />
 
                 </div>
@@ -472,32 +382,30 @@ const Login = () => {
               </>
             )}
 
-
             {/* ================= PASSWORD ================= */}
 
             <PasswordInput
               placeholder="Password"
+              name="password"
               showPassword={showPassword}
               setShowPassword={setShowPassword}
             />
-
 
             {/* Confirm Password */}
 
             <PasswordInput
               placeholder="Confirm Password"
+              name="confirmPassword"
               showPassword={showConfirmPassword}
               setShowPassword={setShowConfirmPassword}
             />
 
-
-            {/* Create Account */}
+            {/* CREATE ACCOUNT */}
 
             <button
               type="submit"
               className="mt-2 flex h-[50px] items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#55ca76] to-[#72df8f] text-base font-bold text-[#062014] shadow-lg shadow-green-500/20 transition hover:-translate-y-0.5 hover:shadow-green-500/30"
             >
-
               Create Account
 
               <span className="text-xl">
@@ -508,7 +416,6 @@ const Login = () => {
 
           </form>
 
-
           {/* Already account */}
 
           <div className="mt-5 flex items-center gap-4">
@@ -516,15 +423,14 @@ const Login = () => {
             <span className="h-px flex-1 bg-white/15" />
 
             <p className="whitespace-nowrap text-xs text-white/60">
-
               Already have an account?
 
-              <a
-                href="#"
+              <Link
+                to="/login"
                 className="ml-1 font-semibold text-[#6ce18a] hover:underline"
               >
                 Login
-              </a>
+              </Link>
 
             </p>
 
@@ -542,13 +448,40 @@ const Login = () => {
 
 
 /* ==============================
+   FEATURE COMPONENT
+   ============================== */
+
+const Feature = ({ icon, title, description }) => {
+  return (
+    <div className="flex items-center gap-4">
+
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#63dc85]/30 bg-[#53be69]/10 text-[#70e58e]">
+        {icon}
+      </div>
+
+      <div>
+
+        <h3 className="text-base font-semibold">
+          {title}
+        </h3>
+
+        <p className="text-[13px] text-white/60">
+          {description}
+        </p>
+
+      </div>
+
+    </div>
+  );
+};
+
+
+/* ==============================
    COLONY SELECT
    ============================== */
 
 const ColonySelect = () => {
-
   return (
-
     <div className="flex h-12 items-center gap-3 rounded-xl border border-white/20 bg-black/20 px-4 transition focus-within:border-[#69dc87]">
 
       <MapPin
@@ -557,7 +490,9 @@ const ColonySelect = () => {
       />
 
       <select
+        name="colony"
         defaultValue=""
+        required
         className="w-full cursor-pointer appearance-none bg-transparent text-sm text-white outline-none"
       >
 
@@ -592,23 +527,21 @@ const ColonySelect = () => {
       </select>
 
     </div>
-
   );
 };
 
 
 /* ==============================
-   NORMAL INPUT COMPONENT
+   NORMAL INPUT
    ============================== */
 
 const Input = ({
   icon,
   placeholder,
   type = "text",
+  name,
 }) => {
-
   return (
-
     <div className="flex h-12 items-center gap-3 rounded-xl border border-white/20 bg-black/20 px-4 transition focus-within:border-[#69dc87] focus-within:bg-[#0c2319]/60">
 
       <span className="shrink-0 text-[#79d995]">
@@ -617,12 +550,13 @@ const Input = ({
 
       <input
         type={type}
+        name={name}
         placeholder={placeholder}
+        required
         className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/55"
       />
 
     </div>
-
   );
 };
 
@@ -633,13 +567,11 @@ const Input = ({
 
 const PasswordInput = ({
   placeholder,
+  name,
   showPassword,
   setShowPassword,
 }) => {
-
-  
   return (
-
     <div className="flex h-12 items-center gap-3 rounded-xl border border-white/20 bg-black/20 px-4 transition focus-within:border-[#69dc87] focus-within:bg-[#0c2319]/60">
 
       <Lock
@@ -649,7 +581,9 @@ const PasswordInput = ({
 
       <input
         type={showPassword ? "text" : "password"}
+        name={name}
         placeholder={placeholder}
+        required
         className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/55"
       />
 
@@ -668,9 +602,8 @@ const PasswordInput = ({
       </button>
 
     </div>
-
   );
 };
 
 
-export default Login;
+export default SignUp;
