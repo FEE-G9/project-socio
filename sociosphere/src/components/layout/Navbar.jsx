@@ -6,11 +6,11 @@ import {
   User,
   LogOut,
   ChevronDown,
-  Shield,
   Sun,
   Moon,
   Settings,
   LayoutDashboard,
+  MapPin,
 } from "lucide-react";
 
 import {
@@ -74,9 +74,11 @@ const Navbar = ({
             className="group flex items-center gap-2"
             aria-label="Go to home"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white transition-all duration-200 group-hover:scale-105 group-hover:bg-emerald-500 group-hover:shadow-lg group-hover:shadow-emerald-500/20">
-              <Shield size={19} />
-            </div>
+<img
+  src="/logo.png"
+  alt="SocioSphere"
+  className="h-9 w-9 rounded-xl object-contain transition-transform duration-200 group-hover:scale-105"
+/>
 
             <span className="text-lg font-bold text-slate-900 dark:text-white">
               Socio
@@ -214,14 +216,31 @@ const Navbar = ({
                     </div>
                   )}
 
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
                       {user?.name || "Citizen"}
                     </p>
-
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">
                       {user?.role || "Citizen"}
                     </p>
+                    
+                    {(user?.email || user?.phone) && (
+                      <div className="space-y-0.5 mt-1 border-t border-slate-200/60 dark:border-slate-700/60 pt-1">
+                        {user?.email && <p className="text-[10px] text-slate-500 truncate">{user.email}</p>}
+                        {user?.phone && <p className="text-[10px] text-slate-500 truncate">{user.phone}</p>}
+                      </div>
+                    )}
+                    
+                    {(user?.block || user?.residence) && (
+                      <div className="mt-1 flex items-center gap-1 text-[10px] text-slate-400">
+                        <MapPin size={10} className="shrink-0" />
+                        <span className="truncate">
+                          {user.block && `${user.block}`}
+                          {user.block && user.residence && ', '}
+                          {user.residence && `Res: ${user.residence}`}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -229,7 +248,7 @@ const Navbar = ({
                 <button
                   onClick={() =>
                     handleProfileNavigation(
-                      "/citizen/profile"
+                      location.pathname.startsWith('/authority') ? '/authority/profile' : '/citizen/profile'
                     )
                   }
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
@@ -242,7 +261,7 @@ const Navbar = ({
                 <button
                   onClick={() =>
                     handleProfileNavigation(
-                      "/citizen/dashboard"
+                      location.pathname.startsWith('/authority') ? '/authority/dashboard' : '/citizen/dashboard'
                     )
                   }
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
@@ -255,7 +274,7 @@ const Navbar = ({
                 <button
                   onClick={() =>
                     handleProfileNavigation(
-                      "/citizen/profile"
+                      location.pathname.startsWith('/authority') ? '/authority/profile' : '/citizen/profile'
                     )
                   }
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
@@ -348,7 +367,7 @@ const Navbar = ({
             <button
               onClick={() =>
                 handleProfileNavigation(
-                  "/citizen/profile"
+                  location.pathname.startsWith('/authority') ? '/authority/profile' : '/citizen/profile'
                 )
               }
               className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"

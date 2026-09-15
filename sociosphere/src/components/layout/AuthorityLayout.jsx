@@ -61,6 +61,15 @@ const AuthorityLayout = () => {
         showBrand={true}
         showNotifications={true}
         onLogout={handleLogout}
+        user={{
+          name: "Vansh Goyal",
+          role: "System Administrator",
+          email: "vansh@example.com",
+          phone: "+91 9041208572",
+          block: "Block B",
+          residence: "B-402",
+          avatar: "https://ui-avatars.com/api/?name=Vansh+Goyal&background=10b981&color=fff"
+        }}
       />
 
       <div className="flex">

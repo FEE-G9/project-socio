@@ -133,67 +133,71 @@ const Dashboard = () => {
      RECENT ISSUES
   ========================================================= */
 
-  const recentIssues = [
-    {
-      id: 1,
-      title: "Streetlight not working",
-      category: "Infrastructure",
-      location: "Block A, Main Road",
-      status: "In Progress",
-      statusClass:
-        "bg-amber-500/10 text-amber-700 border-amber-500/20 dark:text-amber-400",
-      time: "Today, 10:32 AM",
-    },
-    {
-      id: 2,
-      title: "Garbage collection delayed",
-      category: "Sanitation",
-      location: "Block B",
-      status: "Resolved",
-      statusClass:
-        "bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400",
-      time: "Yesterday",
-    },
-    {
-      id: 3,
-      title: "Water leakage near park",
-      category: "Water Supply",
-      location: "Community Park",
-      status: "Pending",
-      statusClass:
-        "bg-blue-500/10 text-blue-700 border-blue-500/20 dark:text-blue-400",
-      time: "2 days ago",
-    },
-    {
-      id: 4,
-      title: "Broken pavement",
-      category: "Roads",
-      location: "Block C",
-      status: "Resolved",
-      statusClass:
-        "bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400",
-      time: "4 days ago",
-    },
-  ];
+  const [recentIssues, setRecentIssues] = React.useState([]);
+
+  React.useEffect(() => {
+    const loadIssues = () => {
+      try {
+        const stored = JSON.parse(localStorage.getItem('sociosphere_issues') || '[]');
+        if (stored.length > 0) {
+          // format top 4 for preview
+          const preview = stored.slice(0, 4).map(iss => ({
+            id: iss.id,
+            title: iss.title,
+            category: iss.category,
+            location: iss.location,
+            status: iss.status,
+            statusClass: iss.status === 'Resolved' 
+               ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400"
+               : iss.status === 'Open'
+               ? "bg-blue-500/10 text-blue-700 border-blue-500/20 dark:text-blue-400"
+               : "bg-amber-500/10 text-amber-700 border-amber-500/20 dark:text-amber-400",
+            time: new Date(iss.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })
+          }));
+          setRecentIssues(preview);
+        }
+      } catch (e) {
+        setRecentIssues([]);
+      }
+    };
+    loadIssues();
+    window.addEventListener('sociosphere_data_updated', loadIssues);
+    return () => window.removeEventListener('sociosphere_data_updated', loadIssues);
+  }, []);
 
   /* =========================================================
      ANNOUNCEMENTS
   ========================================================= */
 
-  const announcements = [
-    {
-      title: "Monthly maintenance payment due",
-      date: "Today",
-    },
-    {
-      title: "Community cleanliness drive",
-      date: "2 days ago",
-    },
-    {
-      title: "Independence Day community event",
-      date: "5 days ago",
-    },
-  ];
+  const [announcements, setAnnouncements] = React.useState([]);
+
+  React.useEffect(() => {
+    // We must lazily import or import at top level. Let's just grab from localStorage safely
+    const loadAnns = () => {
+      try {
+        const stored = JSON.parse(localStorage.getItem('sociosphere_announcements') || '[]');
+        if (stored.length > 0) {
+          // format top 3 for preview
+          const preview = stored.slice(0, 3).map(a => ({
+            title: a.title,
+            date: new Date(a.date).toLocaleDateString([], { month: 'short', day: 'numeric' })
+          }));
+          setAnnouncements(preview);
+        } else {
+           // fallback to hardcoded if none exist
+           setAnnouncements([
+             { title: "Monthly maintenance payment due", date: "Today" },
+             { title: "Community cleanliness drive", date: "2 days ago" },
+           ]);
+        }
+      } catch (e) {
+        setAnnouncements([]);
+      }
+    };
+    loadAnns();
+    window.addEventListener('sociosphere_data_updated', loadAnns);
+    return () => window.removeEventListener('sociosphere_data_updated', loadAnns);
+  }, []);
 
   /* =========================================================
      CHART DATA
