@@ -22,7 +22,7 @@ export default function Landing() {
             </div>
           </div>
         </div>
-
+{/*
         <nav className="landing-nav">
           <button className="nav-link active">Home</button>
           <Link to="/citizen/dashboard" className="nav-link">
@@ -33,9 +33,15 @@ export default function Landing() {
           <button className="nav-link">About Us</button>
           <button className="nav-link">Contact</button>
         </nav>
-
+*/}
         <div className="header-actions">
           <button className="language-btn">EN</button>
+<<<<<<< HEAD
+=======
+          <Link to="/signup" className="login-btn">Login</Link>
+          <Link to="/signup" className="signup-btn">Sign Up</Link>
+        </div>
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565
 
           <Link to="/login" className="login-btn">
             Login
@@ -77,13 +83,18 @@ export default function Landing() {
           </p>
 
           <div className="cta-row">
+<<<<<<< HEAD
             <Link to="/login" className="primary-cta">
+=======
+
+            <Link to="/signup"className="primary-cta">
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565
               Join Your Community
               <ArrowRight size={18} />
             </Link>
 
             <button className="secondary-cta">
-              Explore SocioSphere
+              How it works
             </button>
           </div>
         </div>

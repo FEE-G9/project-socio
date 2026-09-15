@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useNavigate, Link } from "react-router-dom";
 import {
   User,
   Mail,
@@ -18,17 +17,17 @@ import {
   Building2,
 } from "lucide-react";
 
-const Login = () => {
+const SignUp = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [role, setRole] = useState("citizen");
 
-  const handleLogin = (e) => {
+  const handleSignup = (e) => {
     e.preventDefault();
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
     const formData = new FormData(e.currentTarget);
     const password = formData.get("password");
     const confirmPassword = formData.get("confirmPassword");
@@ -52,7 +51,27 @@ const Login = () => {
           ? "HQ Office"
           : "Block B - 201",
     });
+=======
+    const form = e.target;
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
 
+    // Check that all required fields are filled
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    // Get password values
+    const password = form.password.value;
+    const confirmPassword = form.confirmPassword.value;
+
+    // Check whether passwords match
+    if (password !== confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+
+    // Temporary navigation until backend/authentication is connected
     if (role === "authority") {
       navigate("/authority");
     } else {
@@ -78,6 +97,7 @@ const Login = () => {
 
       {/* NAVBAR */}
       <nav className="relative z-10 flex h-[90px] items-center justify-between px-[7%]">
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
         {/* LOGO */}
         <div className="flex items-center gap-3">
           <img
@@ -85,6 +105,16 @@ const Login = () => {
             alt="SocioSphere"
             className="h-12 w-auto object-contain"
           />
+=======
+
+        {/* Logo */}
+
+        <Link to="/" className="flex items-center gap-3">
+
+          <div className="text-4xl">
+            🌿
+          </div>
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
 
           <div>
             <h2 className="text-[27px] font-bold tracking-tight">
@@ -95,10 +125,16 @@ const Login = () => {
               One Community. Everything Connected.
             </p>
           </div>
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
         </div>
+=======
+
+        </Link>
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
 
         {/* NAVIGATION */}
         <div className="flex items-center gap-9">
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
           <a
             href="/"
             className="text-sm text-white/75 transition hover:text-[#6be08a]"
@@ -126,10 +162,18 @@ const Login = () => {
           >
             Login
           </button>
+=======
+          {/* Navigation buttons are currently hidden */}
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
         </div>
       </nav>
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
       {/* MAIN CONTENT */}
+=======
+      {/* ================= MAIN CONTENT ================= */}
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
       <main className="relative z-10 flex min-h-[calc(100vh-90px)] items-center justify-between gap-16 px-[10%] pb-12">
         {/* LEFT SIDE */}
         <section className="max-w-[520px]">
@@ -149,8 +193,26 @@ const Login = () => {
           </p>
 
           {/* FEATURES */}
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
+=======
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
           <div className="flex flex-col gap-5">
             <Feature
+              icon={<Users size={23} />}
+              title="Community Connection"
+              description="Stay connected with people around you."
+            />
+
+            <Feature
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
+              icon={<MessageCircle size={23} />}
+              title="Community Chat"
+              description="Talk, share and stay informed."
+            />
+
+            <Feature
+=======
               icon={<Users size={23} />}
               title="Community Connection"
               description="Stay connected with people around you."
@@ -163,10 +225,20 @@ const Login = () => {
             />
 
             <Feature
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
               icon={<Bell size={23} />}
               title="Reports & Notices"
               description="Report issues and receive important updates."
             />
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
+=======
+
+            <Feature
+              icon={<HeartHandshake size={23} />}
+              title="Local Services"
+              description="Find useful services within your community."
+            />
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
 
             <Feature
               icon={<HeartHandshake size={23} />}
@@ -176,7 +248,12 @@ const Login = () => {
           </div>
         </section>
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
         {/* SIGNUP CARD */}
+=======
+        {/* ================= SIGNUP CARD ================= */}
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
         <section className="w-full max-w-[540px] shrink-0 rounded-[20px] border border-[#84e699]/35 bg-[#18382b]/55 p-8 shadow-2xl backdrop-blur-xl">
           {/* CARD HEADING + LOGO */}
           <div className="mb-5 text-center">
@@ -198,7 +275,12 @@ const Login = () => {
             </p>
           </div>
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
           {/* ROLE SELECTION */}
+=======
+          {/* ================= ROLE SELECTION ================= */}
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
           <div className="mb-5">
             <p className="mb-2 text-center text-sm font-semibold text-white/80">
               Who are you?
@@ -228,7 +310,12 @@ const Login = () => {
                 </div>
               </button>
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
               {/* AUTHORITY */}
+=======
+              {/* Authority */}
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
               <button
                 type="button"
                 onClick={() => setRole("authority")}
@@ -253,6 +340,7 @@ const Login = () => {
             </div>
           </div>
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
           {/* FORM */}
           <form
             onSubmit={handleLogin}
@@ -261,19 +349,39 @@ const Login = () => {
             {/* CITIZEN FORM */}
             {role === "citizen" && (
               <>
+=======
+          {/* ================= FORM ================= */}
+
+          <form
+            onSubmit={handleSignup}
+            className="flex flex-col gap-3"
+          >
+
+            {/* ================= CITIZEN FORM ================= */}
+
+            {role === "citizen" && (
+              <>
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
                 <div className="grid grid-cols-2 gap-3">
                   <Input
                     icon={<User size={19} />}
                     placeholder="Full Name"
                     name="fullName"
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
                     required
+=======
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
                   />
 
                   <Input
                     icon={<User size={19} />}
                     placeholder="Username"
                     name="username"
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
                     required
+=======
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
                   />
                 </div>
 
@@ -283,7 +391,10 @@ const Login = () => {
                     placeholder="Email Address"
                     type="email"
                     name="email"
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
                     required
+=======
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
                   />
 
                   <Input
@@ -292,8 +403,11 @@ const Login = () => {
                     type="number"
                     name="age"
                     min="1"
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
                     max="120"
                     required
+=======
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
                   />
                 </div>
 
@@ -302,6 +416,7 @@ const Login = () => {
                     icon={<Briefcase size={19} />}
                     placeholder="Job / Occupation"
                     name="occupation"
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
                     required
                   />
 
@@ -309,18 +424,32 @@ const Login = () => {
                     name="communityId"
                     required
                   />
+=======
+                  />
+
+                  <ColonySelect />
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
                 </div>
               </>
             )}
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
             {/* AUTHORITY FORM */}
+=======
+            {/* ================= AUTHORITY FORM ================= */}
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
             {role === "authority" && (
               <>
                 <Input
                   icon={<User size={19} />}
                   placeholder="Full Name"
                   name="fullName"
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
                   required
+=======
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
                 />
 
                 <Input
@@ -328,7 +457,10 @@ const Login = () => {
                   placeholder="Official Email Address"
                   type="email"
                   name="email"
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
                   required
+=======
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
                 />
 
                 <div className="grid grid-cols-2 gap-3">
@@ -389,15 +521,25 @@ const Login = () => {
                     </select>
                   </div>
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
                   <ColonySelect
                     name="communityId"
                     required
                   />
+=======
+                  <ColonySelect />
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
                 </div>
               </>
             )}
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
             {/* PASSWORD */}
+=======
+            {/* ================= PASSWORD ================= */}
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
             <PasswordInput
               placeholder="Password"
               name="password"
@@ -406,7 +548,12 @@ const Login = () => {
               required
             />
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
             {/* CONFIRM PASSWORD */}
+=======
+            {/* Confirm Password */}
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
             <PasswordInput
               placeholder="Confirm Password"
               name="confirmPassword"
@@ -416,6 +563,10 @@ const Login = () => {
             />
 
             {/* CREATE ACCOUNT */}
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
+=======
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
             <button
               type="submit"
               className="mt-2 flex h-[50px] items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#55ca76] to-[#72df8f] text-base font-bold text-[#062014] shadow-lg shadow-green-500/20 transition hover:-translate-y-0.5 hover:shadow-green-500/30"
@@ -428,19 +579,29 @@ const Login = () => {
             </button>
           </form>
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
           {/* ALREADY ACCOUNT */}
+=======
+          {/* Already account */}
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
           <div className="mt-5 flex items-center gap-4">
             <span className="h-px flex-1 bg-white/15" />
 
             <p className="whitespace-nowrap text-xs text-white/60">
               Already have an account?
 
-              <a
-                href="#"
+              <Link
+                to="/login"
                 className="ml-1 font-semibold text-[#6ce18a] hover:underline"
               >
                 Login
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
               </a>
+=======
+              </Link>
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
             </p>
 
             <span className="h-px flex-1 bg-white/15" />
@@ -451,6 +612,7 @@ const Login = () => {
   );
 };
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
 /* FEATURE COMPONENT */
 const Feature = ({ icon, title, description }) => {
   return (
@@ -478,6 +640,44 @@ const ColonySelect = ({
   required = false,
 }) => {
   return (
+=======
+
+/* ==============================
+   FEATURE COMPONENT
+   ============================== */
+
+const Feature = ({ icon, title, description }) => {
+  return (
+    <div className="flex items-center gap-4">
+
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#63dc85]/30 bg-[#53be69]/10 text-[#70e58e]">
+        {icon}
+      </div>
+
+      <div>
+
+        <h3 className="text-base font-semibold">
+          {title}
+        </h3>
+
+        <p className="text-[13px] text-white/60">
+          {description}
+        </p>
+
+      </div>
+
+    </div>
+  );
+};
+
+
+/* ==============================
+   COLONY SELECT
+   ============================== */
+
+const ColonySelect = () => {
+  return (
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
     <div className="flex h-12 items-center gap-3 rounded-xl border border-white/20 bg-black/20 px-4 transition focus-within:border-[#69dc87]">
       <MapPin
         size={19}
@@ -485,9 +685,15 @@ const ColonySelect = ({
       />
 
       <select
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
         name={name}
         defaultValue=""
         required={required}
+=======
+        name="colony"
+        defaultValue=""
+        required
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
         className="w-full cursor-pointer appearance-none bg-transparent text-sm text-white outline-none"
       >
         <option
@@ -530,15 +736,26 @@ const ColonySelect = ({
   );
 };
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
 /* NORMAL INPUT */
+=======
+
+/* ==============================
+   NORMAL INPUT
+   ============================== */
+
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
 const Input = ({
   icon,
   placeholder,
   type = "text",
   name,
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
   required = false,
   min,
   max,
+=======
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
 }) => {
   return (
     <div className="flex h-12 items-center gap-3 rounded-xl border border-white/20 bg-black/20 px-4 transition focus-within:border-[#69dc87] focus-within:bg-[#0c2319]/60">
@@ -550,9 +767,13 @@ const Input = ({
         type={type}
         name={name}
         placeholder={placeholder}
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
         required={required}
         min={min}
         max={max}
+=======
+        required
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
         className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/55"
       />
     </div>
@@ -578,8 +799,12 @@ const PasswordInput = ({
         type={showPassword ? "text" : "password"}
         name={name}
         placeholder={placeholder}
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
         required={required}
         minLength={6}
+=======
+        required
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx
         className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/55"
       />
 
@@ -603,4 +828,9 @@ const PasswordInput = ({
   );
 };
 
+<<<<<<< HEAD:sociosphere/src/pages/public/Login.jsx
 export default Login;
+=======
+
+export default SignUp;
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565:sociosphere/src/pages/public/Sign_up.jsx

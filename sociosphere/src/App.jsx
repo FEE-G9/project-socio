@@ -6,7 +6,7 @@ import CitizenLayout from "./components/layout/CitizenLayout";
 import AuthorityLayout from "./components/layout/AuthorityLayout";
 
 import Landing from "./pages/public/Landing";
-import Login from "./pages/public/Login";
+import SignUp from "./pages/public/Sign_up";
 
 // Viewing portal for the citizen Report page:
 import Report from "./pages/citizen/Report";
@@ -32,7 +32,7 @@ function App() {
       {/* ================= PUBLIC ================= */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
       </Route>
 
       {/* ================= CITIZEN ================= */}
