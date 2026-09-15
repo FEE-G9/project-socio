@@ -6,7 +6,6 @@ import {
   User,
   LogOut,
   ChevronDown,
-  Shield,
   Sun,
   Moon,
   Settings,
@@ -75,9 +74,11 @@ const Navbar = ({
             className="group flex items-center gap-2"
             aria-label="Go to home"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white transition-all duration-200 group-hover:scale-105 group-hover:bg-emerald-500 group-hover:shadow-lg group-hover:shadow-emerald-500/20">
-              <Shield size={19} />
-            </div>
+<img
+  src="/logo.png"
+  alt="SocioSphere"
+  className="h-9 w-9 rounded-xl object-contain transition-transform duration-200 group-hover:scale-105"
+/>
 
             <span className="text-lg font-bold text-slate-900 dark:text-white">
               Socio

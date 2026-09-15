@@ -1,22 +1,22 @@
- import { Shield, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import "./landing.css";
 import { Link } from "react-router-dom";
+
 export default function Landing() {
   return (
     <div className="landing-shell">
-
       <header className="landing-header">
-
         <div className="brand-wrap">
-          <div style={{fontSize:"40px"}}>
-            🌿
-          </div>
+          <img
+            src="/logo.png"
+            alt="SocioSphere"
+            className="brand-logo"
+          />
 
           <div>
             <div className="brand-text">
               Socio<span>Sphere</span>
             </div>
-
             <div className="brand-tagline">
               One Community. Everything Connected.
             </div>
@@ -25,7 +25,9 @@ export default function Landing() {
 {/*
         <nav className="landing-nav">
           <button className="nav-link active">Home</button>
-          <Link to="/citizen/dashboard" className="nav-link">Dashboard</Link>
+          <Link to="/citizen/dashboard" className="nav-link">
+            Dashboard
+          </Link>
           <button className="nav-link">Services</button>
           <button className="nav-link">Community</button>
           <button className="nav-link">About Us</button>
@@ -34,15 +36,24 @@ export default function Landing() {
 */}
         <div className="header-actions">
           <button className="language-btn">EN</button>
+<<<<<<< HEAD
+=======
           <Link to="/signup" className="login-btn">Login</Link>
           <Link to="/signup" className="signup-btn">Sign Up</Link>
         </div>
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565
 
+          <Link to="/login" className="login-btn">
+            Login
+          </Link>
+
+          <Link to="/login" className="signup-btn">
+            Sign Up
+          </Link>
+        </div>
       </header>
 
-
       <main className="landing-hero">
-
         <video
           className="hero-video"
           autoPlay
@@ -55,9 +66,7 @@ export default function Landing() {
 
         <div className="image-overlay"></div>
 
-
         <div className="hero-content">
-
           <div className="hero-label">
             BUILDING BETTER COMMUNITIES
           </div>
@@ -74,8 +83,12 @@ export default function Landing() {
           </p>
 
           <div className="cta-row">
+<<<<<<< HEAD
+            <Link to="/login" className="primary-cta">
+=======
 
             <Link to="/signup"className="primary-cta">
+>>>>>>> d2073e9fed63d4c4627969511695641b60d26565
               Join Your Community
               <ArrowRight size={18} />
             </Link>
@@ -83,16 +96,11 @@ export default function Landing() {
             <button className="secondary-cta">
               How it works
             </button>
-
           </div>
-
         </div>
-
       </main>
 
-
       <section className="intro-section">
-
         <p className="section-label">
           EVERYTHING YOU NEED
         </p>
@@ -105,10 +113,7 @@ export default function Landing() {
           Stay informed, stay connected, and take an active part
           in the community around you.
         </p>
-
       </section>
-
     </div>
   );
 }
-
