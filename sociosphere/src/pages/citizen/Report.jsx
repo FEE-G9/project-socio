@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import { useAuth } from "../../context/AuthContext";
-import { useIssues } from "../../context/IssueContext";
 import {
   AlertTriangle,
   Camera,
@@ -474,9 +472,8 @@ export default function Report({
   isEmbedded = false,
   onSuccess,
 }) {
-const { theme } = useTheme();
-const { user } = useAuth();
-const { addIssue } = useIssues();
+  const { theme } = useTheme();
+
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [priority, setPriority] = useState("MEDIUM PRIORITY");
@@ -522,71 +519,42 @@ const { addIssue } = useIssues();
       (c) => c.value === category
     );
 
-   const newIssue = {
-  id: `ISSUE-${Math.floor(1000 + Math.random() * 9000)}`,
+    const newIssue = {
+      id: `ISSUE-${Math.floor(1000 + Math.random() * 9000)}`,
+      title: title.trim(),
+      category: categoryObj ? categoryObj.label : category,
+      categoryValue: category,
+      description: description.trim(),
+      location: location.trim(),
+      priority,
+      priorityClass: priorityObj.class,
+      status: "In Progress",
+      statusClass: "progress",
+      date: `${dateString}, ${timeString}`,
+      time: timeString,
+      rawDate: dateString,
+      timestamp: now.toISOString(),
+      eta: "Pending Dispatch",
+      photoName: photoName || null,
+      image: photoUrl || null,
+    };
 
-  type: "issue",
+    try {
+      const stored = JSON.parse(
+        localStorage.getItem("sociosphere_user_reports") || "[]"
+      );
 
-  title: title.trim(),
+      localStorage.setItem(
+        "sociosphere_user_reports",
+        JSON.stringify([newIssue, ...stored])
+      );
+    } catch (e) {
+      console.error(
+        "Failed to save report to localStorage:",
+        e
+      );
+    }
 
-  category: categoryObj ? categoryObj.label : category,
-
-  categoryValue: category,
-
-  description: description.trim(),
-
-  location: location.trim(),
-
-  priority: priority,
-
-  priorityClass: priorityObj.class,
-
-  status: "In Progress",
-
-  statusClass: "progress",
-
-  date: `${dateString}, ${timeString}`,
-
-  time: timeString,
-
-  rawDate: dateString,
-
-  timestamp: now.toISOString(),
-
-  createdAt: now.toISOString(),
-
-  eta: "Pending Dispatch",
-
-  photoName: photoName || null,
-
-  image: photoUrl || null,
-
-  // IMPORTANT
-  communityId: user?.communityId,
-
-  communityName: user?.communityName,
-
-  reportedBy: user?.name,
-
-  reportedByEmail: user?.email,
-};
-
-    // try {
-    //   const stored = JSON.parse(
-    //     localStorage.getItem("sociosphere_user_reports") || "[]"
-    //   );
-
-    //   localStorage.setItem(
-    //     "sociosphere_user_reports",
-    //     JSON.stringify([newIssue, ...stored])
-    //   );
-    // } catch (e) {
-    //   console.error(
-    //     "Failed to save report to localStorage:",
-    //     e
-    //   );
-    // }
-    addIssue(newIssue);
     setSubmittedIssue(newIssue);
     setSubmitted(true);
 
