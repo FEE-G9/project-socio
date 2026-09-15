@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import { useAuth } from "../../context/AuthContext";
-import { useIssues } from "../../context/IssueContext";
 import {
 	AlertCircle,
 	AlertTriangle,
@@ -60,10 +58,7 @@ const severityLevels = [
 const headingClass="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-300";
 
 export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) {
-	const { theme } = useTheme();  
-	const { user } = useAuth();
-const { addIssue } = useIssues();
-
+	const { theme } = useTheme();
 	const [category, setCategory] = useState("");
 	const [severity, setSeverity] = useState("high");
 	const [description, setDescription] = useState("");
@@ -113,63 +108,32 @@ const { addIssue } = useIssues();
 		const sevInfo = severityMap[severity] || severityMap.high;
 
 		const newCrimeIssue = {
-  id: cId,
+			id: cId,
+			title: `${categoryLabel} Incident`,
+			category: categoryLabel,
+			categoryValue: category,
+			description: description.trim(),
+			location: location.trim() + (landmark ? ` (${landmark})` : ""),
+			priority: sevInfo.priority,
+			priorityClass: sevInfo.class,
+			status: "In Progress",
+			statusClass: "progress",
+			date: `${dateString}, ${timeString}`,
+			time: timeString,
+			rawDate: dateString,
+			timestamp: now.toISOString(),
+			eta: "Security Dispatched",
+			fileName: fileName || null,
+			image: fileUrl || null,
+		};
 
-  type: "crime",
+		try {
+			const stored = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
+			localStorage.setItem("sociosphere_user_reports", JSON.stringify([newCrimeIssue, ...stored]));
+		} catch (e) {
+			console.error("Failed to save crime report to localStorage:", e);
+		}
 
-  title: `${categoryLabel} Incident`,
-
-  category: categoryLabel,
-
-  categoryValue: category,
-
-  description: description.trim(),
-
-  location:
-    location.trim() +
-    (landmark ? ` (${landmark})` : ""),
-
-  priority: sevInfo.priority,
-
-  priorityClass: sevInfo.class,
-
-  status: "In Progress",
-
-  statusClass: "progress",
-
-  date: `${dateString}, ${timeString}`,
-
-  time: timeString,
-
-  rawDate: dateString,
-
-  timestamp: now.toISOString(),
-
-  createdAt: now.toISOString(),
-
-  eta: "Security Dispatched",
-
-  fileName: fileName || null,
-
-  image: fileUrl || null,
-
-  // IMPORTANT
-  communityId: user?.communityId,
-
-  communityName: user?.communityName,
-
-  reportedBy: user?.name,
-
-  reportedByEmail: user?.email,
-};
-
-		// try {
-		// 	const stored = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
-		// 	localStorage.setItem("sociosphere_user_reports", JSON.stringify([newCrimeIssue, ...stored]));
-		// } catch (e) {
-		// 	console.error("Failed to save crime report to localStorage:", e);
-		// }
-        addIssue(newCrimeIssue);
 		setSubmitted(true);
 
 		if (onSuccess) {
