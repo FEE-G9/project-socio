@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import "./home.css";
+
 import Report from "./Report";
 import ReportCrime from "./ReportCrime";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 import Map from "./Map";
+
 import {
   Shield,
   MapPin,
   Bell,
   Users,
-  Building2,
-  Compass,
   CreditCard,
   Plus,
   AlertTriangle,
@@ -22,54 +23,11 @@ import {
   ChevronRight,
   Sparkles,
   X,
-  Phone,
   Calendar,
   MessageSquare,
-  Sun,
-  Moon,
   FileText,
   ShieldAlert,
 } from "lucide-react";
-
-const defaultMockIssue = [
-  {
-    id: "ISSUE-8492",
-    title: "Major Water Leakage near Basement P2 Entrance",
-    category: "Water Leakage",
-    description:
-      "Continuous fresh water gushing from overhead pipe junction near ramp. Slippery floor causing safety hazard for incoming vehicles.",
-    location: "Basement P2, Pillar B-14",
-    priority: "HIGH PRIORITY",
-    priorityClass: "high",
-    status: "In Progress",
-    statusClass: "progress",
-    date: "Today, 08:30 AM",
-    eta: "Today, 2:00 PM",
-    icon: Droplets,
-    image:
-      "https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=600&q=80",
-  },
-];
-
-const defaultMockCrime = [
-  {
-    id: "CRM-2026-8819",
-    title: "Suspicious Activity & Vehicle Inspection near Gate 3",
-    category: "Suspicious Activity",
-    description:
-      "Unidentified individual observing parked vehicles near North Drive. Security patrol dispatched for site verification.",
-    location: "Sector 4 - Visitor Parking Gate 3",
-    priority: "CRITICAL THREAT",
-    priorityClass: "critical",
-    status: "Security Dispatched",
-    statusClass: "progress",
-    date: "Today, 10:15 PM",
-    eta: "Patrol En Route",
-    icon: ShieldAlert,
-    image:
-      "https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=600&q=80",
-  },
-];
 
 const quickActions = [
   {
@@ -108,52 +66,82 @@ export default function Home() {
   const [activeCivicTab, setActiveCivicTab] = useState("all");
   const [activeCrimeTab, setActiveCrimeTab] = useState("all");
   const [showNotifications, setShowNotifications] = useState(false);
-  const [activeModal, setActiveModal] = useState(null); // 'report' | 'reportCrime' | null
+  const [activeModal, setActiveModal] = useState(null);
   const [toast, setToast] = useState("");
   const [userReports, setUserReports] = useState([]);
+
   const { theme } = useTheme();
+  const { user } = useAuth();
 
   const loadUserReports = () => {
-    try {
-      // First, get crime reports from user local storage (since crime isn't fully integrated to admin mockIssues yet)
-      const storedLocal = JSON.parse(
-        localStorage.getItem("sociosphere_user_reports") || "[]"
-      ).filter(r => r.id && r.id.startsWith("CRM-"));
-      
-      // Then get civic issues from the global mock data so they sync with admin!
-      const storedGlobal = JSON.parse(
-        localStorage.getItem("sociosphere_issues") || "[]"
-      ).map(iss => ({
-        id: iss.id,
-        title: iss.title,
-        category: iss.category,
-        description: iss.description,
-        location: iss.location,
-        priority: iss.severity + ' Priority',
-        priorityClass: (iss.severity || '').toLowerCase(),
-        status: iss.status,
-        statusClass: iss.status === 'Resolved' ? 'progress' : 'progress', // simplify
-        date: new Date(iss.createdAt).toLocaleDateString(),
-        eta: iss.aiAnalysis?.estimatedResolutionTime || "Pending",
-        image: iss.image
-      }));
+  try {
+    const storedLocal = JSON.parse(
+      localStorage.getItem("sociosphere_user_reports") || "[]"
+    ).filter((report) => report?.id?.startsWith("CRM-"));
 
-      setUserReports([...storedGlobal, ...storedLocal]);
-    } catch (e) {
-      console.error("Failed to load user reports:", e);
-      setUserReports([]);
-    }
+    const storedGlobal = JSON.parse(
+      localStorage.getItem("sociosphere_issues") || "[]"
+    ).map((issue) => ({
+      id: issue.id,
+      title: issue.title,
+      category: issue.category,
+      description: issue.description,
+      location: issue.location,
+
+      priority: issue.severity
+        ? `${issue.severity} Priority`
+        : "Medium Priority",
+
+      priorityClass: (issue.severity || "medium").toLowerCase(),
+
+      status: issue.status || "In Progress",
+
+      statusClass:
+        issue.status === "Resolved" ? "resolved" : "progress",
+
+      date: issue.createdAt
+        ? new Date(issue.createdAt).toLocaleDateString()
+        : "Recently",
+
+      eta: issue.aiAnalysis?.estimatedResolutionTime || "Pending",
+
+      image: issue.image || null,
+
+      reportedById: issue.reportedById,
+      reportedByEmail: issue.reportedByEmail,
+      communityId: issue.communityId,
+    }));
+
+    // Show all saved reports for now
+    setUserReports([...storedGlobal, ...storedLocal]);
+
+  } catch (error) {
+    console.error("Failed to load user reports:", error);
+    setUserReports([]);
+  }
+};
+
+ useEffect(() => {
+  loadUserReports();
+
+  window.addEventListener(
+    "sociosphere_data_updated",
+    loadUserReports
+  );
+
+  return () => {
+    window.removeEventListener(
+      "sociosphere_data_updated",
+      loadUserReports
+    );
   };
-
-  useEffect(() => {
-    loadUserReports();
-    window.addEventListener('sociosphere_data_updated', loadUserReports);
-    return () => window.removeEventListener('sociosphere_data_updated', loadUserReports);
-  }, []);
-
+}, []);
   const showToast = (message) => {
     setToast(message);
-    setTimeout(() => setToast(""), 2500);
+
+    setTimeout(() => {
+      setToast("");
+    }, 2500);
   };
 
   const handleQuickAction = (title) => {
@@ -161,10 +149,12 @@ export default function Home() {
       setActiveModal("report");
       return;
     }
+
     if (title === "Report Crime") {
       setActiveModal("reportCrime");
       return;
     }
+
     if (title === "View Map") {
       setActiveModal("map");
       return;
@@ -173,176 +163,254 @@ export default function Home() {
     showToast(`${title} feature opened`);
   };
 
-  // Separate user reports into Civic Issues vs Crime & Safety Reports
+  /*
+   * Separate civic issues from crime reports.
+   */
   const userCivicReports = userReports.filter(
-    (item) => item.id && (item.id.startsWith("ISSUE-") || !item.id.startsWith("CRM-"))
+    (item) =>
+      item?.id &&
+      !item.id.startsWith("CRM-")
   );
 
   const userCrimeReports = userReports.filter(
-    (item) => item.id && item.id.startsWith("CRM-")
+    (item) =>
+      item?.id &&
+      item.id.startsWith("CRM-")
   );
 
-  // If there are user reported items, show all of them. Otherwise, show 1 mock item fallback.
-  const displayedCivicIssues =
-    userCivicReports.length > 0 ? userCivicReports : defaultMockIssue;
-
-  const displayedCrimeIssues =
-    userCrimeReports.length > 0 ? userCrimeReports : defaultMockCrime;
+  /*
+   * IMPORTANT:
+   * No fake/default issue is used here.
+   * If the user has not reported anything, the empty state is shown.
+   */
+  const displayedCivicIssues = userCivicReports;
+  const displayedCrimeIssues = userCrimeReports;
 
   const getIssueIcon = (issue) => {
     if (issue.icon) return issue.icon;
-    const cat = (issue.category || "").toLowerCase();
-    if (cat.includes("water") || cat.includes("leak")) return Droplets;
-    if (cat.includes("drain")) return AlertTriangle;
-    if (cat.includes("light") || cat.includes("electric")) return Zap;
-    if (cat.includes("waste") || cat.includes("garbage") || cat.includes("bin"))
-      return Trash2;
+
+    const category = (issue.category || "").toLowerCase();
+
     if (
-      cat.includes("crime") ||
-      cat.includes("theft") ||
-      cat.includes("vandalism") ||
-      cat.includes("harassment") ||
-      cat.includes("safety") ||
-      cat.includes("nuisance") ||
-      cat.includes("cyber")
-    )
+      category.includes("water") ||
+      category.includes("leak")
+    ) {
+      return Droplets;
+    }
+
+    if (category.includes("drain")) {
+      return AlertTriangle;
+    }
+
+    if (
+      category.includes("light") ||
+      category.includes("electric")
+    ) {
+      return Zap;
+    }
+
+    if (
+      category.includes("waste") ||
+      category.includes("garbage") ||
+      category.includes("bin")
+    ) {
+      return Trash2;
+    }
+
+    if (
+      category.includes("crime") ||
+      category.includes("theft") ||
+      category.includes("vandalism") ||
+      category.includes("harassment") ||
+      category.includes("safety") ||
+      category.includes("nuisance") ||
+      category.includes("cyber")
+    ) {
       return ShieldAlert;
+    }
+
     return AlertTriangle;
   };
 
-  // Civic issues filtering
+  /*
+   * Civic issue filtering
+   */
   const filteredCivicIssues = displayedCivicIssues.filter((issue) => {
-    if (activeCivicTab === "progress")
+    if (activeCivicTab === "progress") {
       return (
-        issue.status === "In Progress" || issue.status === "Pending Dispatch"
+        issue.status === "In Progress" ||
+        issue.status === "Pending Dispatch"
       );
-    if (activeCivicTab === "resolved") return issue.status === "Resolved";
+    }
+
+    if (activeCivicTab === "resolved") {
+      return issue.status === "Resolved";
+    }
+
     if (activeCivicTab === "high") {
       return (
         issue.priorityClass === "high" ||
         issue.priorityClass === "critical" ||
-        (issue.priority && issue.priority.includes("HIGH")) ||
-        (issue.priority && issue.priority.includes("CRITICAL"))
+        (issue.priority &&
+          issue.priority.toUpperCase().includes("HIGH")) ||
+        (issue.priority &&
+          issue.priority.toUpperCase().includes("CRITICAL"))
       );
     }
+
     return true;
   });
 
   const civicInProgressCount = displayedCivicIssues.filter(
-    (i) => i.status === "In Progress" || i.status === "Pending Dispatch"
+    (issue) =>
+      issue.status === "In Progress" ||
+      issue.status === "Pending Dispatch"
   ).length;
 
   const civicResolvedCount = displayedCivicIssues.filter(
-    (i) => i.status === "Resolved"
+    (issue) => issue.status === "Resolved"
   ).length;
 
   const civicHighCriticalCount = displayedCivicIssues.filter(
-    (i) =>
-      i.priorityClass === "high" ||
-      i.priorityClass === "critical" ||
-      (i.priority && i.priority.includes("HIGH")) ||
-      (i.priority && i.priority.includes("CRITICAL"))
+    (issue) =>
+      issue.priorityClass === "high" ||
+      issue.priorityClass === "critical" ||
+      (issue.priority &&
+        issue.priority.toUpperCase().includes("HIGH")) ||
+      (issue.priority &&
+        issue.priority.toUpperCase().includes("CRITICAL"))
   ).length;
 
-  // Crime reports filtering
+  /*
+   * Crime report filtering
+   */
   const filteredCrimeIssues = displayedCrimeIssues.filter((crime) => {
-    if (activeCrimeTab === "active")
+    if (activeCrimeTab === "active") {
       return (
         crime.status === "In Progress" ||
         crime.status === "Security Dispatched" ||
         crime.status === "Pending Dispatch"
       );
-    if (activeCrimeTab === "resolved")
-      return crime.status === "Resolved" || crime.status === "Logged";
+    }
+
+    if (activeCrimeTab === "resolved") {
+      return (
+        crime.status === "Resolved" ||
+        crime.status === "Logged"
+      );
+    }
+
     if (activeCrimeTab === "critical") {
       return (
         crime.priorityClass === "critical" ||
-        (crime.priority && crime.priority.includes("CRITICAL")) ||
-        (crime.priority && crime.priority.includes("HIGH"))
+        (crime.priority &&
+          crime.priority.toUpperCase().includes("CRITICAL")) ||
+        (crime.priority &&
+          crime.priority.toUpperCase().includes("HIGH"))
       );
     }
+
     return true;
   });
 
   const crimeActiveCount = displayedCrimeIssues.filter(
-    (i) =>
-      i.status === "In Progress" ||
-      i.status === "Security Dispatched" ||
-      i.status === "Pending Dispatch"
+    (issue) =>
+      issue.status === "In Progress" ||
+      issue.status === "Security Dispatched" ||
+      issue.status === "Pending Dispatch"
   ).length;
 
   const crimeResolvedCount = displayedCrimeIssues.filter(
-    (i) => i.status === "Resolved" || i.status === "Logged"
+    (issue) =>
+      issue.status === "Resolved" ||
+      issue.status === "Logged"
   ).length;
 
   const crimeCriticalCount = displayedCrimeIssues.filter(
-    (i) =>
-      i.priorityClass === "critical" ||
-      (i.priority && i.priority.includes("CRITICAL")) ||
-      (i.priority && i.priority.includes("HIGH"))
+    (issue) =>
+      issue.priorityClass === "critical" ||
+      (issue.priority &&
+        issue.priority.toUpperCase().includes("CRITICAL")) ||
+      (issue.priority &&
+        issue.priority.toUpperCase().includes("HIGH"))
   ).length;
 
   return (
-    <div className={`home-page ${theme === "dark" ? "dark-mode" : "light-mode"}`}>
+    <div
+      className={`home-page ${
+        theme === "dark" ? "dark-mode" : "light-mode"
+      }`}
+    >
+      {/* HEADER */}
       <header className="home-navbar">
-  <div className="navbar-inner">
+        <div className="navbar-inner">
+          <div className="location-section">
+            <MapPin size={16} />
 
-    <div className="location-section">
-      <MapPin size={16} />
+            <span>
+              {user?.communityName || "Your Community"}
+            </span>
 
-      <span>
-        Greenwood Heights,
-        <br />
-        Sector 4
-      </span>
+            <span className="online-dot" />
+          </div>
 
-      <span className="online-dot" />
-    </div>
+          <div className="navbar-actions">
+            <button
+              className="emergency-button"
+              onClick={() => {
+                setActiveModal("reportCrime");
+                showToast(
+                  "Emergency Crime & Safety portal opened"
+                );
+              }}
+            >
+              <span className="emergency-icon">!</span>
+              SOS
+              <strong>Emergency</strong>
+            </button>
+          </div>
+        </div>
+      </header>
 
-    <div className="navbar-actions">
-      <button
-        className="emergency-button"
-        onClick={() => {
-          setActiveModal("reportCrime");
-          showToast("Emergency Crime & Safety portal opened");
-        }}
-      >
-        <span className="emergency-icon">!</span>
-        SOS
-        <strong>Emergency</strong>
-      </button>
-    </div>
-
-  </div>
-</header>
-
+      {/* NOTIFICATIONS */}
       {showNotifications && (
         <div className="notification-panel">
           <div className="notification-header">
             <strong>Notifications</strong>
-            <button onClick={() => setShowNotifications(false)}>
+
+            <button
+              onClick={() => setShowNotifications(false)}
+              aria-label="Close notifications"
+            >
               <X size={16} />
             </button>
           </div>
 
           <div className="notification-item">
             <CheckCircle2 size={17} />
-            <span>Your streetlight issue has been resolved.</span>
+            <span>
+              Your streetlight issue has been resolved.
+            </span>
           </div>
 
           <div className="notification-item">
             <Bell size={17} />
-            <span>New community announcement available.</span>
+            <span>
+              New community announcement available.
+            </span>
           </div>
 
           <div className="notification-item">
             <AlertTriangle size={17} />
-            <span>Drainage issue reported near Block B.</span>
+            <span>
+              Drainage issue reported near Block B.
+            </span>
           </div>
         </div>
       )}
 
       <main className="home-main">
+        {/* QUICK ACTIONS */}
         <section className="section-header quick-header">
           <h2>Quick Civic Actions</h2>
           <span>One-tap resident utilities</span>
@@ -356,7 +424,9 @@ export default function Home() {
               <button
                 key={action.title}
                 className={`quick-action-card ${action.className}`}
-                onClick={() => handleQuickAction(action.title)}
+                onClick={() =>
+                  handleQuickAction(action.title)
+                }
               >
                 <div className="action-icon">
                   <Icon size={23} />
@@ -371,46 +441,69 @@ export default function Home() {
           })}
         </section>
 
-        {/* Section 1: My Reported Civic Issues */}
+        {/* CIVIC ISSUES */}
         <section className="issues-section">
           <div className="issues-heading">
             <div>
               <h2>
                 My Reported Civic Issues
-                <span className="count-badge">{displayedCivicIssues.length}</span>
+
+                <span className="count-badge">
+                  {displayedCivicIssues.length}
+                </span>
               </h2>
 
               <p>
-                Track real-time progress, municipal technician dispatch, and
-                infrastructure resolution
+                Track real-time progress, municipal technician
+                dispatch, and infrastructure resolution
               </p>
             </div>
 
             <div className="filter-tabs">
               <button
-                className={activeCivicTab === "all" ? "active" : ""}
-                onClick={() => setActiveCivicTab("all")}
+                className={
+                  activeCivicTab === "all" ? "active" : ""
+                }
+                onClick={() =>
+                  setActiveCivicTab("all")
+                }
               >
                 All Issues ({displayedCivicIssues.length})
               </button>
 
               <button
-                className={activeCivicTab === "progress" ? "active" : ""}
-                onClick={() => setActiveCivicTab("progress")}
+                className={
+                  activeCivicTab === "progress"
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  setActiveCivicTab("progress")
+                }
               >
                 In Progress ({civicInProgressCount})
               </button>
 
               <button
-                className={activeCivicTab === "resolved" ? "active" : ""}
-                onClick={() => setActiveCivicTab("resolved")}
+                className={
+                  activeCivicTab === "resolved"
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  setActiveCivicTab("resolved")
+                }
               >
                 Resolved ({civicResolvedCount})
               </button>
 
               <button
-                className={activeCivicTab === "high" ? "active" : ""}
-                onClick={() => setActiveCivicTab("high")}
+                className={
+                  activeCivicTab === "high" ? "active" : ""
+                }
+                onClick={() =>
+                  setActiveCivicTab("high")
+                }
               >
                 High / Critical ({civicHighCriticalCount})
               </button>
@@ -418,115 +511,178 @@ export default function Home() {
           </div>
 
           <div className="issues-grid">
-            {filteredCivicIssues.map((issue) => {
-              const Icon = getIssueIcon(issue);
+            {filteredCivicIssues.length === 0 ? (
+             <div className="empty-state civic-empty-state">
+               No issues reported yet.
+</div>
+            ) : (
+              filteredCivicIssues.map((issue) => {
+                const Icon = getIssueIcon(issue);
 
-              return (
-                <article className="issue-card" key={issue.id}>
-                  <div className="issue-top">
-                    <div className={`category-badge ${issue.priorityClass || "high"}`}>
-                      <Icon size={15} />
-                      {issue.category}
-                    </div>
+                return (
+                  <article
+                    className="issue-card"
+                    key={issue.id}
+                  >
+                    <div className="issue-top">
+                      <div
+                        className={`category-badge ${
+                          issue.priorityClass || "medium"
+                        }`}
+                      >
+                        <Icon size={15} />
+                        {issue.category}
+                      </div>
 
-                    <div className={`priority-badge ${issue.priorityClass || "medium"}`}>
-                      {issue.priority}
-                    </div>
+                      <div
+                        className={`priority-badge ${
+                          issue.priorityClass || "medium"
+                        }`}
+                      >
+                        {issue.priority}
+                      </div>
 
-                    <div className={`status-badge ${issue.statusClass || "progress"}`}>
-                      {issue.status === "Resolved" ? (
-                        <CheckCircle2 size={14} />
-                      ) : (
-                        <Clock size={14} />
-                      )}
-                      {issue.status}
-                    </div>
-                  </div>
+                      <div
+                        className={`status-badge ${
+                          issue.statusClass || "progress"
+                        }`}
+                      >
+                        {issue.status === "Resolved" ? (
+                          <CheckCircle2 size={14} />
+                        ) : (
+                          <Clock size={14} />
+                        )}
 
-                  <div className="issue-body">
-                    {issue.image ? (
-                      <img
-                        className="issue-image"
-                        src={issue.image}
-                        alt={issue.title}
-                      />
-                    ) : null}
-
-                    <div className="issue-details">
-                      <span className="issue-id">{issue.id}</span>
-
-                      <h3>{issue.title}</h3>
-
-                      <p>{issue.description}</p>
-
-                      <div className="issue-location">
-                        <MapPin size={15} />
-                        {issue.location}
+                        {issue.status}
                       </div>
                     </div>
-                  </div>
 
-                  <div className="issue-footer">
-                    <div className="issue-time">
-                      <span>{issue.date}</span>
-                      <span>•</span>
-                      <strong>ETA: {issue.eta || "Pending"}</strong>
+                    <div className="issue-body">
+                      {issue.image ? (
+                        <img
+                          className="issue-image"
+                          src={issue.image}
+                          alt={issue.title}
+                        />
+                      ) : null}
+
+                      <div className="issue-details">
+                        <span className="issue-id">
+                          {issue.id}
+                        </span>
+
+                        <h3>{issue.title}</h3>
+
+                        <p>{issue.description}</p>
+
+                        <div className="issue-location">
+                          <MapPin size={15} />
+                          {issue.location}
+                        </div>
+                      </div>
                     </div>
 
-                    <button
-                      className="timeline-button"
-                      onClick={() => showToast(`Tracking timeline for ${issue.id}`)}
-                    >
-                      View Timeline
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
+                    <div className="issue-footer">
+                      <div className="issue-time">
+                        <span>{issue.date}</span>
+                        <span>•</span>
+
+                        <strong>
+                          ETA: {issue.eta || "Pending"}
+                        </strong>
+                      </div>
+
+                      <button
+                        className="timeline-button"
+                        onClick={() =>
+                          showToast(
+                            `Tracking timeline for ${issue.id}`
+                          )
+                        }
+                      >
+                        View Timeline
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  </article>
+                );
+              })
+            )}
           </div>
         </section>
 
-        {/* Section 2: Reported Crimes & Safety Incidents (Separated below Reported Issues) */}
+        {/* CRIME & SAFETY */}
         <section className="issues-section mt-10">
           <div className="issues-heading">
             <div>
               <h2 className="text-rose-400 flex items-center gap-2">
-                <ShieldAlert size={22} className="text-rose-400" />
+                <ShieldAlert
+                  size={22}
+                  className="text-rose-400"
+                />
+
                 Reported Crime & Safety Incidents
-                <span className="count-badge crime-badge">{displayedCrimeIssues.length}</span>
+
+                <span className="count-badge crime-badge">
+                  {displayedCrimeIssues.length}
+                </span>
               </h2>
 
               <p>
-                Live security patrol dispatch, threat level triage, and law enforcement logging
+                Live security patrol dispatch, threat level
+                triage, and law enforcement logging
               </p>
             </div>
 
             <div className="filter-tabs">
               <button
-                className={activeCrimeTab === "all" ? "active-crime" : ""}
-                onClick={() => setActiveCrimeTab("all")}
+                className={
+                  activeCrimeTab === "all"
+                    ? "active-crime"
+                    : ""
+                }
+                onClick={() =>
+                  setActiveCrimeTab("all")
+                }
               >
                 All Incidents ({displayedCrimeIssues.length})
               </button>
 
               <button
-                className={activeCrimeTab === "active" ? "active-crime" : ""}
-                onClick={() => setActiveCrimeTab("active")}
+                className={
+                  activeCrimeTab === "active"
+                    ? "active-crime"
+                    : ""
+                }
+                onClick={() =>
+                  setActiveCrimeTab("active")
+                }
               >
                 Security Active ({crimeActiveCount})
               </button>
 
               <button
-                className={activeCrimeTab === "resolved" ? "active-crime" : ""}
-                onClick={() => setActiveCrimeTab("resolved")}
+                className={
+                  activeCrimeTab === "resolved"
+                    ? "active-crime"
+                    : ""
+                }
+                onClick={() =>
+                  setActiveCrimeTab("resolved")
+                }
               >
                 Resolved ({crimeResolvedCount})
               </button>
 
               <button
-                className={activeCrimeTab === "critical" ? "active-crime" : ""}
-                onClick={() => setActiveCrimeTab("critical")}
+                className={
+                  activeCrimeTab === "critical"
+                    ? "active-crime"
+                    : ""
+                }
+                onClick={() =>
+                  setActiveCrimeTab("critical")
+                }
               >
                 Critical Threats ({crimeCriticalCount})
               </button>
@@ -534,75 +690,105 @@ export default function Home() {
           </div>
 
           <div className="issues-grid">
-            {filteredCrimeIssues.map((crime) => {
-              const Icon = getIssueIcon(crime);
+            {filteredCrimeIssues.length === 0 ? (
+             <div className="empty-state crime-empty-state">
+  No crime or safety incidents reported yet.
+</div>
+            ) : (
+              filteredCrimeIssues.map((crime) => {
+                const Icon = getIssueIcon(crime);
 
-              return (
-                <article className="issue-card border-rose-500/30" key={crime.id}>
-                  <div className="issue-top">
-                    <div className="category-badge critical">
-                      <Icon size={15} />
-                      {crime.category}
-                    </div>
+                return (
+                  <article
+                    className="issue-card border-rose-500/30"
+                    key={crime.id}
+                  >
+                    <div className="issue-top">
+                      <div className="category-badge critical">
+                        <Icon size={15} />
+                        {crime.category}
+                      </div>
 
-                    <div className={`priority-badge ${crime.priorityClass || "critical"}`}>
-                      {crime.priority}
-                    </div>
+                      <div
+                        className={`priority-badge ${
+                          crime.priorityClass || "critical"
+                        }`}
+                      >
+                        {crime.priority}
+                      </div>
 
-                    <div className={`status-badge ${crime.statusClass || "progress"}`}>
-                      {crime.status === "Resolved" ? (
-                        <CheckCircle2 size={14} />
-                      ) : (
-                        <Clock size={14} />
-                      )}
-                      {crime.status}
-                    </div>
-                  </div>
+                      <div
+                        className={`status-badge ${
+                          crime.statusClass || "progress"
+                        }`}
+                      >
+                        {crime.status === "Resolved" ? (
+                          <CheckCircle2 size={14} />
+                        ) : (
+                          <Clock size={14} />
+                        )}
 
-                  <div className="issue-body">
-                    {crime.image ? (
-                      <img
-                        className="issue-image border border-rose-500/20"
-                        src={crime.image}
-                        alt={crime.title}
-                      />
-                    ) : null}
-
-                    <div className="issue-details">
-                      <span className="issue-id text-rose-400">{crime.id}</span>
-
-                      <h3>{crime.title}</h3>
-
-                      <p>{crime.description}</p>
-
-                      <div className="issue-location text-rose-400">
-                        <MapPin size={15} />
-                        {crime.location}
+                        {crime.status}
                       </div>
                     </div>
-                  </div>
 
-                  <div className="issue-footer">
-                    <div className="issue-time">
-                      <span>{crime.date}</span>
-                      <span>•</span>
-                      <strong className="text-rose-300">Status: {crime.eta || "Security Dispatched"}</strong>
+                    <div className="issue-body">
+                      {crime.image ? (
+                        <img
+                          className="issue-image border border-rose-500/20"
+                          src={crime.image}
+                          alt={crime.title}
+                        />
+                      ) : null}
+
+                      <div className="issue-details">
+                        <span className="issue-id text-rose-400">
+                          {crime.id}
+                        </span>
+
+                        <h3>{crime.title}</h3>
+
+                        <p>{crime.description}</p>
+
+                        <div className="issue-location text-rose-400">
+                          <MapPin size={15} />
+                          {crime.location}
+                        </div>
+                      </div>
                     </div>
 
-                    <button
-                      className="timeline-button text-rose-400 hover:text-rose-300"
-                      onClick={() => showToast(`Tracking security dispatch for ${crime.id}`)}
-                    >
-                      View Timeline
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
+                    <div className="issue-footer">
+                      <div className="issue-time">
+                        <span>{crime.date}</span>
+                        <span>•</span>
+
+                        <strong className="text-rose-300">
+                          Status:{" "}
+                          {crime.eta ||
+                            "Security Dispatched"}
+                        </strong>
+                      </div>
+
+                      <button
+                        className="timeline-button text-rose-400 hover:text-rose-300"
+                        onClick={() =>
+                          showToast(
+                            `Tracking security dispatch for ${crime.id}`
+                          )
+                        }
+                      >
+                        View Timeline
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  </article>
+                );
+              })
+            )}
           </div>
         </section>
 
+        {/* COMMUNITY OVERVIEW */}
         <section className="community-overview mt-10">
           <div className="overview-card health-card">
             <div className="overview-icon">
@@ -612,7 +798,9 @@ export default function Home() {
             <div>
               <span>COMMUNITY HEALTH</span>
               <strong>94%</strong>
-              <p>Excellent neighborhood health index</p>
+              <p>
+                Excellent neighborhood health index
+              </p>
             </div>
           </div>
 
@@ -623,8 +811,12 @@ export default function Home() {
 
             <div>
               <span>UPCOMING</span>
-              <strong>Holi Milan & Spring Carnival</strong>
-              <p>Tomorrow • 10:00 AM • Open Amphitheatre</p>
+              <strong>
+                Holi Milan & Spring Carnival
+              </strong>
+              <p>
+                Tomorrow • 10:00 AM • Open Amphitheatre
+              </p>
             </div>
           </div>
 
@@ -636,33 +828,58 @@ export default function Home() {
             <div>
               <span>COMMUNITY ACTIVITY</span>
               <strong>24 new discussions</strong>
-              <p>Residents are actively discussing local issues</p>
+              <p>
+                Residents are actively discussing local
+                issues
+              </p>
             </div>
           </div>
         </section>
       </main>
 
+      {/* FOOTER */}
       <footer className="home-footer">
         <div>
           <Shield size={16} />
-          <strong>SocioSphere Citizen Dashboard</strong>
-          <span>• Greenwood Heights Sector 4</span>
+
+          <strong>
+            SocioSphere Citizen Dashboard
+          </strong>
+
+          <span>
+            • {user?.communityName || "Your Community"}
+          </span>
         </div>
 
         <div>
           <span>Powered by SocioAI Civic Engine</span>
           <span>•</span>
-          <button onClick={() => showToast("Privacy Policy")}>Privacy</button>
-          <button onClick={() => showToast("Terms of Civic Service")}>
+
+          <button
+            onClick={() => showToast("Privacy Policy")}
+          >
+            Privacy
+          </button>
+
+          <button
+            onClick={() =>
+              showToast("Terms of Civic Service")
+            }
+          >
             Terms
           </button>
-          <button onClick={() => showToast("RWA Constitution")}>
+
+          <button
+            onClick={() =>
+              showToast("RWA Constitution")
+            }
+          >
             Bylaws
           </button>
         </div>
       </footer>
 
-      {/* Connected Report Issue Modal */}
+      {/* REPORT ISSUE MODAL */}
       {activeModal === "report" && (
         <div
           className="modal-overlay"
@@ -680,7 +897,9 @@ export default function Home() {
           }}
         >
           <div
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) =>
+              event.stopPropagation()
+            }
             style={{
               position: "relative",
               width: "100%",
@@ -690,7 +909,8 @@ export default function Home() {
               borderRadius: "20px",
               backgroundColor: "#070B14",
               border: "1px solid #1E293B",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.6)",
+              boxShadow:
+                "0 25px 50px -12px rgba(0, 0, 0, 0.6)",
             }}
           >
             <button
@@ -714,19 +934,22 @@ export default function Home() {
             >
               <X size={20} />
             </button>
+
             <Report
               onClose={() => setActiveModal(null)}
               isEmbedded={true}
               onSuccess={() => {
                 loadUserReports();
-                showToast("Issue report logged & saved!");
+                showToast(
+                  "Issue report logged & saved!"
+                );
               }}
             />
           </div>
         </div>
       )}
 
-      {/* Connected Report Crime Modal */}
+      {/* REPORT CRIME MODAL */}
       {activeModal === "reportCrime" && (
         <div
           className="modal-overlay"
@@ -744,7 +967,9 @@ export default function Home() {
           }}
         >
           <div
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) =>
+              event.stopPropagation()
+            }
             style={{
               position: "relative",
               width: "100%",
@@ -754,7 +979,8 @@ export default function Home() {
               borderRadius: "20px",
               backgroundColor: "#070B14",
               border: "1px solid #1E293B",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.6)",
+              boxShadow:
+                "0 25px 50px -12px rgba(0, 0, 0, 0.6)",
             }}
           >
             <button
@@ -778,19 +1004,22 @@ export default function Home() {
             >
               <X size={20} />
             </button>
+
             <ReportCrime
               onClose={() => setActiveModal(null)}
               isEmbedded={true}
               onSuccess={() => {
                 loadUserReports();
-                showToast("Crime report logged & security notified!");
+                showToast(
+                  "Crime report logged & security notified!"
+                );
               }}
             />
           </div>
         </div>
       )}
 
-      {/* Connected Map Modal */}
+      {/* MAP MODAL */}
       {activeModal === "map" && (
         <div
           className="modal-overlay"
@@ -808,7 +1037,9 @@ export default function Home() {
           }}
         >
           <div
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) =>
+              event.stopPropagation()
+            }
             style={{
               position: "relative",
               width: "100%",
@@ -818,7 +1049,8 @@ export default function Home() {
               borderRadius: "20px",
               backgroundColor: "#070B14",
               border: "1px solid #1E293B",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.6)",
+              boxShadow:
+                "0 25px 50px -12px rgba(0, 0, 0, 0.6)",
             }}
           >
             <button
@@ -842,12 +1074,21 @@ export default function Home() {
             >
               <X size={20} />
             </button>
-            <Map onClose={() => setActiveModal(null)} isEmbedded={true} />
+
+            <Map
+              onClose={() => setActiveModal(null)}
+              isEmbedded={true}
+            />
           </div>
         </div>
       )}
 
-      {toast && <div className="home-toast">{toast}</div>}
+      {/* TOAST */}
+      {toast && (
+        <div className="home-toast">
+          {toast}
+        </div>
+      )}
     </div>
   );
 }
