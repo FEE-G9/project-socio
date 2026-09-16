@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
 import {
   User,
   Mail,
@@ -24,24 +25,19 @@ import {
   Camera,
   BadgeCheck,
   TrendingUp,
-  Activity,
-  Star,
-  Heart,
-  MessageSquare,
-  Eye,
-  EyeOff,
-  Lock,
   Globe,
-  Smartphone,
   Building2,
   Hash,
 } from "lucide-react";
+
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 
 const Profile = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { user, updateUserProfile, logout } = useAuth();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -49,17 +45,60 @@ const Profile = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [avatarHover, setAvatarHover] = useState(false);
 
-  const [profile, setProfile] = useState({
-    name: "Ekjot Kaur",
-    email: "ekjot@example.com",
-    phone: "+91 98765 43210",
-    society: "Green Valley Residency",
-    block: "Block A",
-    apartment: "A-204",
-    city: "Chandigarh",
-  });
+  // ---------------------------------------
+  // Convert unitNumber into block/apartment
+  // Example: "Block B - 402"
+  // ---------------------------------------
+  const getUnitDetails = (unitNumber = "") => {
+    const parts = unitNumber.split(" - ");
 
-  const [editProfile, setEditProfile] = useState(profile);
+    if (parts.length >= 2) {
+      return {
+        block: parts[0],
+        apartment: parts.slice(1).join(" - "),
+      };
+    }
+
+    return {
+      block: "",
+      apartment: unitNumber,
+    };
+  };
+
+  const getProfileFromUser = (currentUser) => {
+    const unitDetails = getUnitDetails(currentUser?.unitNumber);
+
+    return {
+      name: currentUser?.name || "",
+      email: currentUser?.email || "",
+      phone: currentUser?.phone || "",
+      society: currentUser?.communityName || "",
+      block: unitDetails.block,
+      apartment: unitDetails.apartment,
+      city: currentUser?.communityCity || "Chandigarh",
+    };
+  };
+
+  const [profile, setProfile] = useState(() => getProfileFromUser(user));
+
+  const [editProfile, setEditProfile] = useState(() =>
+    getProfileFromUser(user)
+  );
+
+  // Keep Profile synchronized with AuthContext/localStorage
+  useEffect(() => {
+    const updatedProfile = getProfileFromUser(user);
+
+    setProfile(updatedProfile);
+    setEditProfile(updatedProfile);
+  }, [
+    user?.name,
+    user?.email,
+    user?.phone,
+    user?.communityName,
+    user?.communityCity,
+    user?.unitNumber,
+  ]);
 
   const handleEdit = () => {
     setEditProfile(profile);
@@ -75,21 +114,36 @@ const Profile = () => {
 
   const handleSave = () => {
     setIsSaving(true);
-    
-    // Simulate API call
+
     setTimeout(() => {
+      const updatedUnitNumber = [editProfile.block, editProfile.apartment]
+        .filter(Boolean)
+        .join(" - ");
+
+      const updatedUserFields = {
+        name: editProfile.name,
+        email: editProfile.email,
+        phone: editProfile.phone,
+        communityName: editProfile.society,
+        unitNumber: updatedUnitNumber,
+      };
+
+      // Update AuthContext + localStorage
+      updateUserProfile(updatedUserFields);
+
       setProfile(editProfile);
       setIsEditing(false);
       setIsSaving(false);
       setShowSaveSuccess(true);
-      
-      // Hide success message after 3 seconds
-      setTimeout(() => setShowSaveSuccess(false), 3000);
+
+      setTimeout(() => {
+        setShowSaveSuccess(false);
+      }, 3000);
     }, 800);
   };
 
   const handleLogout = () => {
-    localStorage.setItem("sociosphere_is_auth", "false");
+    logout();
     navigate("/login");
   };
 
@@ -100,11 +154,21 @@ const Profile = () => {
     }));
   };
 
+  if (!user) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Unable to load profile information.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 pb-8">
       {/* ==================== SAVE SUCCESS TOAST ==================== */}
       {showSaveSuccess && (
-        <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+        <div className="fixed right-4 top-4 z-50 animate-slide-in-right">
           <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 shadow-lg backdrop-blur-sm">
             <CheckCircle2 size={18} className="text-emerald-500" />
             <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
@@ -136,16 +200,19 @@ const Profile = () => {
         {!isEditing ? (
           <button
             onClick={handleEdit}
-            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-500/30 active:translate-y-0"
+            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-400"
           >
-            <Pencil size={16} className="transition-transform group-hover:rotate-12" />
+            <Pencil
+              size={16}
+              className="transition-transform group-hover:rotate-12"
+            />
             Edit Profile
           </button>
         ) : (
           <div className="flex gap-3">
             <button
               onClick={handleCancel}
-              className="inline-flex items-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-all duration-200 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-5 py-3 text-sm font-semibold text-slate-200 transition-all duration-200 hover:bg-slate-700"
             >
               <X size={16} />
               Cancel
@@ -154,11 +221,11 @@ const Profile = () => {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSaving ? (
                 <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
                   Saving...
                 </>
               ) : (
@@ -173,24 +240,25 @@ const Profile = () => {
       </div>
 
       {/* ==================== PROFILE HERO ==================== */}
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-[#0D1524]">
+      <section className="overflow-hidden rounded-2xl border border-slate-800 bg-[#0D1524]">
         {/* Cover */}
-        <div className="relative h-32 overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 sm:h-40">
-          {/* Decorative pattern */}
-          <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.3),transparent_40%),radial-gradient(circle_at_80%_30%,rgba(56,189,248,0.2),transparent_35%),radial-gradient(circle_at_50%_60%,rgba(168,85,247,0.15),transparent_45%)]" />
-            
-            {/* Grid pattern */}
-            <div className="absolute inset-0 opacity-10" style={{
-              backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-              backgroundSize: '30px 30px'
-            }} />
+        <div className="relative h-32 overflow-hidden bg-slate-950 sm:h-40">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.22),transparent_40%),radial-gradient(circle_at_80%_30%,rgba(56,189,248,0.16),transparent_35%),radial-gradient(circle_at_50%_60%,rgba(139,92,246,0.12),transparent_45%)]" />
+
+          <div className="absolute inset-0 opacity-10">
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage:
+                  "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+                backgroundSize: "30px 30px",
+              }}
+            />
           </div>
 
-          {/* Decorative circles */}
           <div className="absolute -right-12 -top-16 h-48 w-48 rounded-full border-2 border-emerald-500/20" />
           <div className="absolute right-16 top-4 h-24 w-24 rounded-full border-2 border-emerald-500/15" />
-          <div className="absolute -left-8 -bottom-16 h-40 w-40 rounded-full border-2 border-blue-500/10" />
+          <div className="absolute -bottom-16 -left-8 h-40 w-40 rounded-full border-2 border-blue-500/10" />
         </div>
 
         {/* Profile info */}
@@ -198,50 +266,72 @@ const Profile = () => {
           <div className="-mt-12 flex flex-col gap-5 sm:-mt-16 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
               {/* Avatar */}
-              <div 
+              <div
                 className="relative"
                 onMouseEnter={() => setAvatarHover(true)}
                 onMouseLeave={() => setAvatarHover(false)}
               >
-                <div className="flex h-28 w-28 items-center justify-center rounded-2xl border-4 border-white bg-gradient-to-br from-emerald-500 to-teal-600 text-4xl font-extrabold text-white shadow-xl transition-all duration-300 hover:scale-105 dark:border-[#0D1524] sm:h-32 sm:w-32 sm:text-5xl">
-                  {profile.name.split(' ').map(word => word[0]).join('')}
+                <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border-4 border-[#0D1524] bg-gradient-to-br from-emerald-500 to-teal-600 text-4xl font-extrabold text-white shadow-xl transition-all duration-300 hover:scale-105 sm:h-32 sm:w-32 sm:text-5xl">
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    profile.name
+                      .split(" ")
+                      .filter(Boolean)
+                      .map((word) => word[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase()
+                  )}
                 </div>
 
-                {/* Camera overlay on hover */}
                 {avatarHover && (
-                  <button className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/40 opacity-0 transition-opacity duration-200 hover:opacity-100">
+                  <button
+                    type="button"
+                    className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/40"
+                    aria-label="Change profile photo"
+                  >
                     <Camera size={24} className="text-white" />
                   </button>
                 )}
 
-                {/* Verified badge */}
-                <div className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-emerald-500 shadow-lg dark:border-[#0D1524]">
-                  <BadgeCheck size={16} strokeWidth={2.5} className="text-white" />
+                <div className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#0D1524] bg-emerald-500 shadow-lg">
+                  <BadgeCheck
+                    size={16}
+                    strokeWidth={2.5}
+                    className="text-white"
+                  />
                 </div>
               </div>
 
               <div className="sm:pb-2">
                 <div className="flex flex-wrap items-center gap-3">
-                  <h2 className="text-2xl font-extrabold text-slate-900 dark:text-slate-50 sm:text-3xl">
+                  <h2 className="text-2xl font-extrabold text-slate-50 sm:text-3xl">
                     {profile.name}
                   </h2>
 
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-500/10 to-teal-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-400">
                     <ShieldCheck size={13} />
-                    Verified Citizen
+                    {user.role === "authority"
+                      ? "Verified Authority"
+                      : "Verified Citizen"}
                   </span>
                 </div>
 
-                <p className="mt-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-2 flex items-center gap-2 text-sm text-slate-400">
                   <Home size={14} className="text-emerald-500" />
-                  {profile.society}
+                  {profile.society || "Community not available"}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600 dark:bg-slate-800/50 dark:text-slate-300">
+            <div className="flex items-center gap-2 rounded-xl bg-slate-800/60 px-3 py-2 text-xs font-medium text-slate-300">
               <MapPin size={14} className="text-emerald-500" />
-              {profile.city}
+              {profile.city || "Location unavailable"}
             </div>
           </div>
         </div>
@@ -249,20 +339,20 @@ const Profile = () => {
 
       {/* ==================== MAIN GRID ==================== */}
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        {/* ==================== PERSONAL INFORMATION ==================== */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-[#0D1524] sm:p-7">
+        {/* PERSONAL INFORMATION */}
+        <section className="rounded-2xl border border-slate-800 bg-[#0D1524] p-6 sm:p-7">
           <div className="mb-7">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20">
-                <User size={20} className="text-white" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500 shadow-lg shadow-emerald-500/20">
+                <User size={20} className="text-slate-950" />
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">
+                <h3 className="text-lg font-bold text-slate-50">
                   Personal Information
                 </h3>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-slate-400">
                   Your basic account information
                 </p>
               </div>
@@ -327,19 +417,19 @@ const Profile = () => {
           </div>
         </section>
 
-        {/* ==================== ACCOUNT STATUS ==================== */}
-        <section className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-6 shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:from-[#0D1524] dark:to-slate-900 sm:p-7">
+        {/* ACCOUNT STATUS */}
+        <section className="rounded-2xl border border-slate-800 bg-[#0D1524] p-6 sm:p-7">
           <div className="mb-6 flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/20">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500 shadow-lg shadow-blue-500/20">
               <ShieldCheck size={20} className="text-white" />
             </div>
 
             <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">
+              <h3 className="text-lg font-bold text-slate-50">
                 Account Status
               </h3>
 
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-400">
                 Your SocioSphere account
               </p>
             </div>
@@ -351,7 +441,7 @@ const Profile = () => {
               value="Active"
               icon={CheckCircle2}
               positive
-              iconClass="bg-emerald-500/10 text-emerald-500"
+              iconClass="bg-emerald-500/10 text-emerald-400"
             />
 
             <StatusRow
@@ -359,34 +449,41 @@ const Profile = () => {
               value="Verified"
               icon={Mail}
               positive
-              iconClass="bg-blue-500/10 text-blue-500"
+              iconClass="bg-blue-500/10 text-blue-400"
             />
 
             <StatusRow
-              label="Resident"
-              value="Verified"
+              label="Role"
+              value={
+                user.role === "authority"
+                  ? "Authority"
+                  : "Citizen"
+              }
               icon={Home}
               positive
-              iconClass="bg-purple-500/10 text-purple-500"
+              iconClass="bg-purple-500/10 text-purple-400"
             />
 
             <StatusRow
               label="Member Since"
-              value="August 2026"
+              value={user.joinedDate || "Not available"}
               icon={CalendarDays}
-              iconClass="bg-amber-500/10 text-amber-500"
+              iconClass="bg-amber-500/10 text-amber-400"
             />
 
-            {/* Verification score */}
-            <div className="mt-2 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/50">
+            <div className="mt-2 rounded-xl border border-slate-800 bg-slate-900/50 p-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                <span className="text-xs font-semibold text-slate-300">
                   Verification Score
                 </span>
-                <span className="text-sm font-bold text-emerald-500">100%</span>
+
+                <span className="text-sm font-bold text-emerald-400">
+                  100%
+                </span>
               </div>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                <div className="h-full w-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500" />
+
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-800">
+                <div className="h-full w-full rounded-full bg-emerald-500" />
               </div>
             </div>
           </div>
@@ -396,11 +493,11 @@ const Profile = () => {
       {/* ==================== STATS ==================== */}
       <section>
         <div className="mb-5">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">
+          <h3 className="text-lg font-bold text-slate-50">
             Community Activity
           </h3>
 
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-1 text-sm text-slate-400">
             Your contribution to the community
           </p>
         </div>
@@ -411,9 +508,9 @@ const Profile = () => {
             label="Issues Reported"
             value="12"
             description="Total reports"
-            iconClass="bg-gradient-to-br from-blue-500 to-blue-600"
+            iconClass="bg-blue-500"
             trend="+18%"
-            trendUp={true}
+            trendUp
           />
 
           <StatCard
@@ -421,9 +518,9 @@ const Profile = () => {
             label="Issues Resolved"
             value="8"
             description="Successfully resolved"
-            iconClass="bg-gradient-to-br from-emerald-500 to-teal-600"
+            iconClass="bg-emerald-500"
             trend="+24%"
-            trendUp={true}
+            trendUp
           />
 
           <StatCard
@@ -431,7 +528,7 @@ const Profile = () => {
             label="In Progress"
             value="3"
             description="Currently being handled"
-            iconClass="bg-gradient-to-br from-amber-500 to-orange-600"
+            iconClass="bg-amber-500"
             trend="-8%"
             trendUp={false}
           />
@@ -441,31 +538,31 @@ const Profile = () => {
             label="Community Score"
             value="87%"
             description="Above community average"
-            iconClass="bg-gradient-to-br from-purple-500 to-pink-600"
+            iconClass="bg-purple-500"
             trend="+6%"
-            trendUp={true}
+            trendUp
           />
         </div>
       </section>
 
       {/* ==================== LOWER GRID ==================== */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* ==================== RECENT ACTIVITY ==================== */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-[#0D1524] sm:p-7">
+        {/* RECENT ACTIVITY */}
+        <section className="rounded-2xl border border-slate-800 bg-[#0D1524] p-6 sm:p-7">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">
+              <h3 className="text-lg font-bold text-slate-50">
                 Recent Activity
               </h3>
 
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-sm text-slate-400">
                 Your latest community actions
               </p>
             </div>
 
             <button
               onClick={() => navigate("/citizen/home")}
-              className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              className="inline-flex items-center gap-1 rounded-lg bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-300 transition-colors hover:bg-slate-700"
             >
               View all
               <ChevronRight size={14} />
@@ -475,7 +572,7 @@ const Profile = () => {
           <div className="space-y-5">
             <ActivityItem
               icon={CheckCircle2}
-              iconClass="bg-gradient-to-br from-emerald-500 to-teal-600"
+              iconClass="bg-emerald-500"
               title="Streetlight issue resolved"
               description="Your reported issue was marked as resolved."
               time="2 hours ago"
@@ -483,7 +580,7 @@ const Profile = () => {
 
             <ActivityItem
               icon={AlertCircle}
-              iconClass="bg-gradient-to-br from-blue-500 to-indigo-600"
+              iconClass="bg-blue-500"
               title="New issue reported"
               description="Garbage collection issue reported."
               time="Yesterday"
@@ -491,7 +588,7 @@ const Profile = () => {
 
             <ActivityItem
               icon={Users}
-              iconClass="bg-gradient-to-br from-purple-500 to-pink-600"
+              iconClass="bg-purple-500"
               title="Community participation"
               description="You participated in a community poll."
               time="3 days ago"
@@ -499,7 +596,7 @@ const Profile = () => {
 
             <ActivityItem
               icon={Award}
-              iconClass="bg-gradient-to-br from-amber-500 to-orange-600"
+              iconClass="bg-amber-500"
               title="Community milestone"
               description="You reached 10 issue reports."
               time="1 week ago"
@@ -507,20 +604,19 @@ const Profile = () => {
           </div>
         </section>
 
-        {/* ==================== PREFERENCES ==================== */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-[#0D1524] sm:p-7">
+        {/* PREFERENCES */}
+        <section className="rounded-2xl border border-slate-800 bg-[#0D1524] p-6 sm:p-7">
           <div className="mb-6">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">
+            <h3 className="text-lg font-bold text-slate-50">
               Preferences
             </h3>
 
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-sm text-slate-400">
               Customize your SocioSphere experience
             </p>
           </div>
 
           <div className="space-y-4">
-            {/* Theme */}
             <PreferenceRow
               icon={theme === "dark" ? Moon : Sun}
               title="Appearance"
@@ -532,7 +628,7 @@ const Profile = () => {
               action={
                 <button
                   onClick={toggleTheme}
-                  className="relative flex h-8 w-14 items-center rounded-full bg-gradient-to-r from-slate-200 to-slate-300 transition-all duration-300 hover:scale-105 dark:from-slate-700 dark:to-slate-600"
+                  className="relative flex h-8 w-14 items-center rounded-full bg-slate-700 transition-all duration-300 hover:scale-105"
                   aria-label="Toggle theme"
                 >
                   <div
@@ -550,7 +646,6 @@ const Profile = () => {
               }
             />
 
-            {/* Notifications */}
             <PreferenceRow
               icon={Bell}
               title="Notifications"
@@ -561,11 +656,13 @@ const Profile = () => {
               }
               action={
                 <button
-                  onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                  onClick={() =>
+                    setNotificationsEnabled(!notificationsEnabled)
+                  }
                   className={`relative h-8 w-14 rounded-full transition-all duration-300 ${
                     notificationsEnabled
-                      ? "bg-gradient-to-r from-emerald-500 to-teal-500"
-                      : "bg-slate-300 dark:bg-slate-700"
+                      ? "bg-emerald-500"
+                      : "bg-slate-700"
                   }`}
                   aria-label="Toggle notifications"
                 >
@@ -578,28 +675,25 @@ const Profile = () => {
               }
             />
 
-            {/* Language */}
             <PreferenceRow
               icon={Globe}
               title="Language"
               description="English (US)"
               action={
-                <button className="flex items-center gap-1 text-xs font-semibold text-slate-600 transition-colors hover:text-emerald-500 dark:text-slate-300">
+                <button className="flex items-center gap-1 text-xs font-semibold text-slate-300 transition-colors hover:text-emerald-400">
                   Change
                   <ChevronRight size={14} />
                 </button>
               }
             />
 
-            {/* Settings */}
             <PreferenceRow
               icon={Settings}
               title="Account Settings"
               description="Security and privacy options"
               action={
                 <button
-                  onClick={() => {}}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-all duration-200 hover:bg-slate-800 hover:text-slate-200"
                   aria-label="Account settings"
                 >
                   <ChevronRight size={18} />
@@ -611,19 +705,19 @@ const Profile = () => {
       </div>
 
       {/* ==================== LOGOUT ==================== */}
-      <section className="rounded-2xl border border-rose-500/20 bg-gradient-to-r from-rose-500/5 to-red-500/5 p-6 transition-all duration-300 hover:border-rose-500/30 dark:bg-gradient-to-r dark:from-rose-500/[0.06] dark:to-red-500/[0.06] sm:p-7">
+      <section className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-6 transition-all duration-300 hover:border-rose-500/30 sm:p-7">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-red-600 shadow-lg shadow-rose-500/20">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-rose-500 shadow-lg shadow-rose-500/20">
               <LogOut size={20} className="text-white" />
             </div>
 
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">
+              <h3 className="text-base font-bold text-slate-50">
                 Sign out of SocioSphere
               </h3>
 
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-sm text-slate-400">
                 You will need to sign in again to access your account.
               </p>
             </div>
@@ -631,9 +725,12 @@ const Profile = () => {
 
           <button
             onClick={handleLogout}
-            className="group inline-flex items-center justify-center gap-2 rounded-xl border-2 border-rose-500/30 bg-rose-500/10 px-5 py-3 text-sm font-bold text-rose-500 transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-500/20 hover:shadow-lg hover:shadow-rose-500/20"
+            className="group inline-flex items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-5 py-3 text-sm font-bold text-rose-400 transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-500/20"
           >
-            <LogOut size={16} className="transition-transform group-hover:translate-x-0.5" />
+            <LogOut
+              size={16}
+              className="transition-transform group-hover:translate-x-0.5"
+            />
             Log Out
           </button>
         </div>
@@ -643,7 +740,7 @@ const Profile = () => {
 };
 
 /* =========================================================
-   ENHANCED PROFILE FIELD
+   PROFILE FIELD
 ========================================================= */
 
 const ProfileField = ({
@@ -659,25 +756,25 @@ const ProfileField = ({
 
   return (
     <div className="group">
-      <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400 transition-colors group-hover:text-slate-500">
+      <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
         {label}
       </label>
 
       <div
-        className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition-all duration-200 ${
+        className={`flex items-center gap-3 rounded-xl border px-4 py-3 transition-all duration-200 ${
           editing
             ? isFocused
-              ? "border-emerald-500 bg-white shadow-lg shadow-emerald-500/10 dark:bg-slate-900"
-              : "border-slate-300 bg-white hover:border-emerald-400 dark:border-slate-700 dark:bg-slate-900"
-            : "border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/60"
+              ? "border-emerald-500 bg-slate-900 shadow-lg shadow-emerald-500/10"
+              : "border-slate-700 bg-slate-900 hover:border-emerald-400"
+            : "border-slate-800 bg-slate-900/60"
         }`}
       >
         <Icon
           size={17}
-          className={`shrink-0 transition-colors ${
+          className={`shrink-0 ${
             editing && isFocused
               ? "text-emerald-500"
-              : "text-slate-400 group-hover:text-slate-500"
+              : "text-slate-400"
           }`}
         />
 
@@ -689,18 +786,20 @@ const ProfileField = ({
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
-            className="min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100"
+            className="min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-100 outline-none placeholder:text-slate-500"
           />
         ) : (
-          <span className="min-w-0 truncate text-sm font-medium text-slate-700 dark:text-slate-200">
-            {value}
+          <span className="min-w-0 truncate text-sm font-medium text-slate-200">
+            {value || "Not available"}
           </span>
         )}
 
         {editing && value && (
           <button
+            type="button"
             onClick={() => onChange("")}
-            className="shrink-0 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
+            className="shrink-0 text-slate-400 transition-colors hover:text-slate-200"
+            aria-label={`Clear ${label}`}
           >
             <X size={14} />
           </button>
@@ -711,7 +810,7 @@ const ProfileField = ({
 };
 
 /* =========================================================
-   ENHANCED STATUS ROW
+   STATUS ROW
 ========================================================= */
 
 const StatusRow = ({
@@ -722,13 +821,15 @@ const StatusRow = ({
   iconClass,
 }) => {
   return (
-    <div className="group flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3.5 transition-all duration-200 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-slate-700">
+    <div className="group flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3.5 transition-all duration-200 hover:border-slate-700">
       <div className="flex items-center gap-3">
-        <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${iconClass}`}>
+        <div
+          className={`flex h-9 w-9 items-center justify-center rounded-lg ${iconClass}`}
+        >
           <Icon size={16} />
         </div>
 
-        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+        <span className="text-sm font-medium text-slate-300">
           {label}
         </span>
       </div>
@@ -737,11 +838,10 @@ const StatusRow = ({
         {positive && (
           <CheckCircle2 size={14} className="text-emerald-500" />
         )}
+
         <span
           className={`text-xs font-bold ${
-            positive
-              ? "text-emerald-500"
-              : "text-slate-500 dark:text-slate-400"
+            positive ? "text-emerald-500" : "text-slate-400"
           }`}
         >
           {value}
@@ -752,7 +852,7 @@ const StatusRow = ({
 };
 
 /* =========================================================
-   ENHANCED STAT CARD
+   STAT CARD
 ========================================================= */
 
 const StatCard = ({
@@ -765,14 +865,11 @@ const StatCard = ({
   trendUp,
 }) => {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50 dark:border-slate-800 dark:bg-[#0D1524] dark:hover:border-slate-700 dark:hover:shadow-black/20">
-      {/* Decorative gradient on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-transparent to-transparent transition-all duration-300 group-hover:from-slate-50 group-hover:to-transparent dark:group-hover:from-slate-800/30" />
-      
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-[#0D1524] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-slate-700">
       <div className="relative">
         <div className="flex items-start justify-between">
           <div
-            className={`flex h-12 w-12 items-center justify-center rounded-xl ${iconClass} shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
+            className={`flex h-12 w-12 items-center justify-center rounded-xl ${iconClass} shadow-lg transition-transform duration-300 group-hover:scale-110`}
           >
             <Icon size={20} className="text-white" />
           </div>
@@ -795,11 +892,11 @@ const StatCard = ({
         </div>
 
         <div className="mt-5">
-          <p className="text-3xl font-extrabold text-slate-900 dark:text-slate-50">
+          <p className="text-3xl font-extrabold text-slate-50">
             {value}
           </p>
 
-          <p className="mt-1 text-sm font-semibold text-slate-700 dark:text-slate-200">
+          <p className="mt-1 text-sm font-semibold text-slate-200">
             {label}
           </p>
 
@@ -813,7 +910,7 @@ const StatCard = ({
 };
 
 /* =========================================================
-   ENHANCED ACTIVITY ITEM
+   ACTIVITY ITEM
 ========================================================= */
 
 const ActivityItem = ({
@@ -824,29 +921,29 @@ const ActivityItem = ({
   time,
 }) => {
   return (
-    <div className="group flex gap-4 rounded-xl p-2 transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-900/40">
+    <div className="group flex gap-4 rounded-xl p-2 transition-all duration-200 hover:bg-slate-900/40">
       <div className="relative">
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconClass} shadow-md transition-transform duration-300 group-hover:scale-110`}
         >
           <Icon size={17} className="text-white" />
         </div>
-        {/* Connecting line */}
-        <div className="absolute left-1/2 top-full h-full w-px -translate-x-1/2 bg-slate-200 dark:bg-slate-800" />
+
+        <div className="absolute left-1/2 top-full h-full w-px -translate-x-1/2 bg-slate-800" />
       </div>
 
       <div className="min-w-0 flex-1 pb-4">
         <div className="flex flex-col justify-between gap-1 sm:flex-row sm:items-center">
-          <p className="text-sm font-bold text-slate-800 transition-colors group-hover:text-emerald-600 dark:text-slate-200 dark:group-hover:text-emerald-400">
+          <p className="text-sm font-bold text-slate-200 group-hover:text-emerald-400">
             {title}
           </p>
 
-          <span className="shrink-0 rounded-full bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-400 dark:bg-slate-800">
+          <span className="shrink-0 rounded-full bg-slate-800 px-2 py-1 text-[10px] font-medium text-slate-400">
             {time}
           </span>
         </div>
 
-        <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+        <p className="mt-1 text-xs leading-relaxed text-slate-400">
           {description}
         </p>
       </div>
@@ -855,7 +952,7 @@ const ActivityItem = ({
 };
 
 /* =========================================================
-   ENHANCED PREFERENCE ROW
+   PREFERENCE ROW
 ========================================================= */
 
 const PreferenceRow = ({
@@ -865,14 +962,14 @@ const PreferenceRow = ({
   action,
 }) => {
   return (
-    <div className="group flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 transition-all duration-200 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-slate-700">
+    <div className="group flex items-center justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-all duration-200 hover:border-slate-700">
       <div className="flex min-w-0 items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-all duration-300 group-hover:scale-110 group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:group-hover:bg-slate-700">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-800 text-slate-300 transition-all duration-300 group-hover:bg-slate-700">
           <Icon size={18} />
         </div>
 
         <div className="min-w-0">
-          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
+          <p className="text-sm font-bold text-slate-200">
             {title}
           </p>
 
@@ -887,24 +984,33 @@ const PreferenceRow = ({
   );
 };
 
-// Add custom animation
-const style = document.createElement('style');
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+const style = document.createElement("style");
+
 style.textContent = `
   @keyframes slide-in-right {
     from {
       transform: translateX(100%);
       opacity: 0;
     }
+
     to {
       transform: translateX(0);
       opacity: 1;
     }
   }
-  
+
   .animate-slide-in-right {
     animation: slide-in-right 0.3s ease-out;
   }
 `;
-document.head.appendChild(style);
 
-export default Profile; 
+if (!document.head.querySelector("#profile-animation-style")) {
+  style.id = "profile-animation-style";
+  document.head.appendChild(style);
+}
+
+export default Profile;
