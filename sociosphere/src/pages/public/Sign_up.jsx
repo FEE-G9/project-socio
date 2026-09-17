@@ -170,11 +170,11 @@ const SignUp = () => {
               <img src="/logo_main.png" alt="SocioSphere" style={{ width: "40px", height: "40px", alignItems:"center" }} />
             </div>
 
-            <h2 className="text-[27px] font-bold">
+            <h2 className="text-[29px] font-bold">
               Join <span className="text-[#67dc87]">SocioSphere</span>
             </h2>
 
-            <p className="mt-1.5 text-[13px] text-white/60">
+            <p className="mt-1.5 text-[15px] text-white/60">
               Create your community account.
             </p>
 
@@ -184,7 +184,7 @@ const SignUp = () => {
 
           <div className="mb-5">
 
-            <p className="mb-2 text-center text-sm font-semibold text-white/80">
+            <p className="mb-2 text-center text-base font-semibold text-white/80">
               Who are you?
             </p>
 
@@ -205,11 +205,11 @@ const SignUp = () => {
                 <Users size={21} />
 
                 <div className="text-left">
-                  <p className="text-sm font-semibold">
+                  <p className="text-base font-semibold">
                     Normal Citizen
                   </p>
 
-                  <p className="text-[10px] text-white/50">
+                  <p className="text-[12px] text-white/50">
                     Community member
                   </p>
                 </div>
@@ -231,11 +231,11 @@ const SignUp = () => {
                 <ShieldCheck size={21} />
 
                 <div className="text-left">
-                  <p className="text-sm font-semibold">
+                  <p className="text-base font-semibold">
                     Authority
                   </p>
 
-                  <p className="text-[10px] text-white/50">
+                  <p className="text-[12px] text-white/50">
                     Official account
                   </p>
                 </div>
@@ -340,7 +340,7 @@ const SignUp = () => {
                       name="department"
                       defaultValue=""
                       required
-                      className="w-full cursor-pointer appearance-none bg-transparent text-sm text-white outline-none"
+                      className="w-full cursor-pointer appearance-none bg-transparent text-base text-white outline-none"
                     >
 
                       <option
@@ -404,11 +404,11 @@ const SignUp = () => {
 
             <button
               type="submit"
-              className="mt-2 flex h-[50px] items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#55ca76] to-[#72df8f] text-base font-bold text-[#062014] shadow-lg shadow-green-500/20 transition hover:-translate-y-0.5 hover:shadow-green-500/30"
+              className="mt-2 flex h-[50px] items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#55ca76] to-[#72df8f] text-[17px] font-bold text-[#062014] shadow-lg shadow-green-500/20 transition hover:-translate-y-0.5 hover:shadow-green-500/30"
             >
               Create Account
 
-              <span className="text-xl">
+              <span className="text-[22px]">
                 →
               </span>
 
@@ -422,7 +422,7 @@ const SignUp = () => {
 
             <span className="h-px flex-1 bg-white/15" />
 
-            <p className="whitespace-nowrap text-xs text-white/60">
+            <p className="whitespace-nowrap text-[15px] text-white/60">
               Already have an account?
 
               <Link
@@ -493,7 +493,7 @@ const ColonySelect = () => {
         name="colony"
         defaultValue=""
         required
-        className="w-full cursor-pointer appearance-none bg-transparent text-sm text-white outline-none"
+        className="w-full cursor-pointer appearance-none bg-transparent text-base text-white outline-none"
       >
 
         <option
@@ -505,19 +505,19 @@ const ColonySelect = () => {
         </option>
 
         <option className="bg-[#10271e]">
-          Green Valley
+          Gandhi colony
         </option>
 
         <option className="bg-[#10271e]">
-          Rose Garden
+          sham nager
         </option>
 
         <option className="bg-[#10271e]">
-          Shanti Nagar
+          Sheetal colony
         </option>
 
         <option className="bg-[#10271e]">
-          Model Town
+          Dalima vihar
         </option>
 
         <option className="bg-[#10271e]">
@@ -553,7 +553,7 @@ const Input = ({
         name={name}
         placeholder={placeholder}
         required
-        className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/55"
+        className="w-full bg-transparent text-base text-white outline-none placeholder:text-[15px] placeholder:text-white/55"
       />
 
     </div>
@@ -584,7 +584,7 @@ const PasswordInput = ({
         name={name}
         placeholder={placeholder}
         required
-        className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/55"
+        className="w-full bg-transparent text-base text-white outline-none placeholder:text-[15px] placeholder:text-white/55"
       />
 
       <button

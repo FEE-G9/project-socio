@@ -34,7 +34,7 @@ export default function Landing() {
 */}
         <div className="header-actions">
         {/* <button className="language-btn">EN</button>*/}
-          <Link to="/signup" className="login-btn">Login</Link>
+          <Link to="/login" className="login-btn">Login</Link>
           <Link to="/signup" className="signup-btn">Sign Up</Link>
         </div>
 
