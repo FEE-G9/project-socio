@@ -88,8 +88,8 @@ const Navbar = ({
           </button>
         )}
 
-        {/* DESKTOP NAVIGATION */}
-        <nav className="hidden items-center gap-1 md:flex">
+        {/* DESKTOP NAVIGATION - COMMENTED OUT AS REQUESTED */}
+        {/* <nav className="hidden items-center gap-1 md:flex">
           {links.map((link) => {
             const active = isActive(link.href);
 
@@ -109,7 +109,7 @@ const Navbar = ({
               </button>
             );
           })}
-        </nav>
+        </nav> */}
 
         {/* RIGHT SIDE */}
         <div className="hidden items-center gap-2 md:flex">
@@ -324,7 +324,7 @@ const Navbar = ({
 
           <nav className="space-y-1">
 
-            {links.map((link) => {
+            {/* {links.map((link) => {
               const active = isActive(link.href);
 
               return (
@@ -342,7 +342,7 @@ const Navbar = ({
                   {link.label}
                 </button>
               );
-            })}
+            })} */}
 
             {/* MOBILE THEME */}
             <button

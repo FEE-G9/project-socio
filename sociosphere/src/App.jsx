@@ -15,7 +15,7 @@ import ReportCrime from "./pages/citizen/ReportCrime";
 import Home from "./pages/citizen/Home";
 import Profile from "./pages/citizen/Profile";
 import Dashboard from "./pages/citizen/Dashboard";
-import Map from "./pages/citizen/Map";
+// import Map from "./pages/citizen/Map";
 import Announcements from "./pages/citizen/Announcements";
 
 import AdminDashboard from "./pages/authority/Admin";
@@ -40,7 +40,7 @@ function App() {
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<Home />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="map" element={<Map />} />
+        {/* <Route path="map" element={<Map />} /> */}
         <Route path="report" element={<Report />} />
         <Route path="report-crime" element={<ReportCrime />} />
         <Route path="profile" element={<Profile />} />

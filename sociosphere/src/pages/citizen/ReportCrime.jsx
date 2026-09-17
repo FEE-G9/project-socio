@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import {
 	AlertCircle,
@@ -55,9 +56,10 @@ const severityLevels = [
 	},
 ];
 
-const headingClass="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-300";
+const headingClass = "mb-2 block text-xs font-bold uppercase tracking-wide text-slate-600 dark:text-slate-300";
 
 export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) {
+	const navigate = useNavigate();
 	const { theme } = useTheme();
 	const [category, setCategory] = useState("");
 	const [severity, setSeverity] = useState("high");
@@ -158,39 +160,39 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 
 	if (submitted) {
 		return (
-			<main className={`${theme === "light" ? "theme-light" : "theme-dark"} ${isEmbedded ? "p-2" : "min-h-screen bg-[#070B14] px-4 py-6"} text-[#F8FAFC] sm:px-6 lg:px-8`}>
+			<main className={`${theme === "dark" ? "theme-dark" : "theme-light"} ${isEmbedded ? "p-2" : "min-h-screen bg-slate-50 text-slate-900 dark:bg-[#070B14] dark:text-[#F8FAFC] px-4 py-6"} sm:px-6 lg:px-8`}>
 				<div className={`mx-auto flex ${isEmbedded ? "min-h-auto" : "min-h-[calc(100vh-3rem)]"} max-w-3xl items-center justify-center`}>
-					<section className="w-full rounded-2xl border border-slate-800 bg-[#0D1524] p-6 text-center sm:p-12 shadow-2xl">
-						<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30">
+					<section className="w-full rounded-2xl border border-slate-200 bg-white p-6 text-center sm:p-12 shadow-2xl dark:border-slate-800 dark:bg-[#0D1524]">
+						<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-rose-500/15 text-rose-500 border border-rose-500/30 dark:text-rose-400">
 							<ShieldAlert size={34} strokeWidth={1.8} />
 						</div>
-						<div className="inline-flex items-center gap-2 rounded-full bg-rose-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-rose-400 border border-rose-500/20 mb-4">
+						<div className="inline-flex items-center gap-2 rounded-full bg-rose-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 border border-rose-500/20 mb-4">
 							<CheckCircle2 size={14} /> Report Logged • Ref #{reportId}
 						</div>
-						<h1 className="mb-3 text-2xl font-extrabold tracking-tight sm:text-3xl">
+						<h1 className="mb-3 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
 							Crime & Safety Incident Report Submitted
 						</h1>
-						<p className="mx-auto mb-8 max-w-md text-sm leading-6 text-slate-400">
+						<p className="mx-auto mb-8 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-400">
 							Your incident report has been dispatched to the society security desk and logged for law enforcement review.
 							{isAnonymous && " Your report was recorded anonymously."}
 						</p>
 
-						<div className="mb-8 rounded-xl border border-slate-800 bg-slate-900/70 p-4 text-left text-xs leading-6 text-slate-300 space-y-2">
-							<div className="flex justify-between border-b border-slate-800 pb-2">
-								<span className="text-slate-500">Incident Category:</span>
-								<span className="font-semibold text-slate-200 capitalize">{category}</span>
+						<div className="mb-8 rounded-xl border border-slate-200 bg-slate-50 p-4 text-left text-xs leading-6 text-slate-700 space-y-2 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
+							<div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+								<span className="text-slate-500 dark:text-slate-400">Incident Category:</span>
+								<span className="font-semibold text-slate-800 dark:text-slate-200 capitalize">{category}</span>
 							</div>
-							<div className="flex justify-between border-b border-slate-800 pb-2">
-								<span className="text-slate-500">Severity Level:</span>
-								<span className="font-semibold text-rose-400 uppercase">{severity}</span>
+							<div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+								<span className="text-slate-500 dark:text-slate-400">Severity Level:</span>
+								<span className="font-semibold text-rose-600 dark:text-rose-400 uppercase">{severity}</span>
 							</div>
-							<div className="flex justify-between border-b border-slate-800 pb-2">
-								<span className="text-slate-500">Location:</span>
-								<span className="font-semibold text-slate-200">{location}</span>
+							<div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+								<span className="text-slate-500 dark:text-slate-400">Location:</span>
+								<span className="font-semibold text-slate-800 dark:text-slate-200">{location}</span>
 							</div>
 							<div className="flex justify-between">
-								<span className="text-slate-500">Reporting Mode:</span>
-								<span className="font-semibold text-slate-200">{isAnonymous ? "Anonymous Citizen" : "Verified Resident"}</span>
+								<span className="text-slate-500 dark:text-slate-400">Reporting Mode:</span>
+								<span className="font-semibold text-slate-800 dark:text-slate-200">{isAnonymous ? "Anonymous Citizen" : "Verified Resident"}</span>
 							</div>
 						</div>
 
@@ -198,14 +200,14 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 							<button
 								type="button"
 								onClick={() => setSubmitted(false)}
-								className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-slate-800 px-5 py-3 text-sm font-bold text-slate-200 border border-slate-700 transition-all duration-200 hover:bg-slate-700"
+								className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-slate-100 px-5 py-3 text-sm font-bold text-slate-700 transition-all duration-200 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
 							>
 								<FileText size={17} />
 								Submit Another Incident
 							</button>
 							<button
 								type="button"
-								onClick={() => (onClose ? onClose() : window.history.back())}
+								onClick={() => (onClose ? onClose() : navigate("/citizen/home"))}
 								className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-sm font-bold text-white transition-all duration-200 hover:bg-rose-500 shadow-lg shadow-rose-600/20"
 							>
 								<ArrowLeft size={17} />
@@ -219,50 +221,22 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 	}
 
 	return (
-<main
-  className={`${theme === "light" ? "theme-light" : "theme-dark"} ${
-    isEmbedded ? "p-0" : ""
-  } text-[#F8FAFC]`}
->			{/* Header */}
-			{/* {!isEmbedded && (
-				<header className="border-b border-slate-800/80 bg-[#080E1A] sticky top-0 z-10 backdrop-blur-md bg-opacity-90">
-					<div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-						<button
-							type="button"
-							className="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 transition-colors duration-200 hover:text-rose-400"
-							onClick={() => (onClose ? onClose() : window.history.back())}
-						>
-							<ArrowLeft size={18} />
-							Back to dashboard
-						</button>
-						<div className="flex items-center gap-3">
-							<a
-								href="tel:112"
-								className="inline-flex items-center gap-2 rounded-xl bg-rose-500/15 border border-rose-500/30 px-3.5 py-1.5 text-xs font-bold text-rose-400 hover:bg-rose-500/25 transition-colors"
-							>
-								<PhoneCall size={14} />
-								Emergency Hotline: 112
-							</a>
-							<div className="hidden items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-rose-400 sm:flex">
-								<ShieldAlert size={17} />
-								Crime & Safety Portal
-							</div>
-						</div>
-					</div>
-				</header>
-			)} */}
-
+		<main
+			className={`${theme === "dark" ? "theme-dark" : "theme-light"} ${
+				isEmbedded ? "p-0" : "min-h-screen bg-slate-50 text-slate-900 dark:bg-[#070B14] dark:text-[#F8FAFC]"
+			}`}
+		>
 			<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
 				{/* Emergency Banner */}
-				<aside className="mb-8 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 sm:p-6 text-rose-200">
+				<aside className="mb-8 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 sm:p-6 text-rose-800 dark:text-rose-200">
 					<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 						<div className="flex items-start gap-3.5">
-							<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40">
+							<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/40">
 								<AlertCircle size={22} />
 							</div>
 							<div>
-								<h2 className="text-base font-bold text-white">Active Life-Threatening Emergency?</h2>
-								<p className="mt-1 text-xs text-rose-200/80 leading-5">
+								<h2 className="text-base font-bold text-slate-900 dark:text-white">Active Life-Threatening Emergency?</h2>
+								<p className="mt-1 text-xs text-rose-800 dark:text-rose-200/80 leading-5">
 									For crimes in progress, active assault, or immediate physical danger, call national emergency services or security desk immediately.
 								</p>
 							</div>
@@ -279,27 +253,27 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 
 				{/* Title Section */}
 				<div className="mb-8 max-w-2xl">
-					<p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-rose-400">
+					<p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-rose-600 dark:text-rose-400">
 						Community Safety & Security
 					</p>
-					<h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+					<h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
 						Report a Crime or Incident
 					</h1>
-					<p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
+					<p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400 sm:text-base">
 						Report illegal activity, suspicious behavior, or safety hazards to dispatch security patrols and inform local authorities.
 					</p>
 				</div>
 
 				<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
 					{/* Main Form */}
-					<form onSubmit={handleSubmit} className="rounded-2xl border border-slate-800 bg-[#0D1524] p-5 sm:p-8">
-						<div className="mb-8 flex items-start gap-4 border-b border-slate-800 pb-6">
-							<div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/30">
+					<form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm dark:border-slate-800 dark:bg-[#0D1524]">
+						<div className="mb-8 flex items-start gap-4 border-b border-slate-200 pb-6 dark:border-slate-800">
+							<div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30">
 								<ShieldAlert size={22} />
 							</div>
 							<div>
-								<h2 className="text-lg font-bold">Incident Details</h2>
-								<p className="mt-1 text-sm text-slate-400">Provide accurate information for rapid triage and security dispatch.</p>
+								<h2 className="text-lg font-bold text-slate-900 dark:text-white">Incident Details</h2>
+								<p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Provide accurate information for rapid triage and security dispatch.</p>
 							</div>
 						</div>
 
@@ -307,13 +281,13 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 							{/* Category */}
 							<label className="block">
 								<span className={headingClass}>
-									Incident Category <span className="text-rose-400">*</span>
+									Incident Category <span className="text-rose-500">*</span>
 								</span>
 								<span className="relative block">
 									<select
 										value={category}
 										onChange={(event) => setCategory(event.target.value)}
-										className="w-full appearance-none rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 outline-none transition-all duration-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+										className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
 									>
 										<option value="">Select crime or incident type</option>
 										{crimeCategories.map((item) => (
@@ -322,14 +296,14 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 											</option>
 										))}
 									</select>
-									<ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+									<ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
 								</span>
 							</label>
 
 							{/* Severity Level */}
 							<div>
 								<span className={headingClass}>
-									Severity / Threat Level <span className="text-rose-400">*</span>
+									Severity / Threat Level <span className="text-rose-500">*</span>
 								</span>
 								<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 									{severityLevels.map((lvl) => (
@@ -340,11 +314,11 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 											className={`flex flex-col text-left rounded-xl border p-3.5 transition-all duration-200 ${
 												severity === lvl.id
 													? lvl.badgeClass
-													: "border-slate-800 bg-slate-900/60 hover:border-slate-700"
+													: "border-slate-200 bg-slate-50 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-slate-700"
 											}`}
 										>
-											<span className="text-xs font-bold text-slate-200">{lvl.label}</span>
-											<span className="mt-1 text-[11px] text-slate-400 leading-4">{lvl.desc}</span>
+											<span className="text-xs font-bold text-slate-800 dark:text-slate-200">{lvl.label}</span>
+											<span className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 leading-4">{lvl.desc}</span>
 										</button>
 									))}
 								</div>
@@ -357,13 +331,13 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 										When did this occur?
 									</span>
 									<span className="relative block">
-										<Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+										<Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
 										<input
 											type="text"
 											value={incidentTime}
 											onChange={(e) => setIncidentTime(e.target.value)}
 											placeholder="e.g. Just now, Today 2:30 PM"
-											className="w-full rounded-xl border border-slate-700 bg-slate-900 py-3 pl-11 pr-4 text-sm text-slate-100 outline-none transition-all duration-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+											className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-900 outline-none transition-all duration-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
 										/>
 									</span>
 								</label>
@@ -376,28 +350,27 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 										value={landmark}
 										onChange={(e) => setLandmark(e.target.value)}
 										placeholder="e.g. Near Gate 3 parking, Block C stairwell"
-										className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 outline-none transition-all duration-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+										className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
 									/>
 								</label>
 							</div>
 
 							{/* Location */}
-							{/* 7/09/2026 -> To change the Location to Current colony person is in later */}
 							<label className="block">
 								<span className={headingClass}>
-									Location <span className="text-rose-400">*</span>
+									Location <span className="text-rose-500">*</span>
 								</span>
 								<span className="relative block">
-									<MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400" size={18} />
+									<MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-500 dark:text-rose-400" size={18} />
 									<input
 										value={location}
 										onChange={(event) => setLocation(event.target.value)}
-										className="w-full rounded-xl border border-slate-700 bg-slate-900 py-3 pl-11 pr-12 text-sm text-slate-100 outline-none transition-all duration-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+										className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-12 text-sm text-slate-900 outline-none transition-all duration-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
 									/>
 									<button
 										type="button"
 										aria-label="Use current location"
-										className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-800 hover:text-rose-400"
+										className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-rose-600 dark:hover:bg-slate-800 dark:hover:text-rose-400"
 									>
 										<Crosshair size={17} />
 									</button>
@@ -407,7 +380,7 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 							{/* Description */}
 							<label className="block">
 								<span className={headingClass}>
-									Detailed Description <span className="text-rose-400">*</span>
+									Detailed Description <span className="text-rose-500">*</span>
 								</span>
 								<textarea
 									value={description}
@@ -415,9 +388,9 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 									placeholder="Provide exact facts: sequence of events, physical characteristics of persons involved, weapon/vehicle observations, or stolen items..."
 									rows="5"
 									maxLength={1000}
-									className="w-full resize-y rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm leading-6 text-slate-100 outline-none placeholder:text-slate-500 transition-all duration-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+									className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all duration-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
 								/>
-								<span className="mt-2 block text-right text-xs text-slate-500">
+								<span className="mt-2 block text-right text-xs text-slate-400 dark:text-slate-500">
 									{description.length}/1000
 								</span>
 							</label>
@@ -425,25 +398,25 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 							{/* Suspect / Vehicle Details */}
 							<label className="block">
 								<span className={headingClass}>
-									Suspect / Vehicle Details <span className="font-normal normal-case text-slate-500">(optional)</span>
+									Suspect / Vehicle Details <span className="font-normal normal-case text-slate-400 dark:text-slate-500">(optional)</span>
 								</span>
 								<input
 									type="text"
 									value={suspectDetails}
 									onChange={(e) => setSuspectDetails(e.target.value)}
 									placeholder="e.g. Tall male in black hoodie, silver SUV reg #AB-123"
-									className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 outline-none transition-all duration-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+									className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
 								/>
 							</label>
 
 							{/* Evidence / Photo / Video Upload */}
 							<div>
 								<span className={headingClass}>
-									Photo / Video Evidence <span className="font-normal normal-case text-slate-500">(image only)</span>
+									Photo / Video Evidence <span className="font-normal normal-case text-slate-400 dark:text-slate-500">(image only)</span>
 								</span>
 								{fileUrl ? (
-									<div className="relative rounded-xl border border-rose-500/40 bg-slate-900 p-2">
-										<div className="relative h-48 w-full overflow-hidden rounded-lg bg-slate-950">
+									<div className="relative rounded-xl border border-rose-500/40 bg-slate-50 p-2 dark:bg-slate-900">
+										<div className="relative h-48 w-full overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-950">
 											<img src={fileUrl} alt="Evidence preview" className="h-full w-full object-cover" />
 											<button
 												type="button"
@@ -457,25 +430,25 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 												<X size={16} />
 											</button>
 										</div>
-										<div className="mt-2 flex items-center justify-between px-1 text-xs text-slate-400">
+										<div className="mt-2 flex items-center justify-between px-1 text-xs text-slate-600 dark:text-slate-400">
 											<span className="truncate font-mono">{fileName}</span>
-											<span className="font-semibold text-rose-400">Evidence Photo Loaded</span>
+											<span className="font-semibold text-rose-600 dark:text-rose-400">Evidence Photo Loaded</span>
 										</div>
 									</div>
 								) : (
-									<label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-slate-700 bg-slate-900/60 px-4 py-4 transition-colors duration-200 hover:border-rose-500/60 hover:bg-slate-900">
-										<span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-slate-300">
+									<label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-4 transition-colors duration-200 hover:border-rose-500/60 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:bg-slate-900">
+										<span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
 											<ImagePlus size={19} />
 										</span>
 										<span className="min-w-0 flex-1">
-											<span className="block text-sm font-semibold text-slate-200">
+											<span className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
 												Upload photo of incident or evidence
 											</span>
-											<span className="mt-1 block text-xs text-slate-500">
+											<span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
 												JPG or PNG, up to 10 MB
 											</span>
 										</span>
-										<Camera size={18} className="text-slate-500" />
+										<Camera size={18} className="text-slate-400 dark:text-slate-500" />
 										<input
 											type="file"
 											accept="image/*"
@@ -487,23 +460,22 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 							</div>
 
 							{/* Anonymous Toggle & Contact Info */}
-							<div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-4">
-							{/* space-y-4 gives vertical space of 1 rem in child elements */}
+							<div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-4 dark:border-slate-800 dark:bg-slate-900/60">
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-3">
-										<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-slate-300">
-											{isAnonymous ? <EyeOff size={18} className="text-purple-400" /> : <Lock size={18} className="text-blue-400" />}
+										<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+											{isAnonymous ? <EyeOff size={18} className="text-purple-500 dark:text-purple-400" /> : <Lock size={18} className="text-blue-500 dark:text-blue-400" />}
 										</div>
 										<div>
-											<span className="block text-sm font-bold text-slate-200">Submit Anonymously</span>
-											<span className="block text-xs text-slate-400">Hide your identity from public records & society feeds</span>
+											<span className="block text-sm font-bold text-slate-800 dark:text-slate-200">Submit Anonymously</span>
+											<span className="block text-xs text-slate-500 dark:text-slate-400">Hide your identity from public records & society feeds</span>
 										</div>
 									</div>
 									<button
 										type="button"
 										onClick={() => setIsAnonymous(!isAnonymous)}
 										className={`relative inline-flex h-6 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-											isAnonymous ? "bg-rose-600" : "bg-slate-700"
+											isAnonymous ? "bg-rose-600" : "bg-slate-300 dark:bg-slate-700"
 										}`}
 									>
 										<span
@@ -515,20 +487,20 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 								</div>
 
 								{!isAnonymous && (
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-800 pt-3">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-200 dark:border-slate-800 pt-3">
 										<input
 											type="text"
 											value={reporterName}
 											onChange={(e) => setReporterName(e.target.value)}
 											placeholder="Your Name (Optional)"
-											className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-rose-500"
+											className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 outline-none focus:border-rose-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
 										/>
 										<input
 											type="tel"
 											value={reporterPhone}
 											onChange={(e) => setReporterPhone(e.target.value)}
 											placeholder="Contact Phone Number"
-											className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-rose-500"
+											className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 outline-none focus:border-rose-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
 										/>
 									</div>
 								)}
@@ -536,9 +508,9 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 						</div>
 
 						{/* Form Actions */}
-						<div className="mt-8 flex flex-col-reverse gap-3 border-t border-slate-800 pt-6 sm:flex-row sm:items-center sm:justify-between">
-							<p className="flex items-center gap-2 text-xs leading-5 text-slate-500">
-								<Sparkles size={15} className="shrink-0 text-rose-400" />
+						<div className="mt-8 flex flex-col-reverse gap-3 border-t border-slate-200 dark:border-slate-800 pt-6 sm:flex-row sm:items-center sm:justify-between">
+							<p className="flex items-center gap-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+								<Sparkles size={15} className="shrink-0 text-rose-500 dark:text-rose-400" />
 								AI Auto-Triage will prioritize & route report to security desk.
 							</p>
 							<button
@@ -554,60 +526,60 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 
 					{/* Sidebar */}
 					<aside className="space-y-4">
-						<section className="rounded-2xl border border-rose-500/50 bg-slate-900/85 p-5">
+						<section className="rounded-2xl border border-rose-500/30 bg-rose-50/50 p-5 dark:border-rose-500/50 dark:bg-slate-900/85">
 							<div className="mb-4 flex items-center gap-3">
-								<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-500/15 text-rose-400">
+								<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-500/15 text-rose-600 dark:text-rose-400">
 									<PhoneCall size={19} />
 								</div>
-								<h2 className="text-sm font-bold text-slate-100">Emergency Contacts</h2>
+								<h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Emergency Contacts</h2>
 							</div>
 							<div className="space-y-3 text-xs">
-								<div className="flex items-center justify-between rounded-xl bg-slate-900/60 p-3 border border-slate-800">
+								<div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900/60">
 									<div>
-										<span className="block font-bold text-slate-200">Main Security Gate</span>
-										<span className="text-slate-400">24/7 Security Patrol Desk</span>
+										<span className="block font-bold text-slate-800 dark:text-slate-200">Main Security Gate</span>
+										<span className="text-slate-500 dark:text-slate-400">24/7 Security Patrol Desk</span>
 									</div>
-									<a href="tel:5550192831" className="text-rose-400 font-bold hover:underline">
+									<a href="tel:5550192831" className="text-rose-600 dark:text-rose-400 font-bold hover:underline">
 										Call
 									</a>
 								</div>
-								<div className="flex items-center justify-between rounded-xl bg-slate-900/60 p-3 border border-slate-800">
+								<div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900/60">
 									<div>
-										<span className="block font-bold text-slate-200">Local Police Control</span>
-										<span className="text-slate-400">Emergency Dispatch</span>
+										<span className="block font-bold text-slate-800 dark:text-slate-200">Local Police Control</span>
+										<span className="text-slate-500 dark:text-slate-400">Emergency Dispatch</span>
 									</div>
-									<a href="tel:112" className="text-rose-400 font-bold hover:underline">
+									<a href="tel:112" className="text-rose-600 dark:text-rose-400 font-bold hover:underline">
 										112
 									</a>
 								</div>
-								<div className="flex items-center justify-between rounded-xl bg-slate-900/60 p-3 border border-slate-800">
+								<div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900/60">
 									<div>
-										<span className="block font-bold text-slate-200">Women & Child Safety</span>
-										<span className="text-slate-400">Helpline Service</span>
+										<span className="block font-bold text-slate-800 dark:text-slate-200">Women & Child Safety</span>
+										<span className="text-slate-500 dark:text-slate-400">Helpline Service</span>
 									</div>
-									<a href="tel:1091" className="text-rose-400 font-bold hover:underline">
+									<a href="tel:1091" className="text-rose-600 dark:text-rose-400 font-bold hover:underline">
 										1091
 									</a>
 								</div>
 							</div>
 						</section>
 
-						<section className="rounded-2xl border border-slate-800 bg-[#0D1524] p-5">
-							<div className="mb-3 flex items-center gap-2 text-slate-200 font-bold text-sm">
-								<ShieldCheck size={18} className="text-emerald-400" />
+						<section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-[#0D1524]">
+							<div className="mb-3 flex items-center gap-2 text-slate-900 dark:text-slate-200 font-bold text-sm">
+								<ShieldCheck size={18} className="text-emerald-600 dark:text-emerald-400" />
 								<span>Evidence & Safety Tips</span>
 							</div>
-							<ul className="space-y-2.5 text-xs text-slate-400 leading-5">
+							<ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-400 leading-5">
 								<li className="flex items-start gap-2">
-									<span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-400" />
+									<span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500 dark:bg-rose-400" />
 									<span>Do not disturb or touch physical evidence at the incident site.</span>
 								</li>
 								<li className="flex items-start gap-2">
-									<span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-400" />
+									<span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500 dark:bg-rose-400" />
 									<span>Never attempt to confront suspicious or armed individuals personally.</span>
 								</li>
 								<li className="flex items-start gap-2">
-									<span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-400" />
+									<span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500 dark:bg-rose-400" />
 									<span>Note vehicle license numbers and precise direction of travel if safe.</span>
 								</li>
 							</ul>

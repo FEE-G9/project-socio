@@ -38,11 +38,11 @@ const CitizenLayout = () => {
       href: "/citizen/report-crime",
       icon: ShieldAlert,
     },
-    {
-      label: "Map",
-      href: "/citizen/map",
-      icon: Map,
-    },
+    // {
+    //   label: "Map",
+    //   href: "/citizen/map",
+    //   icon: Map,
+    // },
     {
       label: "Profile",
       href: "/citizen/profile",

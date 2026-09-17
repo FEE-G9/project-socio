@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./home.css";
 
 import Report from "./Report";
@@ -7,6 +8,7 @@ import Map from "./Map";
 
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+// import Map from "./Map";
 
 import {
   Shield,
@@ -43,12 +45,12 @@ const quickActions = [
     icon: Shield,
     className: "action-red",
   },
-  {
-    title: "View Map",
-    description: "Live community problem heatmap",
-    icon: MapPin,
-    className: "action-blue",
-  },
+  // {
+  //   title: "View Map",
+  //   description: "Live community problem heatmap",
+  //   icon: MapPin,
+  //   className: "action-blue",
+  // },
   {
     title: "Community Hub",
     description: "Resident polls, clubs, rides",
@@ -64,6 +66,7 @@ const quickActions = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   const [activeCivicTab, setActiveCivicTab] = useState("all");
   const [activeCrimeTab, setActiveCrimeTab] = useState("all");
   const [showNotifications, setShowNotifications] = useState(false);
@@ -277,19 +280,19 @@ export default function Home() {
 
   const handleQuickAction = (title) => {
     if (title === "Report Issue") {
-      setActiveModal("report");
+      navigate("/citizen/report");
       return;
     }
 
     if (title === "Report Crime") {
-      setActiveModal("reportCrime");
+      navigate("/citizen/report-crime");
       return;
     }
 
-    if (title === "View Map") {
-      setActiveModal("map");
-      return;
-    }
+    // if (title === "View Map") {
+    //   setActiveModal("map");
+    //   return;
+    // }
 
     if (
       title === "Community Hub" ||
@@ -528,6 +531,7 @@ export default function Home() {
             <button
               className="emergency-button"
               onClick={() => {
+                navigate("/citizen/report-crime");
                 setActiveModal("reportCrime");
 
                 showToast(
@@ -1136,6 +1140,10 @@ export default function Home() {
         </div>
       </footer>
 
+      {/* FOOTER */}
+
+      {/* MAP MODAL - COMMENTED OUT FOR FUTURE USE */}
+      {/* {activeModal === "map" && (
       {/* =====================================================
           REPORT ISSUE MODAL
       ===================================================== */}
@@ -1349,7 +1357,7 @@ export default function Home() {
             />
           </div>
         </div>
-      )}
+      )} */}
 
       {/* =====================================================
           COMING SOON MODAL
