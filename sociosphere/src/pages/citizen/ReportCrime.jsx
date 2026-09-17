@@ -79,7 +79,7 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 
 	const canSubmit = category && description.trim() && location.trim();
 
-	const handleSubmit = (event) => {
+	const handleSubmit = async (event) => {
 		event.preventDefault();
 		if (!canSubmit) return;
 

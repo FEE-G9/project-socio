@@ -8,7 +8,9 @@ import {
   TrendingUp, 
   CheckCircle2, 
   ChevronRight,
-  FileText
+  FileText,
+  ShieldAlert,
+  ArrowUpRight
 } from 'lucide-react';
 import StatCard from '../../components/ui/StatCard';
 import Card from '../../components/ui/Card';
@@ -17,20 +19,29 @@ import Modal from '../../components/ui/Modal';
 import Spinner from '../../components/ui/Spinner';
 import { mockFinance } from '../../data/mockFinance';
 import { getIssues } from '../../data/mockIssues';
+import { getCrimes } from '../../data/mockCrimes';
 
-const AdminDashboard = () => {
+const AdminHome = () => {
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState(null); // 'reports', 'announcement', 'logs', 'members'
   const [isLoading, setIsLoading] = useState(false);
   
   // Dynamic Stats
   const [issues, setIssues] = useState([]);
+  const [crimes, setCrimes] = useState([]);
 
   useEffect(() => {
     const loadIssues = () => setIssues(getIssues());
     loadIssues();
     window.addEventListener('sociosphere_data_updated', loadIssues);
     return () => window.removeEventListener('sociosphere_data_updated', loadIssues);
+  }, []);
+
+  useEffect(() => {
+    const loadCrimes = () => setCrimes(getCrimes());
+    loadCrimes();
+    window.addEventListener('sociosphere_crimes_updated', loadCrimes);
+    return () => window.removeEventListener('sociosphere_crimes_updated', loadCrimes);
   }, []);
 
   const totalIssues = issues.length;
@@ -57,22 +68,34 @@ const AdminDashboard = () => {
     }, 1500);
   };
 
+  const recentActivities = [...issues.map(i => ({
+    id: i.id, type: 'Issue', title: i.title, status: i.status, date: i.createdAt || new Date().toISOString()
+  })), ...crimes.map(c => ({
+    id: c.id, type: 'Crime', title: c.title, status: c.status, date: c.timestamp || new Date().toISOString()
+  }))].sort((a, b) => {
+    const timeA = isNaN(new Date(a.date).getTime()) ? 0 : new Date(a.date).getTime();
+    const timeB = isNaN(new Date(b.date).getTime()) ? 0 : new Date(b.date).getTime();
+    return timeB - timeA;
+  }).slice(0, 4);
+
   return (
     <div className="space-y-8">
       {/* Header Info - Replaces the old fixed header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Dashboard</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Admin Home</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Overview of your society's metrics and modules.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="secondary" className="text-sm" onClick={() => handleAction('reports')}>
-            View Reports
-          </Button>
-          <Button className="text-sm" onClick={() => handleAction('announcement')}>
-            Post Announcement
-          </Button>
-        </div>
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" className="text-sm" onClick={() => handleAction('reports')}>
+              View Reports
+            </Button>
+            {/* 
+            <Button className="text-sm" onClick={() => handleAction('announcement')}>
+              Post Announcement
+            </Button>
+            */}
+          </div>
       </div>
 
       {/* Stats Row */}
@@ -132,36 +155,52 @@ const AdminDashboard = () => {
                 <p className="text-sm text-slate-500 dark:text-slate-400">Manage and update all society issues reported by citizens.</p>
               </Link>
 
-              <Link to="/authority/analytics" className="block p-5 bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/60 rounded-2xl hover:border-blue-500 dark:hover:border-blue-500 transition-all group shadow-sm">
+              <Link to="/authority/crimes" className="block p-5 bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/60 rounded-2xl hover:border-blue-500 dark:hover:border-blue-500 transition-all group shadow-sm">
                 <div className="flex items-center gap-4 mb-3">
-                  <div className="p-3 bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 rounded-xl group-hover:scale-110 transition-transform">
-                    <Activity size={24} />
+                  <div className="p-3 bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 rounded-xl group-hover:scale-110 transition-transform">
+                    <ShieldAlert size={24} />
                   </div>
-                  <h3 className="font-bold text-slate-900 dark:text-slate-100">Analytics Hub</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100">Crime Log</h3>
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">View comprehensive data, resource usage, and AI insights.</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">View and update statuses for security and crime reports.</p>
               </Link>
             </div>
           </section>
 
-          {/* System Alerts Section */}
+                    {/* Recent Activities Section */}
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">System Alerts</h2>
-              <Button variant="secondary" className="text-xs px-3 py-1.5 h-auto" onClick={() => handleAction('logs')}>Manage</Button>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Recent Activities</h2>
+              <Button variant="secondary" className="text-xs px-3 py-1.5 h-auto" onClick={() => navigate('/authority/issues')}>View All</Button>
             </div>
             
-            <Card className="p-8 border-dashed flex flex-col items-center justify-center text-center">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 flex items-center justify-center mb-3 border border-emerald-100 dark:border-emerald-500/20">
-                <CheckCircle2 size={24} />
-              </div>
-              <h3 className="font-medium text-slate-900 dark:text-slate-100">All Systems Operational</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
-                There are no critical system alerts at the moment. Community dashboard is running smoothly.
-              </p>
-              <Button variant="secondary" className="mt-4 text-xs h-8" onClick={() => handleAction('logs')}>
-                View System Logs
-              </Button>
+            <Card className="p-0 overflow-hidden">
+              {recentActivities.length > 0 ? (
+                <div className="divide-y divide-slate-200 dark:divide-slate-700/60">
+                  {recentActivities.map((activity, idx) => (
+                    <div key={idx} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${activity.type === 'Crime' ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400' : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'}`}>
+                          {activity.type === 'Crime' ? <ShieldAlert size={18} /> : <AlertTriangle size={18} />}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{activity.title}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{activity.type} • {isNaN(new Date(activity.date).getTime()) ? 'Unknown Date' : new Date(activity.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${activity.status === 'Resolved' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : activity.status === 'In Progress' ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' : 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20'}`}>
+                          {activity.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">No recent activities found.</p>
+                </div>
+              )}
             </Card>
           </section>
 
@@ -252,53 +291,8 @@ const AdminDashboard = () => {
         </div>
       </Modal>
 
-      {/* Announcement Modal */}
-      <Modal isOpen={activeModal === 'announcement'} onClose={closeModal} title="Post Announcement">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">Title</label>
-            <input 
-              type="text" 
-              placeholder="E.g. Water Supply Interruption" 
-              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-xl px-4 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-emerald-500 dark:focus:border-emerald-500 outline-none transition-colors"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">Message</label>
-            <textarea 
-              rows={4}
-              placeholder="Enter announcement details..." 
-              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-xl px-4 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-emerald-500 dark:focus:border-emerald-500 outline-none transition-colors resize-none"
-            />
-          </div>
-          <Button className="w-full" onClick={simulateLoadingAction} disabled={isLoading}>
-            {isLoading ? <Spinner size="sm" /> : "Publish to Community"}
-          </Button>
-        </div>
-      </Modal>
-
-      {/* Logs Modal */}
-      <Modal isOpen={activeModal === 'logs'} onClose={closeModal} title="System Logs">
-        <div className="space-y-2 max-h-64 overflow-y-auto font-mono text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
-          <p><span className="text-emerald-600 dark:text-emerald-400">[OK]</span> 2023-10-27 10:15:00 - Database backup completed.</p>
-          <p><span className="text-emerald-600 dark:text-emerald-400">[OK]</span> 2023-10-27 09:30:22 - Admin login successful.</p>
-          <p><span className="text-emerald-600 dark:text-emerald-400">[OK]</span> 2023-10-27 08:00:00 - Daily cron job executed.</p>
-          <p><span className="text-slate-500 dark:text-slate-500">[INFO]</span> 2023-10-26 23:59:59 - System stats aggregated.</p>
-          <p><span className="text-amber-600 dark:text-amber-400">[WARN]</span> 2023-10-26 14:20:10 - High memory usage detected (82%).</p>
-        </div>
-        <Button variant="secondary" className="w-full mt-4" onClick={closeModal}>Close</Button>
-      </Modal>
-
-      {/* Members Modal */}
-      <Modal isOpen={activeModal === 'members'} onClose={closeModal} title="Pending Approvals">
-        <div className="space-y-3">
-          <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">No pending member approvals at the moment.</p>
-          <Button variant="secondary" className="w-full" onClick={closeModal}>Close</Button>
-        </div>
-      </Modal>
-
     </div>
   );
 };
 
-export default AdminDashboard;
+export default AdminHome;

@@ -7,6 +7,7 @@ import {
   Users,
   IndianRupee,
   Megaphone,
+  ShieldAlert
 } from "lucide-react";
 
 import Navbar from "./Navbar";
@@ -18,8 +19,8 @@ const AuthorityLayout = () => {
 
   const links = [
     {
-      label: "Dashboard",
-      href: "/authority",
+      label: "Admin Home",
+      href: "/authority/home",
       icon: LayoutDashboard,
     },
     {
@@ -28,25 +29,30 @@ const AuthorityLayout = () => {
       icon: AlertCircle,
     },
     {
-      label: "Analytics",
-      href: "/authority/analytics",
-      icon: BarChart3,
+      label: "Crimes",
+      href: "/authority/crimes",
+      icon: ShieldAlert,
     },
-    {
-      label: "Members",
-      href: "/authority/members",
-      icon: Users,
-    },
-    {
-      label: "Fees",
-      href: "/authority/fees",
-      icon: IndianRupee,
-    },
-    {
-      label: "Announcements",
-      href: "/authority/announcements",
-      icon: Megaphone,
-    },
+    // {
+    //   label: "Analytics",
+    //   href: "/authority/analytics",
+    //   icon: BarChart3,
+    // },
+    // {
+    //   label: "Members",
+    //   href: "/authority/members",
+    //   icon: Users,
+    // },
+    // {
+    //   label: "Fees",
+    //   href: "/authority/fees",
+    //   icon: IndianRupee,
+    // },
+    // {
+    //   label: "Announcements",
+    //   href: "/authority/announcements",
+    //   icon: Megaphone,
+    // },
   ];
 
   const handleLogout = () => {

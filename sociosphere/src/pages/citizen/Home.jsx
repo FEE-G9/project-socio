@@ -1296,7 +1296,7 @@ export default function Home() {
           MAP MODAL
       ===================================================== */}
 
-      {activeModal === "map" && (
+      {/* {activeModal === "map" && (
         <div
           className="modal-overlay"
           onClick={() => setActiveModal(null)}

@@ -47,6 +47,10 @@ const Navbar = ({
       return location.pathname === "/";
     }
 
+    if (href === "/authority" || href === "/authority/home") {
+      return location.pathname === "/authority" || location.pathname === "/authority/home";
+    }
+
     return (
       location.pathname === href ||
       location.pathname.startsWith(`${href}/`)
