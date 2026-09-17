@@ -3,21 +3,22 @@ import "./home.css";
 
 import Report from "./Report";
 import ReportCrime from "./ReportCrime";
+import Map from "./Map";
+
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
-import Map from "./Map";
 
 import {
   Shield,
   MapPin,
   Bell,
   Users,
+  Trash2,
   CreditCard,
   Plus,
   AlertTriangle,
   Droplets,
   Zap,
-  Trash2,
   Clock,
   CheckCircle2,
   ChevronRight,
@@ -69,73 +70,15 @@ export default function Home() {
   const [activeModal, setActiveModal] = useState(null);
   const [toast, setToast] = useState("");
   const [userReports, setUserReports] = useState([]);
+  const [comingSoonFeature, setComingSoonFeature] = useState(null);
 
   const { theme } = useTheme();
   const { user } = useAuth();
 
-  const loadUserReports = () => {
-  try {
-    const storedLocal = JSON.parse(
-      localStorage.getItem("sociosphere_user_reports") || "[]"
-    ).filter((report) => report?.id?.startsWith("CRM-"));
+  /* =========================================================
+     TOAST
+  ========================================================= */
 
-    const storedGlobal = JSON.parse(
-      localStorage.getItem("sociosphere_issues") || "[]"
-    ).map((issue) => ({
-      id: issue.id,
-      title: issue.title,
-      category: issue.category,
-      description: issue.description,
-      location: issue.location,
-
-      priority: issue.severity
-        ? `${issue.severity} Priority`
-        : "Medium Priority",
-
-      priorityClass: (issue.severity || "medium").toLowerCase(),
-
-      status: issue.status || "In Progress",
-
-      statusClass:
-        issue.status === "Resolved" ? "resolved" : "progress",
-
-      date: issue.createdAt
-        ? new Date(issue.createdAt).toLocaleDateString()
-        : "Recently",
-
-      eta: issue.aiAnalysis?.estimatedResolutionTime || "Pending",
-
-      image: issue.image || null,
-
-      reportedById: issue.reportedById,
-      reportedByEmail: issue.reportedByEmail,
-      communityId: issue.communityId,
-    }));
-
-    // Show all saved reports for now
-    setUserReports([...storedGlobal, ...storedLocal]);
-
-  } catch (error) {
-    console.error("Failed to load user reports:", error);
-    setUserReports([]);
-  }
-};
-
- useEffect(() => {
-  loadUserReports();
-
-  window.addEventListener(
-    "sociosphere_data_updated",
-    loadUserReports
-  );
-
-  return () => {
-    window.removeEventListener(
-      "sociosphere_data_updated",
-      loadUserReports
-    );
-  };
-}, []);
   const showToast = (message) => {
     setToast(message);
 
@@ -143,6 +86,194 @@ export default function Home() {
       setToast("");
     }, 2500);
   };
+
+  /* =========================================================
+     LOAD ONLY CURRENT USER'S REPORTS
+  ========================================================= */
+
+ const loadUserReports = () => {
+  try {
+    const currentEmail =
+      user?.email?.trim().toLowerCase();
+
+    const currentUserId = user?.id;
+
+    if (!currentEmail && !currentUserId) {
+      setUserReports([]);
+      return;
+    }
+
+    // =====================================================
+    // ALL USER REPORTS
+    // Civic + Crime
+    // =====================================================
+
+    const storedReports = JSON.parse(
+      localStorage.getItem("sociosphere_user_reports") || "[]"
+    );
+
+    const filteredReports = storedReports
+      .filter((report) => {
+        const reportEmail =
+          report?.reportedByEmail
+            ?.trim()
+            .toLowerCase();
+
+        const emailMatches =
+          currentEmail &&
+          reportEmail === currentEmail;
+
+        const idMatches =
+          currentUserId &&
+          report?.reportedById === currentUserId;
+
+        return emailMatches || idMatches;
+      })
+      .map((report) => {
+        const isCrime =
+          report?.reportType === "crime" ||
+          report?.id?.startsWith("CRM-");
+
+        return {
+          ...report,
+
+          priority:
+            report.priority ||
+            (report.severity
+              ? `${report.severity} Priority`
+              : isCrime
+                ? "High Priority"
+                : "Medium Priority"),
+
+          priorityClass:
+            report.priorityClass ||
+            (
+              report.severity ||
+              (isCrime ? "critical" : "medium")
+            ).toLowerCase(),
+
+          status:
+            report.status ||
+            "In Progress",
+
+          statusClass:
+            report.statusClass ||
+            (
+              report.status === "Resolved"
+                ? "resolved"
+                : "progress"
+            ),
+
+          date:
+            report.date ||
+            (
+              report.createdAt ||
+              report.timestamp
+            )
+              ? new Date(
+                  report.createdAt ||
+                  report.timestamp
+                ).toLocaleDateString()
+              : "Recently",
+
+          eta:
+            report.eta ||
+            report.aiAnalysis
+              ?.estimatedResolutionTime ||
+            (isCrime
+              ? "Security Dispatched"
+              : "Pending Dispatch"),
+
+          image:
+            report.image || null,
+
+          reportType:
+            isCrime ? "crime" : "civic",
+        };
+      });
+
+    setUserReports(filteredReports);
+  } catch (error) {
+    console.error(
+      "Failed to load user reports:",
+      error
+    );
+
+    setUserReports([]);
+  }
+};
+
+  /* =========================================================
+     LOAD ON USER CHANGE + DATA UPDATE
+  ========================================================= */
+
+  useEffect(() => {
+    loadUserReports();
+
+    window.addEventListener(
+      "sociosphere_data_updated",
+      loadUserReports
+    );
+
+    return () => {
+      window.removeEventListener(
+        "sociosphere_data_updated",
+        loadUserReports
+      );
+    };
+  }, [user?.email, user?.id]);
+
+  /* =========================================================
+     DELETE REPORT
+  ========================================================= */
+
+  const handleDeleteReport = (issue) => {
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this report?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+    const reports = JSON.parse(
+      localStorage.getItem(
+        "sociosphere_user_reports"
+      ) || "[]"
+    );
+
+    const updatedReports = reports.filter(
+      (report) => report.id !== issue.id
+    );
+
+    localStorage.setItem(
+      "sociosphere_user_reports",
+      JSON.stringify(updatedReports)
+    );
+
+    window.dispatchEvent(
+      new Event("sociosphere_data_updated")
+    );
+
+    loadUserReports();
+
+    showToast(
+      "Report deleted successfully."
+    );
+  } catch (error) {
+    console.error(
+      "Failed to delete report:",
+      error
+    );
+
+    showToast(
+      "Unable to delete report."
+    );
+  }
+};
+
+  /* =========================================================
+     QUICK ACTIONS
+  ========================================================= */
 
   const handleQuickAction = (title) => {
     if (title === "Report Issue") {
@@ -160,12 +291,18 @@ export default function Home() {
       return;
     }
 
-    showToast(`${title} feature opened`);
+    if (
+      title === "Community Hub" ||
+      title === "Maintenance"
+    ) {
+      setComingSoonFeature(title);
+    }
   };
 
-  /*
-   * Separate civic issues from crime reports.
-   */
+  /* =========================================================
+     SEPARATE CIVIC + CRIME
+  ========================================================= */
+
   const userCivicReports = userReports.filter(
     (item) =>
       item?.id &&
@@ -178,18 +315,19 @@ export default function Home() {
       item.id.startsWith("CRM-")
   );
 
-  /*
-   * IMPORTANT:
-   * No fake/default issue is used here.
-   * If the user has not reported anything, the empty state is shown.
-   */
   const displayedCivicIssues = userCivicReports;
   const displayedCrimeIssues = userCrimeReports;
+
+  /* =========================================================
+     GET ISSUE ICON
+  ========================================================= */
 
   const getIssueIcon = (issue) => {
     if (issue.icon) return issue.icon;
 
-    const category = (issue.category || "").toLowerCase();
+    const category = (
+      issue?.category || ""
+    ).toLowerCase();
 
     if (
       category.includes("water") ||
@@ -232,123 +370,155 @@ export default function Home() {
     return AlertTriangle;
   };
 
-  /*
-   * Civic issue filtering
-   */
-  const filteredCivicIssues = displayedCivicIssues.filter((issue) => {
-    if (activeCivicTab === "progress") {
-      return (
+  /* =========================================================
+     CIVIC FILTERING
+  ========================================================= */
+
+  const filteredCivicIssues =
+    displayedCivicIssues.filter((issue) => {
+      if (activeCivicTab === "progress") {
+        return (
+          issue.status === "In Progress" ||
+          issue.status === "Pending Dispatch"
+        );
+      }
+
+      if (activeCivicTab === "resolved") {
+        return issue.status === "Resolved";
+      }
+
+      if (activeCivicTab === "high") {
+        return (
+          issue.priorityClass === "high" ||
+          issue.priorityClass === "critical" ||
+          (issue.priority &&
+            issue.priority
+              .toUpperCase()
+              .includes("HIGH")) ||
+          (issue.priority &&
+            issue.priority
+              .toUpperCase()
+              .includes("CRITICAL"))
+        );
+      }
+
+      return true;
+    });
+
+  const civicInProgressCount =
+    displayedCivicIssues.filter(
+      (issue) =>
         issue.status === "In Progress" ||
         issue.status === "Pending Dispatch"
-      );
-    }
+    ).length;
 
-    if (activeCivicTab === "resolved") {
-      return issue.status === "Resolved";
-    }
+  const civicResolvedCount =
+    displayedCivicIssues.filter(
+      (issue) => issue.status === "Resolved"
+    ).length;
 
-    if (activeCivicTab === "high") {
-      return (
+  const civicHighCriticalCount =
+    displayedCivicIssues.filter(
+      (issue) =>
         issue.priorityClass === "high" ||
         issue.priorityClass === "critical" ||
         (issue.priority &&
-          issue.priority.toUpperCase().includes("HIGH")) ||
+          issue.priority
+            .toUpperCase()
+            .includes("HIGH")) ||
         (issue.priority &&
-          issue.priority.toUpperCase().includes("CRITICAL"))
-      );
-    }
+          issue.priority
+            .toUpperCase()
+            .includes("CRITICAL"))
+    ).length;
 
-    return true;
-  });
+  /* =========================================================
+     CRIME FILTERING
+  ========================================================= */
 
-  const civicInProgressCount = displayedCivicIssues.filter(
-    (issue) =>
-      issue.status === "In Progress" ||
-      issue.status === "Pending Dispatch"
-  ).length;
+  const filteredCrimeIssues =
+    displayedCrimeIssues.filter((crime) => {
+      if (activeCrimeTab === "active") {
+        return (
+          crime.status === "In Progress" ||
+          crime.status === "Security Dispatched" ||
+          crime.status === "Pending Dispatch"
+        );
+      }
 
-  const civicResolvedCount = displayedCivicIssues.filter(
-    (issue) => issue.status === "Resolved"
-  ).length;
+      if (activeCrimeTab === "resolved") {
+        return (
+          crime.status === "Resolved" ||
+          crime.status === "Logged"
+        );
+      }
 
-  const civicHighCriticalCount = displayedCivicIssues.filter(
-    (issue) =>
-      issue.priorityClass === "high" ||
-      issue.priorityClass === "critical" ||
-      (issue.priority &&
-        issue.priority.toUpperCase().includes("HIGH")) ||
-      (issue.priority &&
-        issue.priority.toUpperCase().includes("CRITICAL"))
-  ).length;
+      if (activeCrimeTab === "critical") {
+        return (
+          crime.priorityClass === "critical" ||
+          (crime.priority &&
+            crime.priority
+              .toUpperCase()
+              .includes("CRITICAL")) ||
+          (crime.priority &&
+            crime.priority
+              .toUpperCase()
+              .includes("HIGH"))
+        );
+      }
 
-  /*
-   * Crime report filtering
-   */
-  const filteredCrimeIssues = displayedCrimeIssues.filter((crime) => {
-    if (activeCrimeTab === "active") {
-      return (
-        crime.status === "In Progress" ||
-        crime.status === "Security Dispatched" ||
-        crime.status === "Pending Dispatch"
-      );
-    }
+      return true;
+    });
 
-    if (activeCrimeTab === "resolved") {
-      return (
-        crime.status === "Resolved" ||
-        crime.status === "Logged"
-      );
-    }
+  const crimeActiveCount =
+    displayedCrimeIssues.filter(
+      (issue) =>
+        issue.status === "In Progress" ||
+        issue.status === "Security Dispatched" ||
+        issue.status === "Pending Dispatch"
+    ).length;
 
-    if (activeCrimeTab === "critical") {
-      return (
-        crime.priorityClass === "critical" ||
-        (crime.priority &&
-          crime.priority.toUpperCase().includes("CRITICAL")) ||
-        (crime.priority &&
-          crime.priority.toUpperCase().includes("HIGH"))
-      );
-    }
+  const crimeResolvedCount =
+    displayedCrimeIssues.filter(
+      (issue) =>
+        issue.status === "Resolved" ||
+        issue.status === "Logged"
+    ).length;
 
-    return true;
-  });
-
-  const crimeActiveCount = displayedCrimeIssues.filter(
-    (issue) =>
-      issue.status === "In Progress" ||
-      issue.status === "Security Dispatched" ||
-      issue.status === "Pending Dispatch"
-  ).length;
-
-  const crimeResolvedCount = displayedCrimeIssues.filter(
-    (issue) =>
-      issue.status === "Resolved" ||
-      issue.status === "Logged"
-  ).length;
-
-  const crimeCriticalCount = displayedCrimeIssues.filter(
-    (issue) =>
-      issue.priorityClass === "critical" ||
-      (issue.priority &&
-        issue.priority.toUpperCase().includes("CRITICAL")) ||
-      (issue.priority &&
-        issue.priority.toUpperCase().includes("HIGH"))
-  ).length;
+  const crimeCriticalCount =
+    displayedCrimeIssues.filter(
+      (issue) =>
+        issue.priorityClass === "critical" ||
+        (issue.priority &&
+          issue.priority
+            .toUpperCase()
+            .includes("CRITICAL")) ||
+        (issue.priority &&
+          issue.priority
+            .toUpperCase()
+            .includes("HIGH"))
+    ).length;
 
   return (
     <div
       className={`home-page ${
-        theme === "dark" ? "dark-mode" : "light-mode"
+        theme === "dark"
+          ? "dark-mode"
+          : "light-mode"
       }`}
     >
-      {/* HEADER */}
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+
       <header className="home-navbar">
         <div className="navbar-inner">
           <div className="location-section">
             <MapPin size={16} />
 
             <span>
-              {user?.communityName || "Your Community"}
+              {user?.communityName ||
+                "Your Community"}
             </span>
 
             <span className="online-dot" />
@@ -359,27 +529,37 @@ export default function Home() {
               className="emergency-button"
               onClick={() => {
                 setActiveModal("reportCrime");
+
                 showToast(
                   "Emergency Crime & Safety portal opened"
                 );
               }}
             >
-              <span className="emergency-icon">!</span>
+              <span className="emergency-icon">
+                !
+              </span>
+
               SOS
+
               <strong>Emergency</strong>
             </button>
           </div>
         </div>
       </header>
 
-      {/* NOTIFICATIONS */}
+      {/* =====================================================
+          NOTIFICATIONS
+      ===================================================== */}
+
       {showNotifications && (
         <div className="notification-panel">
           <div className="notification-header">
             <strong>Notifications</strong>
 
             <button
-              onClick={() => setShowNotifications(false)}
+              onClick={() =>
+                setShowNotifications(false)
+              }
               aria-label="Close notifications"
             >
               <X size={16} />
@@ -388,6 +568,7 @@ export default function Home() {
 
           <div className="notification-item">
             <CheckCircle2 size={17} />
+
             <span>
               Your streetlight issue has been resolved.
             </span>
@@ -395,6 +576,7 @@ export default function Home() {
 
           <div className="notification-item">
             <Bell size={17} />
+
             <span>
               New community announcement available.
             </span>
@@ -402,6 +584,7 @@ export default function Home() {
 
           <div className="notification-item">
             <AlertTriangle size={17} />
+
             <span>
               Drainage issue reported near Block B.
             </span>
@@ -410,7 +593,10 @@ export default function Home() {
       )}
 
       <main className="home-main">
-        {/* QUICK ACTIONS */}
+        {/* ===================================================
+            QUICK ACTIONS
+        =================================================== */}
+
         <section className="section-header quick-header">
           <h2>Quick Civic Actions</h2>
           <span>One-tap resident utilities</span>
@@ -441,7 +627,10 @@ export default function Home() {
           })}
         </section>
 
-        {/* CIVIC ISSUES */}
+        {/* ===================================================
+            CIVIC ISSUES
+        =================================================== */}
+
         <section className="issues-section">
           <div className="issues-heading">
             <div>
@@ -462,13 +651,16 @@ export default function Home() {
             <div className="filter-tabs">
               <button
                 className={
-                  activeCivicTab === "all" ? "active" : ""
+                  activeCivicTab === "all"
+                    ? "active"
+                    : ""
                 }
                 onClick={() =>
                   setActiveCivicTab("all")
                 }
               >
-                All Issues ({displayedCivicIssues.length})
+                All Issues (
+                {displayedCivicIssues.length})
               </button>
 
               <button
@@ -499,22 +691,25 @@ export default function Home() {
 
               <button
                 className={
-                  activeCivicTab === "high" ? "active" : ""
+                  activeCivicTab === "high"
+                    ? "active"
+                    : ""
                 }
                 onClick={() =>
                   setActiveCivicTab("high")
                 }
               >
-                High / Critical ({civicHighCriticalCount})
+                High / Critical (
+                {civicHighCriticalCount})
               </button>
             </div>
           </div>
 
           <div className="issues-grid">
             {filteredCivicIssues.length === 0 ? (
-             <div className="empty-state civic-empty-state">
-               No issues reported yet.
-</div>
+              <div className="empty-state civic-empty-state">
+                No issues reported yet.
+              </div>
             ) : (
               filteredCivicIssues.map((issue) => {
                 const Icon = getIssueIcon(issue);
@@ -527,7 +722,8 @@ export default function Home() {
                     <div className="issue-top">
                       <div
                         className={`category-badge ${
-                          issue.priorityClass || "medium"
+                          issue.priorityClass ||
+                          "medium"
                         }`}
                       >
                         <Icon size={15} />
@@ -536,7 +732,8 @@ export default function Home() {
 
                       <div
                         className={`priority-badge ${
-                          issue.priorityClass || "medium"
+                          issue.priorityClass ||
+                          "medium"
                         }`}
                       >
                         {issue.priority}
@@ -544,7 +741,8 @@ export default function Home() {
 
                       <div
                         className={`status-badge ${
-                          issue.statusClass || "progress"
+                          issue.statusClass ||
+                          "progress"
                         }`}
                       >
                         {issue.status === "Resolved" ? (
@@ -573,7 +771,9 @@ export default function Home() {
 
                         <h3>{issue.title}</h3>
 
-                        <p>{issue.description}</p>
+                        <p>
+                          {issue.description}
+                        </p>
 
                         <div className="issue-location">
                           <MapPin size={15} />
@@ -585,6 +785,7 @@ export default function Home() {
                     <div className="issue-footer">
                       <div className="issue-time">
                         <span>{issue.date}</span>
+
                         <span>•</span>
 
                         <strong>
@@ -592,17 +793,31 @@ export default function Home() {
                         </strong>
                       </div>
 
-                      <button
-                        className="timeline-button"
-                        onClick={() =>
-                          showToast(
-                            `Tracking timeline for ${issue.id}`
-                          )
-                        }
-                      >
-                        View Timeline
-                        <ChevronRight size={16} />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="timeline-button"
+                          onClick={() =>
+                            showToast(
+                              `Tracking timeline for ${issue.id}`
+                            )
+                          }
+                        >
+                          View Timeline
+
+                          <ChevronRight size={16} />
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleDeleteReport(issue)
+                          }
+                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-400 transition-all duration-200 hover:bg-rose-500/20 hover:text-rose-300"
+                          title="Delete report"
+                          aria-label={`Delete report ${issue.id}`}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   </article>
                 );
@@ -611,7 +826,10 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CRIME & SAFETY */}
+        {/* ===================================================
+            CRIME & SAFETY
+        =================================================== */}
+
         <section className="issues-section mt-10">
           <div className="issues-heading">
             <div>
@@ -645,7 +863,8 @@ export default function Home() {
                   setActiveCrimeTab("all")
                 }
               >
-                All Incidents ({displayedCrimeIssues.length})
+                All Incidents (
+                {displayedCrimeIssues.length})
               </button>
 
               <button
@@ -691,9 +910,9 @@ export default function Home() {
 
           <div className="issues-grid">
             {filteredCrimeIssues.length === 0 ? (
-             <div className="empty-state crime-empty-state">
-  No crime or safety incidents reported yet.
-</div>
+              <div className="empty-state crime-empty-state">
+                No crime or safety incidents reported yet.
+              </div>
             ) : (
               filteredCrimeIssues.map((crime) => {
                 const Icon = getIssueIcon(crime);
@@ -711,7 +930,8 @@ export default function Home() {
 
                       <div
                         className={`priority-badge ${
-                          crime.priorityClass || "critical"
+                          crime.priorityClass ||
+                          "critical"
                         }`}
                       >
                         {crime.priority}
@@ -719,7 +939,8 @@ export default function Home() {
 
                       <div
                         className={`status-badge ${
-                          crime.statusClass || "progress"
+                          crime.statusClass ||
+                          "progress"
                         }`}
                       >
                         {crime.status === "Resolved" ? (
@@ -748,7 +969,9 @@ export default function Home() {
 
                         <h3>{crime.title}</h3>
 
-                        <p>{crime.description}</p>
+                        <p>
+                          {crime.description}
+                        </p>
 
                         <div className="issue-location text-rose-400">
                           <MapPin size={15} />
@@ -760,6 +983,7 @@ export default function Home() {
                     <div className="issue-footer">
                       <div className="issue-time">
                         <span>{crime.date}</span>
+
                         <span>•</span>
 
                         <strong className="text-rose-300">
@@ -769,17 +993,31 @@ export default function Home() {
                         </strong>
                       </div>
 
-                      <button
-                        className="timeline-button text-rose-400 hover:text-rose-300"
-                        onClick={() =>
-                          showToast(
-                            `Tracking security dispatch for ${crime.id}`
-                          )
-                        }
-                      >
-                        View Timeline
-                        <ChevronRight size={16} />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="timeline-button text-rose-400 hover:text-rose-300"
+                          onClick={() =>
+                            showToast(
+                              `Tracking security dispatch for ${crime.id}`
+                            )
+                          }
+                        >
+                          View Timeline
+
+                          <ChevronRight size={16} />
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleDeleteReport(crime)
+                          }
+                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-400 transition-all duration-200 hover:bg-rose-500/20 hover:text-rose-300"
+                          title="Delete crime report"
+                          aria-label={`Delete crime report ${crime.id}`}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   </article>
                 );
@@ -788,7 +1026,10 @@ export default function Home() {
           </div>
         </section>
 
-        {/* COMMUNITY OVERVIEW */}
+        {/* ===================================================
+            COMMUNITY OVERVIEW
+        =================================================== */}
+
         <section className="community-overview mt-10">
           <div className="overview-card health-card">
             <div className="overview-icon">
@@ -797,7 +1038,9 @@ export default function Home() {
 
             <div>
               <span>COMMUNITY HEALTH</span>
+
               <strong>94%</strong>
+
               <p>
                 Excellent neighborhood health index
               </p>
@@ -811,9 +1054,11 @@ export default function Home() {
 
             <div>
               <span>UPCOMING</span>
+
               <strong>
                 Holi Milan & Spring Carnival
               </strong>
+
               <p>
                 Tomorrow • 10:00 AM • Open Amphitheatre
               </p>
@@ -827,7 +1072,11 @@ export default function Home() {
 
             <div>
               <span>COMMUNITY ACTIVITY</span>
-              <strong>24 new discussions</strong>
+
+              <strong>
+                24 new discussions
+              </strong>
+
               <p>
                 Residents are actively discussing local
                 issues
@@ -837,7 +1086,10 @@ export default function Home() {
         </section>
       </main>
 
-      {/* FOOTER */}
+      {/* =====================================================
+          FOOTER
+      ===================================================== */}
+
       <footer className="home-footer">
         <div>
           <Shield size={16} />
@@ -852,11 +1104,16 @@ export default function Home() {
         </div>
 
         <div>
-          <span>Powered by SocioAI Civic Engine</span>
+          <span>
+            Powered by SocioAI Civic Engine
+          </span>
+
           <span>•</span>
 
           <button
-            onClick={() => showToast("Privacy Policy")}
+            onClick={() =>
+              showToast("Privacy Policy")
+            }
           >
             Privacy
           </button>
@@ -879,7 +1136,10 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* REPORT ISSUE MODAL */}
+      {/* =====================================================
+          REPORT ISSUE MODAL
+      ===================================================== */}
+
       {activeModal === "report" && (
         <div
           className="modal-overlay"
@@ -940,6 +1200,7 @@ export default function Home() {
               isEmbedded={true}
               onSuccess={() => {
                 loadUserReports();
+
                 showToast(
                   "Issue report logged & saved!"
                 );
@@ -949,7 +1210,10 @@ export default function Home() {
         </div>
       )}
 
-      {/* REPORT CRIME MODAL */}
+      {/* =====================================================
+          REPORT CRIME MODAL
+      ===================================================== */}
+
       {activeModal === "reportCrime" && (
         <div
           className="modal-overlay"
@@ -1010,6 +1274,7 @@ export default function Home() {
               isEmbedded={true}
               onSuccess={() => {
                 loadUserReports();
+
                 showToast(
                   "Crime report logged & security notified!"
                 );
@@ -1019,7 +1284,10 @@ export default function Home() {
         </div>
       )}
 
-      {/* MAP MODAL */}
+      {/* =====================================================
+          MAP MODAL
+      ===================================================== */}
+
       {activeModal === "map" && (
         <div
           className="modal-overlay"
@@ -1083,7 +1351,55 @@ export default function Home() {
         </div>
       )}
 
-      {/* TOAST */}
+      {/* =====================================================
+          COMING SOON MODAL
+      ===================================================== */}
+
+      {comingSoonFeature && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          onClick={() =>
+            setComingSoonFeature(null)
+          }
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-slate-700 bg-[#0D1524] p-6 shadow-2xl"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+              <Sparkles size={22} />
+            </div>
+
+            <div className="mt-4 text-center">
+              <h3 className="text-xl font-bold text-slate-100">
+                {comingSoonFeature}
+              </h3>
+
+              <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                This feature is currently under
+                development and will be available soon
+                on SocioSphere.
+              </p>
+
+              <button
+                onClick={() =>
+                  setComingSoonFeature(null)
+                }
+                className="mt-6 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 transition-all duration-200 hover:bg-emerald-400"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================
+          TOAST
+      ===================================================== */}
+
       {toast && (
         <div className="home-toast">
           {toast}
