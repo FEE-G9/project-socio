@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 import { addIssue } from "../../data/mockIssues";
 import {
   AlertTriangle,
@@ -67,6 +68,7 @@ const headingStyle =
 export default function Report({ onClose, isEmbedded = false, onSuccess }) {
 	const navigate = useNavigate();
 	const { theme } = useTheme();
+	const { user } = useAuth();
 	const [title, setTitle] = useState("");
 	const [category, setCategory] = useState("");
 	const [priority, setPriority] = useState("MEDIUM PRIORITY");
@@ -99,24 +101,66 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
 		const categoryObj = categories.find((c) => c.value === category);
 
 		const newIssue = {
-			id: `ISSUE-${Math.floor(1000 + Math.random() * 9000)}`,
-			title: title.trim(),
-			category: categoryObj ? categoryObj.label : category,
-			categoryValue: category,
-			description: description.trim(),
-			location: location.trim(),
-			priority: priority,
-			priorityClass: priorityObj.class,
-			status: "In Progress",
-			statusClass: "progress",
-			date: `${dateString}, ${timeString}`,
-			time: timeString,
-			rawDate: dateString,
-			timestamp: now.toISOString(),
-			eta: "Pending Dispatch",
-			photoName: photoName || null,
-			image: photoUrl || null,
-		};
+  id: `ISSUE-${Math.floor(1000 + Math.random() * 9000)}`,
+
+  title: title.trim(),
+
+  category: categoryObj
+    ? categoryObj.label
+    : category,
+
+  categoryValue: category,
+
+  description: description.trim(),
+
+  location: location.trim(),
+
+  priority,
+
+  priorityClass: priorityObj.class,
+
+  status: "In Progress",
+
+  statusClass: "progress",
+
+  date: `${dateString}, ${timeString}`,
+
+  time: timeString,
+
+  rawDate: dateString,
+
+  timestamp: now.toISOString(),
+
+  createdAt: now.toISOString(),
+
+  updatedAt: now.toISOString(),
+
+  eta: "Pending Dispatch",
+
+  photoName: photoName || null,
+
+  image: photoUrl || null,
+
+  // ================================
+  // CURRENT LOGGED-IN USER
+  // ================================
+
+  reportedBy: user?.name || "Citizen",
+
+  reportedByEmail:
+    user?.email?.trim().toLowerCase() || "",
+
+  reportedById:
+    user?.id || "",
+
+  communityId:
+    user?.communityId || "",
+
+  communityName:
+    user?.communityName || "",
+  
+  reportType: "civic",
+};
 
 		// Save to mock storage so Authority gets it, and save to local user history
 		try {
