@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./home.css";
 
 import Report from "./Report";
 import ReportCrime from "./ReportCrime";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
-import Map from "./Map";
+// import Map from "./Map";
 
 import {
   Shield,
@@ -42,12 +43,12 @@ const quickActions = [
     icon: Shield,
     className: "action-red",
   },
-  {
-    title: "View Map",
-    description: "Live community problem heatmap",
-    icon: MapPin,
-    className: "action-blue",
-  },
+  // {
+  //   title: "View Map",
+  //   description: "Live community problem heatmap",
+  //   icon: MapPin,
+  //   className: "action-blue",
+  // },
   {
     title: "Community Hub",
     description: "Resident polls, clubs, rides",
@@ -63,6 +64,7 @@ const quickActions = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   const [activeCivicTab, setActiveCivicTab] = useState("all");
   const [activeCrimeTab, setActiveCrimeTab] = useState("all");
   const [showNotifications, setShowNotifications] = useState(false);
@@ -146,19 +148,19 @@ export default function Home() {
 
   const handleQuickAction = (title) => {
     if (title === "Report Issue") {
-      setActiveModal("report");
+      navigate("/citizen/report");
       return;
     }
 
     if (title === "Report Crime") {
-      setActiveModal("reportCrime");
+      navigate("/citizen/report-crime");
       return;
     }
 
-    if (title === "View Map") {
-      setActiveModal("map");
-      return;
-    }
+    // if (title === "View Map") {
+    //   setActiveModal("map");
+    //   return;
+    // }
 
     showToast(`${title} feature opened`);
   };
@@ -358,10 +360,7 @@ export default function Home() {
             <button
               className="emergency-button"
               onClick={() => {
-                setActiveModal("reportCrime");
-                showToast(
-                  "Emergency Crime & Safety portal opened"
-                );
+                navigate("/citizen/report-crime");
               }}
             >
               <span className="emergency-icon">!</span>
@@ -879,148 +878,10 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* REPORT ISSUE MODAL */}
-      {activeModal === "report" && (
-        <div
-          className="modal-overlay"
-          onClick={() => setActiveModal(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 100,
-            backgroundColor: "rgba(3, 7, 18, 0.85)",
-            backdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "16px",
-          }}
-        >
-          <div
-            onClick={(event) =>
-              event.stopPropagation()
-            }
-            style={{
-              position: "relative",
-              width: "100%",
-              maxWidth: "920px",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              borderRadius: "20px",
-              backgroundColor: "#070B14",
-              border: "1px solid #1E293B",
-              boxShadow:
-                "0 25px 50px -12px rgba(0, 0, 0, 0.6)",
-            }}
-          >
-            <button
-              onClick={() => setActiveModal(null)}
-              style={{
-                position: "absolute",
-                top: "16px",
-                right: "16px",
-                zIndex: 30,
-                padding: "8px",
-                borderRadius: "12px",
-                backgroundColor: "#1E293B",
-                color: "#94A3B8",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              aria-label="Close modal"
-            >
-              <X size={20} />
-            </button>
+      {/* FOOTER */}
 
-            <Report
-              onClose={() => setActiveModal(null)}
-              isEmbedded={true}
-              onSuccess={() => {
-                loadUserReports();
-                showToast(
-                  "Issue report logged & saved!"
-                );
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* REPORT CRIME MODAL */}
-      {activeModal === "reportCrime" && (
-        <div
-          className="modal-overlay"
-          onClick={() => setActiveModal(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 100,
-            backgroundColor: "rgba(3, 7, 18, 0.85)",
-            backdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "16px",
-          }}
-        >
-          <div
-            onClick={(event) =>
-              event.stopPropagation()
-            }
-            style={{
-              position: "relative",
-              width: "100%",
-              maxWidth: "920px",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              borderRadius: "20px",
-              backgroundColor: "#070B14",
-              border: "1px solid #1E293B",
-              boxShadow:
-                "0 25px 50px -12px rgba(0, 0, 0, 0.6)",
-            }}
-          >
-            <button
-              onClick={() => setActiveModal(null)}
-              style={{
-                position: "absolute",
-                top: "16px",
-                right: "16px",
-                zIndex: 30,
-                padding: "8px",
-                borderRadius: "12px",
-                backgroundColor: "#1E293B",
-                color: "#94A3B8",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              aria-label="Close modal"
-            >
-              <X size={20} />
-            </button>
-
-            <ReportCrime
-              onClose={() => setActiveModal(null)}
-              isEmbedded={true}
-              onSuccess={() => {
-                loadUserReports();
-                showToast(
-                  "Crime report logged & security notified!"
-                );
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* MAP MODAL */}
-      {activeModal === "map" && (
+      {/* MAP MODAL - COMMENTED OUT FOR FUTURE USE */}
+      {/* {activeModal === "map" && (
         <div
           className="modal-overlay"
           onClick={() => setActiveModal(null)}
@@ -1081,7 +942,7 @@ export default function Home() {
             />
           </div>
         </div>
-      )}
+      )} */}
 
       {/* TOAST */}
       {toast && (

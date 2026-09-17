@@ -617,7 +617,7 @@ const Dashboard = () => {
               }
             />
 
-            <QuickAction
+            {/* <QuickAction
               icon={MapPin}
               title="Community Map"
               description="Explore local issues"
@@ -625,7 +625,7 @@ const Dashboard = () => {
               onClick={() =>
                 navigate("/citizen/map")
               }
-            />
+            /> */}
 
             <QuickAction
               icon={WalletCards}
