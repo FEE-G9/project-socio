@@ -9,7 +9,7 @@ export default function Landing() {
 
         <div className="brand-wrap">
           <div style={{fontSize:"40px"}}>
-            🌿
+          <img src="/logo_main.png" alt="SocioSphere" style={{ width: "40px", height: "40px" }} />
           </div>
 
           <div>
@@ -33,8 +33,8 @@ export default function Landing() {
         </nav>
 */}
         <div className="header-actions">
-          <button className="language-btn">EN</button>
-          <Link to="/signup" className="login-btn">Login</Link>
+        {/* <button className="language-btn">EN</button>*/}
+          <Link to="/login" className="login-btn">Login</Link>
           <Link to="/signup" className="signup-btn">Sign Up</Link>
         </div>
 
