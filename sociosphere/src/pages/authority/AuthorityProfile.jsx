@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   User,
   Mail,
@@ -38,10 +38,12 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 
 const Profile = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { user, updateUserProfile } = useAuth();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -50,14 +52,28 @@ const Profile = () => {
   const [avatarHover, setAvatarHover] = useState(false);
 
   const [profile, setProfile] = useState({
-    name: "Vansh Goyal",
-    email: "vansh@example.com",
-    phone: "+91 9041208572",
-    society: "Greenwood Heights",
-    block: "Block B",
-    apartment: "B-402",
-    city: "Chandigarh",
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    society: user?.communityName || "",
+    block: user?.unitNumber ? user.unitNumber.split(' - ')[0] || "" : "",
+    apartment: user?.unitNumber ? user.unitNumber.split(' - ')[1] || "" : "",
+    city: user?.city || "",
   });
+
+  useEffect(() => {
+    if (user) {
+      setProfile({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        society: user.communityName || "",
+        block: user.unitNumber ? user.unitNumber.split(' - ')[0] || "" : "",
+        apartment: user.unitNumber ? user.unitNumber.split(' - ')[1] || "" : "",
+        city: user.city || "",
+      });
+    }
+  }, [user]);
 
   const [editProfile, setEditProfile] = useState(profile);
 
@@ -79,6 +95,16 @@ const Profile = () => {
     // Simulate API call
     setTimeout(() => {
       setProfile(editProfile);
+      if (updateUserProfile) {
+        updateUserProfile({
+          name: editProfile.name,
+          email: editProfile.email,
+          phone: editProfile.phone,
+          communityName: editProfile.society,
+          unitNumber: editProfile.block && editProfile.apartment ? `${editProfile.block} - ${editProfile.apartment}` : editProfile.block || editProfile.apartment || "",
+          city: editProfile.city
+        });
+      }
       setIsEditing(false);
       setIsSaving(false);
       setShowSaveSuccess(true);

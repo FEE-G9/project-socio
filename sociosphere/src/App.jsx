@@ -21,9 +21,10 @@ import Dashboard from "./pages/citizen/Dashboard";
 // import Map from "./pages/citizen/Map";
 import Announcements from "./pages/citizen/Announcements";
 
-import AdminDashboard from "./pages/authority/Admin";
+import AdminHome from "./pages/authority/Admin";
 import Analytics from "./pages/authority/Analytics";
 import Issues from "./pages/authority/Issues";
+import Crimes from "./pages/authority/Crimes";
 import Members from "./pages/authority/Members";
 import ManageFees from "./pages/authority/ManageFees";
 import PostAnnouncement from "./pages/authority/PostAnnouncement";
@@ -56,10 +57,11 @@ function App() {
 
       {/* ================= AUTHORITY ================= */}
       <Route path="/authority" element={<AuthorityLayout />}>
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route index element={<Navigate to="home" replace />} />
+        <Route path="home" element={<AdminHome />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="issues" element={<Issues />} />
+        <Route path="crimes" element={<Crimes />} />
         <Route path="members" element={<Members />} />
         <Route path="fees" element={<ManageFees />} />
         <Route path="announcements" element={<PostAnnouncement />} />

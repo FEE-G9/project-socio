@@ -13,6 +13,7 @@ import { useAuth } from "../../context/AuthContext";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
+import { useAuth } from "../../context/AuthContext";
 import ScrollReveal from "../ui/ScrollReveal";
 
 const CitizenLayout = () => {
@@ -60,6 +61,17 @@ const CitizenLayout = () => {
 
 return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+     <Navbar
+  links={links}
+  showBrand={true}
+  showNotifications={true}
+  notificationCount={3}
+  onLogout={handleLogout}
+  user={user || {
+    name: "Citizen",
+    role: "Resident",
+  }}
+/>
       <Navbar
         links={links}
         showBrand={true}
