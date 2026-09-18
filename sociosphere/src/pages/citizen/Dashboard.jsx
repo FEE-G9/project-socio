@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 /* =========================================================
    THIN ZIG-ZAG TREND ARROW
@@ -80,6 +81,7 @@ const TrendArrow = ({ direction = "up" }) => {
 ========================================================= */
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   /* =========================================================
@@ -139,9 +141,14 @@ const Dashboard = () => {
     const loadIssues = () => {
       try {
         const stored = JSON.parse(localStorage.getItem('sociosphere_issues') || '[]');
-        if (stored.length > 0) {
+        const currentEmail = user?.email?.trim().toLowerCase();
+        const ownIssues = stored.filter((issue) =>
+          issue.reportedByEmail?.trim().toLowerCase() === currentEmail ||
+          issue.reportedById === user?.id
+        );
+        if (ownIssues.length > 0) {
           // format top 4 for preview
-          const preview = stored.slice(0, 4).map(iss => ({
+          const preview = ownIssues.slice(0, 4).map(iss => ({
             id: iss.id,
             title: iss.title,
             category: iss.category,
@@ -163,7 +170,7 @@ const Dashboard = () => {
     loadIssues();
     window.addEventListener('sociosphere_data_updated', loadIssues);
     return () => window.removeEventListener('sociosphere_data_updated', loadIssues);
-  }, []);
+  }, [user?.email, user?.id]);
 
   /* =========================================================
      ANNOUNCEMENTS
@@ -230,11 +237,11 @@ const Dashboard = () => {
             </p>
           </div>
 
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
+          <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
             Good morning, Citizen 👋
           </h1>
 
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
             Here's what's happening in your community today.
           </p>
         </div>
@@ -330,7 +337,7 @@ const Dashboard = () => {
           <div className="flex items-start justify-between">
 
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+              <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
                 Issue Activity
               </h2>
 
@@ -423,7 +430,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
 
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+              <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
                 Community Health
               </h2>
 
@@ -517,7 +524,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800">
 
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+              <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
                 Recent Activity
               </h2>
 
@@ -596,7 +603,7 @@ const Dashboard = () => {
         <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-[#0D1524]">
 
           <div>
-            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+            <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
               Quick Actions
             </h2>
 
@@ -669,11 +676,11 @@ const Dashboard = () => {
               </div>
 
               <div>
-                <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
                   Community Announcements
                 </h2>
 
-                <p className="text-[11px] text-slate-400">
+                <p className="text-xs text-slate-400">
                   Latest updates
                 </p>
               </div>
@@ -718,11 +725,11 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
 
             <div>
-              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
                 Maintenance
               </h2>
 
-              <p className="mt-1 text-[11px] text-slate-400">
+              <p className="mt-1 text-xs text-slate-400">
                 Current payment status
               </p>
             </div>

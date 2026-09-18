@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./home.css";
+import "./Home.css";
 
 import Report from "./Report";
 import ReportCrime from "./ReportCrime";
@@ -8,6 +8,7 @@ import Map from "./Map";
 
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import { getIssues, saveIssues } from "../../data/mockIssues";
 // import Map from "./Map";
 
 import {
@@ -30,6 +31,7 @@ import {
   MessageSquare,
   FileText,
   ShieldAlert,
+  PhoneCall,
 } from "lucide-react";
 
 const quickActions = [
@@ -111,9 +113,16 @@ export default function Home() {
     // Civic + Crime
     // =====================================================
 
-    const storedReports = JSON.parse(
+    const legacyReports = JSON.parse(
       localStorage.getItem("sociosphere_user_reports") || "[]"
     );
+    const authorityIssues = getIssues();
+    const storedReports = [
+      ...authorityIssues,
+      ...legacyReports.filter((report) =>
+        !authorityIssues.some((issue) => issue.id === report.id)
+      ),
+    ];
 
     const filteredReports = storedReports
       .filter((report) => {
@@ -252,6 +261,8 @@ export default function Home() {
       "sociosphere_user_reports",
       JSON.stringify(updatedReports)
     );
+
+    saveIssues(getIssues().filter((report) => report.id !== issue.id));
 
     window.dispatchEvent(
       new Event("sociosphere_data_updated")
@@ -531,13 +542,10 @@ export default function Home() {
             <button
               className="emergency-button"
               onClick={() => {
-                navigate("/citizen/report-crime");
-                setActiveModal("reportCrime");
-
-                showToast(
-                  "Emergency Crime & Safety portal opened"
-                );
+                setActiveModal("emergency");
               }}
+              aria-haspopup="dialog"
+              aria-label="Open emergency call options"
             >
               <span className="emergency-icon">
                 !
@@ -596,12 +604,11 @@ export default function Home() {
         </div>
       )}
 
-      <main className="home-main">
-        {/* ===================================================
-            QUICK ACTIONS
-        =================================================== */}
+      {/* ===================================================
+          QUICK ACTIONS
+      =================================================== */}
 
-        <section className="section-header quick-header">
+      <section className="section-header quick-header">
           <h2>Quick Civic Actions</h2>
           <span>One-tap resident utilities</span>
         </section>
@@ -1088,7 +1095,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-      </main>
 
       {/* =====================================================
           FOOTER
@@ -1142,8 +1148,72 @@ export default function Home() {
 
       {/* FOOTER */}
 
-      {/* MAP MODAL - COMMENTED OUT FOR FUTURE USE */}
-      {/* {activeModal === "map" && (
+      {/* =====================================================
+          EMERGENCY CALL MODAL
+      ===================================================== */}
+
+      {activeModal === "emergency" && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/55 p-4 backdrop-blur-sm dark:bg-slate-950/85"
+          onClick={() => setActiveModal(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="emergency-title"
+        >
+          <div
+            className="relative w-full max-w-md rounded-2xl border border-rose-500/40 bg-white p-6 shadow-2xl dark:bg-[#0D1524]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setActiveModal(null)}
+              className="absolute right-4 top-4 rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+              aria-label="Close emergency options"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400">
+              <PhoneCall size={27} />
+            </div>
+
+            <h2 id="emergency-title" className="mt-4 text-2xl font-extrabold text-slate-900 dark:text-white">
+              Emergency assistance
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              If there is immediate danger, call emergency services now. Your device will open its calling app.
+            </p>
+
+            <div className="mt-6 space-y-3">
+              <a
+                href="tel:112"
+                onClick={() => setActiveModal(null)}
+                className="flex items-center justify-between rounded-xl bg-rose-500 px-5 py-4 font-bold text-white transition hover:bg-rose-400"
+              >
+                <span className="flex items-center gap-3"><PhoneCall size={20} /> Call 112</span>
+                <span className="text-sm">National Emergency</span>
+              </a>
+              <a
+                href="tel:108"
+                onClick={() => setActiveModal(null)}
+                className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 font-bold text-slate-900 transition hover:border-rose-400 hover:bg-rose-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+              >
+                <span className="flex items-center gap-3"><PhoneCall size={20} /> Call 108</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">Ambulance</span>
+              </a>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setActiveModal("reportCrime")}
+              className="mt-5 w-full text-sm font-semibold text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+            >
+              It is not immediate — report a crime or safety issue
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* =====================================================
           REPORT ISSUE MODAL
       ===================================================== */}
@@ -1357,7 +1427,7 @@ export default function Home() {
             />
           </div>
         </div>
-      )} */}
+      )}
 
       {/* =====================================================
           COMING SOON MODAL
@@ -1365,27 +1435,27 @@ export default function Home() {
 
       {comingSoonFeature && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/55 p-4 backdrop-blur-sm dark:bg-black/70"
           onClick={() =>
             setComingSoonFeature(null)
           }
         >
           <div
-            className="w-full max-w-md rounded-2xl border border-slate-700 bg-[#0D1524] p-6 shadow-2xl"
+            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-[#0D1524]"
             onClick={(event) =>
               event.stopPropagation()
             }
           >
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
               <Sparkles size={22} />
             </div>
 
             <div className="mt-4 text-center">
-              <h3 className="text-xl font-bold text-slate-100">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                 {comingSoonFeature}
               </h3>
 
-              <p className="mt-2 text-sm leading-relaxed text-slate-400">
+              <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                 This feature is currently under
                 development and will be available soon
                 on SocioSphere.
@@ -1395,7 +1465,7 @@ export default function Home() {
                 onClick={() =>
                   setComingSoonFeature(null)
                 }
-                className="mt-6 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 transition-all duration-200 hover:bg-emerald-400"
+                className="mt-6 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:bg-emerald-500 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
               >
                 Got it
               </button>
