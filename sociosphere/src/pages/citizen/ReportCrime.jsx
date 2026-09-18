@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
+import { addIssue } from "../../data/mockIssues";
 import {
 	AlertCircle,
 	AlertTriangle,
@@ -61,6 +63,7 @@ const headingClass = "mb-2 block text-xs font-bold uppercase tracking-wide text-
 export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) {
 	const navigate = useNavigate();
 	const { theme } = useTheme();
+	const { user } = useAuth();
 	const [category, setCategory] = useState("");
 	const [severity, setSeverity] = useState("high");
 	const [description, setDescription] = useState("");
@@ -127,11 +130,24 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 			eta: "Security Dispatched",
 			fileName: fileName || null,
 			image: fileUrl || null,
+			reportedBy: isAnonymous ? "Anonymous Citizen" : (user?.name || reporterName || "Citizen"),
+			reportedByEmail: user?.email?.trim().toLowerCase() || "",
+			reportedById: user?.id || "",
+			communityId: user?.communityId || "",
+			communityName: user?.communityName || "",
+			reportType: "crime",
 		};
 
 		try {
+			const savedIssue = addIssue({
+				...newCrimeIssue,
+				severity: severity === "critical" ? "Critical" : severity === "high" ? "High" : "Medium",
+				reporterAvatar: user?.avatar || null,
+			});
 			const stored = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
-			localStorage.setItem("sociosphere_user_reports", JSON.stringify([newCrimeIssue, ...stored]));
+			localStorage.setItem("sociosphere_user_reports", JSON.stringify([savedIssue, ...stored]));
+			setReportId(savedIssue.id);
+			window.dispatchEvent(new Event("sociosphere_data_updated"));
 		} catch (e) {
 			console.error("Failed to save crime report to localStorage:", e);
 		}

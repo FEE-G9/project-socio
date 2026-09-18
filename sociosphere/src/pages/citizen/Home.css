@@ -215,9 +215,21 @@
 }
 
 .home-page.light-mode .emergency-button {
-  background: rgba(225, 29, 72, 0.08);
-  border-color: rgba(225, 29, 72, 0.35);
+  background: #fff1f2;
+  border-color: #fda4af;
   color: #be123c;
+}
+
+.home-page.light-mode .emergency-button:hover,
+.home-page.light-mode .emergency-button:focus-visible {
+  background: #ffe4e6;
+  border-color: #e11d48;
+  color: #9f1239;
+  outline: none;
+}
+
+.home-page.light-mode .emergency-icon {
+  border-color: currentColor;
 }
 
 .home-page.light-mode .profile-avatar {

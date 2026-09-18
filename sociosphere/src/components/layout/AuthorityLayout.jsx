@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   AlertCircle,
@@ -12,9 +12,11 @@ import {
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
+import ScrollReveal from "../ui/ScrollReveal";
 
 const AuthorityLayout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const links = [
     {
@@ -77,7 +79,9 @@ const AuthorityLayout = () => {
 
         <main className="min-w-0 flex-1 pb-20 md:pb-0">
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <Outlet />
+            <ScrollReveal key={location.pathname} className="w-full">
+              <Outlet />
+            </ScrollReveal>
           </div>
         </main>
       </div>
