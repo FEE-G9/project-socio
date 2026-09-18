@@ -16,9 +16,11 @@ import {
   ShieldCheck,
   Building2,
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -45,9 +47,32 @@ const SignUp = () => {
       return;
     }
 
+    const fullName = form.fullName?.value || "";
+    const email = form.email?.value || "";
+    // Note: for colony selection, the name is "colony"
+    const colony = form.colony?.value || "";
+    
+    // Additional fields depending on role
+    const username = form.username?.value || "";
+    const age = form.age?.value || "";
+    const occupation = form.occupation?.value || "";
+    const department = form.department?.value || "";
+
+    login({
+      name: fullName,
+      email: email,
+      username: username,
+      role: role,
+      communityName: colony,
+      communityId: colony ? `col-${colony.substring(0, 3).toLowerCase()}` : undefined,
+      department: department,
+      age: age,
+      occupation: occupation,
+    });
+
     // Temporary navigation until backend/authentication is connected
     if (role === "authority") {
-      navigate("/authority");
+      navigate("/authority/home");
     } else {
       navigate("/citizen/home");
     }

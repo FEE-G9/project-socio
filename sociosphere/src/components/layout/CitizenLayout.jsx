@@ -12,10 +12,12 @@ import {
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
+import { useAuth } from "../../context/AuthContext";
 
 const CitizenLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const links = [
     {
@@ -51,7 +53,7 @@ const CitizenLayout = () => {
   ];
 
   const handleLogout = () => {
-    localStorage.setItem("sociosphere_is_auth", "false");
+    logout();
     navigate("/login");
   };
 
@@ -63,9 +65,9 @@ const CitizenLayout = () => {
   showNotifications={true}
   notificationCount={3}
   onLogout={handleLogout}
-  user={{
-    name: "Ekjot Kaur",
-    role: "Citizen",
+  user={user || {
+    name: "Citizen",
+    role: "Resident",
   }}
 />
 

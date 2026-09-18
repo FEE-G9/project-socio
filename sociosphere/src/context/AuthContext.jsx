@@ -11,20 +11,8 @@ export const AuthProvider = ({ children }) => {
         // Fallback
       }
     }
-    const colonies = getColonies();
-    const defaultColony = colonies[0] || { id: 'colony-1', name: 'Green Meadows Heights' };
-    return {
-      id: 'usr-1',
-      name: 'Aarav Sharma',
-      email: 'aarav@sociosphere.io',
-      role: 'citizen', // 'citizen' | 'authority'
-      communityId: defaultColony.id,
-      communityName: defaultColony.name,
-      unitNumber: 'Block B - 402',
-      phone: '+91 98765 43210',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      joinedDate: 'Jan 2025'
-    };
+    // Return a completely blank shell to force dynamic loading
+    return null;
   });
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -38,23 +26,29 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('sociosphere_is_auth', isAuthenticated ? 'true' : 'false');
   }, [user, isAuthenticated]);
 
-  const login = ({ name, email, communityId, role, unitNumber }) => {
+  const login = (userData) => {
+    const { name, email, communityId, communityName, role, unitNumber, phone, city, department, username, age, occupation } = userData;
+    
     const colonies = getColonies();
-    const foundColony = colonies.find(c => c.id === communityId) || colonies[0];
+    const foundColony = colonies.find(c => c.id === communityId || c.name === communityName) || colonies[0];
 
     const newUser = {
       id: `usr-${Date.now()}`,
-      name: name || (role === 'authority' ? 'Authority Administrator' : 'Resident Citizen'),
-      email: email || 'user@sociosphere.io',
+      name: name || username || (role === 'authority' ? 'Authority Administrator' : 'Resident Citizen'),
+      email: email || (username && username.includes("@") ? username : 'user@sociosphere.io'),
       role: role || 'citizen',
       communityId: foundColony ? foundColony.id : 'colony-1',
-      communityName: foundColony ? foundColony.name : 'Green Meadows Heights',
-      unitNumber: unitNumber || (role === 'authority' ? 'HQ Office' : 'Block B - 201'),
-      phone: '+91 98765 12345',
+      communityName: communityName || (foundColony ? foundColony.name : 'Green Meadows Heights'),
+      unitNumber: unitNumber || '',
+      phone: phone || '',
+      city: city || '',
+      department: department || '',
+      age: age || '',
+      occupation: occupation || '',
       avatar: role === 'authority' 
         ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80'
         : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      joinedDate: 'Sep 2026'
+      joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
     };
 
     setUser(newUser);
@@ -80,6 +74,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setIsAuthenticated(false);
+    localStorage.removeItem('sociosphere_auth_user');
     localStorage.setItem('sociosphere_is_auth', 'false');
   };
 

@@ -13,9 +13,11 @@ import {
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
+import { useAuth } from "../../context/AuthContext";
 
 const AuthorityLayout = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const links = [
     {
@@ -33,30 +35,10 @@ const AuthorityLayout = () => {
       href: "/authority/crimes",
       icon: ShieldAlert,
     },
-    // {
-    //   label: "Analytics",
-    //   href: "/authority/analytics",
-    //   icon: BarChart3,
-    // },
-    // {
-    //   label: "Members",
-    //   href: "/authority/members",
-    //   icon: Users,
-    // },
-    // {
-    //   label: "Fees",
-    //   href: "/authority/fees",
-    //   icon: IndianRupee,
-    // },
-    // {
-    //   label: "Announcements",
-    //   href: "/authority/announcements",
-    //   icon: Megaphone,
-    // },
   ];
 
   const handleLogout = () => {
-    localStorage.setItem("sociosphere_is_auth", "false");
+    logout();
     navigate("/login");
   };
 
@@ -67,14 +49,9 @@ const AuthorityLayout = () => {
         showBrand={true}
         showNotifications={true}
         onLogout={handleLogout}
-        user={{
-          name: "Vansh Goyal",
-          role: "System Administrator",
-          email: "vansh@example.com",
-          phone: "+91 9041208572",
-          block: "Block B",
-          residence: "B-402",
-          avatar: "https://ui-avatars.com/api/?name=Vansh+Goyal&background=10b981&color=fff"
+        user={user || {
+          name: "System Administrator",
+          role: "Authority",
         }}
       />
 
