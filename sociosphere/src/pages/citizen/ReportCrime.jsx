@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 import {
 	AlertCircle,
 	AlertTriangle,
@@ -61,6 +62,7 @@ const headingClass = "mb-2 block text-xs font-bold uppercase tracking-wide text-
 export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) {
 	const navigate = useNavigate();
 	const { theme } = useTheme();
+	const { user } = useAuth();
 	const [category, setCategory] = useState("");
 	const [severity, setSeverity] = useState("high");
 	const [description, setDescription] = useState("");
@@ -109,6 +111,10 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 		};
 		const sevInfo = severityMap[severity] || severityMap.high;
 
+		const personName = isAnonymous
+			? "Anonymous Resident"
+			: (reporterName.trim() || user?.name || "Citizen");
+
 		const newCrimeIssue = {
 			id: cId,
 			title: `${categoryLabel} Incident`,
@@ -124,14 +130,27 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 			time: timeString,
 			rawDate: dateString,
 			timestamp: now.toISOString(),
+			createdAt: now.toISOString(),
+			updatedAt: now.toISOString(),
 			eta: "Security Dispatched",
 			fileName: fileName || null,
 			image: fileUrl || null,
+
+			// Person's name and reporter metadata
+			reportedBy: personName,
+			personName: personName,
+			reportedByEmail: isAnonymous ? "" : (user?.email?.trim().toLowerCase() || ""),
+			reportedById: isAnonymous ? "" : (user?.id || ""),
+			communityId: user?.communityId || "colony-1",
+			communityName: user?.communityName || "Green Meadows Heights",
+			colony: user?.communityName || user?.communityId || "Green Meadows Heights",
+			reportType: "crime",
 		};
 
 		try {
 			const stored = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
 			localStorage.setItem("sociosphere_user_reports", JSON.stringify([newCrimeIssue, ...stored]));
+			window.dispatchEvent(new Event("sociosphere_data_updated"));
 		} catch (e) {
 			console.error("Failed to save crime report to localStorage:", e);
 		}
@@ -508,11 +527,8 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 						</div>
 
 						{/* Form Actions */}
-						<div className="mt-8 flex flex-col-reverse gap-3 border-t border-slate-200 dark:border-slate-800 pt-6 sm:flex-row sm:items-center sm:justify-between">
-							<p className="flex items-center gap-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
-								<Sparkles size={15} className="shrink-0 text-rose-500 dark:text-rose-400" />
-								AI Auto-Triage will prioritize & route report to security desk.
-							</p>
+						<div className="mt-8 flex flex-col-reverse gap-3 border-t border-slate-200 dark:border-slate-800 pt-6 sm:flex-row sm:items-center sm:justify-around">
+
 							<button
 								type="submit"
 								disabled={!canSubmit}

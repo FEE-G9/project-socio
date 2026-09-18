@@ -142,10 +142,12 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
   image: photoUrl || null,
 
   // ================================
-  // CURRENT LOGGED-IN USER
+  // CURRENT LOGGED-IN USER & COLONY
   // ================================
 
   reportedBy: user?.name || "Citizen",
+
+  personName: user?.name || "Citizen",
 
   reportedByEmail:
     user?.email?.trim().toLowerCase() || "",
@@ -154,10 +156,13 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
     user?.id || "",
 
   communityId:
-    user?.communityId || "",
+    user?.communityId || "colony-1",
 
   communityName:
-    user?.communityName || "",
+    user?.communityName || "Green Meadows Heights",
+
+  colony:
+    user?.communityName || user?.communityId || "Green Meadows Heights",
   
   reportType: "civic",
 };
@@ -176,11 +181,13 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
 			  severity: newIssue.priorityClass === "high" || newIssue.priorityClass === "critical" ? "High" : newIssue.priorityClass === "medium" ? "Medium" : "Low",
 			  location: newIssue.location,
 			  description: newIssue.description,
-			  reportedBy: "Resident Citizen",
-			  reportedByEmail: "citizen@sociosphere.io",
-			  reporterAvatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=150&q=80",
+			  reportedBy: newIssue.reportedBy,
+			  reportedByEmail: newIssue.reportedByEmail || "citizen@sociosphere.io",
+			  reporterAvatar: user?.avatar || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=150&q=80",
 			  image: newIssue.image,
-			  status: newIssue.status || "In Progress"
+			  status: newIssue.status || "In Progress",
+			  colonyId: newIssue.communityId,
+			  colonyName: newIssue.communityName,
 			});
 
 			window.dispatchEvent(new Event("sociosphere_data_updated"));
@@ -458,9 +465,7 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
 						{/* Footer submit & metadata indicator */}
 						<div className="mt-8 flex flex-col-reverse gap-4 border-t border-slate-200 pt-6 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
 							<div className="space-y-1">
-								<p className="flex items-center gap-2 text-xs leading-5 text-slate-600 dark:text-slate-400">
-									<Sparkles size={15} className="shrink-0 text-purple-500 dark:text-purple-400" /> AI will auto-categorize and route your report.
-								</p>
+								
 								<p className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
 									<Clock size={13} className="shrink-0 text-emerald-600 dark:text-emerald-400" /> Submission date & time will be automatically logged.
 								</p>
