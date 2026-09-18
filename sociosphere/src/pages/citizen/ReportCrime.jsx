@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import { addIssue } from "../../data/mockIssues";
+import { addCrime } from "../../data/mockCrimes";
 import {
 	AlertCircle,
 	AlertTriangle,
@@ -62,7 +64,6 @@ const headingClass = "mb-2 block text-xs font-bold uppercase tracking-wide text-
 export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) {
 	const navigate = useNavigate();
 	const { theme } = useTheme();
-	const { user } = useAuth();
 	const { user } = useAuth();
 	const [category, setCategory] = useState("");
 	const [severity, setSeverity] = useState("high");
@@ -138,27 +139,68 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 			image: fileUrl || null,
 
 			// Person's name and reporter metadata
+			reporterName: personName,
 			reportedBy: personName,
 			personName: personName,
 			reportedByEmail: isAnonymous ? "" : (user?.email?.trim().toLowerCase() || ""),
 			reportedById: isAnonymous ? "" : (user?.id || ""),
+			reporterPhone: isAnonymous ? "" : reporterPhone,
 			communityId: user?.communityId || "colony-1",
 			communityName: user?.communityName || "Green Meadows Heights",
 			colony: user?.communityName || user?.communityId || "Green Meadows Heights",
 			reportType: "crime",
+			timeline: [
+				{
+					step: "Reported",
+					date: `${dateString}, ${timeString}`,
+					note: isAnonymous ? "Anonymous resident reported incident." : `Reported by ${personName}`,
+				},
+				{
+					step: "In Progress",
+					date: `${dateString}, ${timeString}`,
+					note: "Security unit dispatched to location.",
+				},
+			],
 		};
 
 		try {
-			const savedIssue = addIssue({
+			// 1. Save to crimes store (sociosphere_crimes_v2)
+			addCrime(newCrimeIssue);
+
+			// 2. Save to issues store (sociosphere_issues)
+			addIssue({
 				...newCrimeIssue,
 				severity: severity === "critical" ? "Critical" : severity === "high" ? "High" : "Medium",
 				reporterAvatar: user?.avatar || null,
 			});
+
+			// 3. Save to user reports store (sociosphere_user_reports)
 			const stored = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
-			localStorage.setItem("sociosphere_user_reports", JSON.stringify([newCrimeIssue, ...stored]));
+			const nextStored = [newCrimeIssue, ...stored.filter((item) => item.id !== newCrimeIssue.id)];
+			localStorage.setItem("sociosphere_user_reports", JSON.stringify(nextStored));
+
 			window.dispatchEvent(new Event("sociosphere_data_updated"));
+			window.dispatchEvent(new Event("sociosphere_crimes_updated"));
+
+			console.log("Crime report saved successfully to LocalStorage:", newCrimeIssue.id);
 		} catch (e) {
-			console.error("Failed to save crime report to localStorage:", e);
+			console.error("Failed to save crime report to localStorage, attempting fallback without image:", e);
+			try {
+				const fallbackCrime = { ...newCrimeIssue, image: null };
+				addCrime(fallbackCrime);
+				addIssue({
+					...fallbackCrime,
+					severity: severity === "critical" ? "Critical" : severity === "high" ? "High" : "Medium",
+					reporterAvatar: user?.avatar || null,
+				});
+				const stored = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
+				const nextStored = [fallbackCrime, ...stored.filter((item) => item.id !== fallbackCrime.id)];
+				localStorage.setItem("sociosphere_user_reports", JSON.stringify(nextStored));
+				window.dispatchEvent(new Event("sociosphere_data_updated"));
+				window.dispatchEvent(new Event("sociosphere_crimes_updated"));
+			} catch (fallbackError) {
+				console.error("Fallback save also failed:", fallbackError);
+			}
 		}
 
 		setSubmitted(true);
@@ -174,7 +216,34 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 			setFileName(file.name);
 			const reader = new FileReader();
 			reader.onload = (e) => {
-				setFileUrl(e.target.result);
+				const img = new Image();
+				img.onload = () => {
+					const canvas = document.createElement("canvas");
+					const MAX_WIDTH = 800;
+					const MAX_HEIGHT = 800;
+					let width = img.width;
+					let height = img.height;
+
+					if (width > height) {
+						if (width > MAX_WIDTH) {
+							height *= MAX_WIDTH / width;
+							width = MAX_WIDTH;
+						}
+					} else {
+						if (height > MAX_HEIGHT) {
+							width *= MAX_HEIGHT / height;
+							height = MAX_HEIGHT;
+						}
+					}
+
+					canvas.width = width;
+					canvas.height = height;
+					const ctx = canvas.getContext("2d");
+					ctx.drawImage(img, 0, 0, width, height);
+					const compressedUrl = canvas.toDataURL("image/jpeg", 0.7);
+					setFileUrl(compressedUrl);
+				};
+				img.src = e.target.result;
 			};
 			reader.readAsDataURL(file);
 		} else {
