@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import {
   User,
   Mail,
@@ -21,6 +22,7 @@ import { useAuth } from "../../context/AuthContext";
 const SignUp = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { login, updateUserProfile } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -71,6 +73,20 @@ const SignUp = () => {
     });
 
     // Temporary navigation until backend/authentication is connected
+    const account = login({
+      name: form.fullName.value.trim(),
+      email: form.email.value.trim(),
+      role,
+    });
+
+    updateUserProfile({
+      ...account,
+      username: form.username?.value?.trim() || "",
+      age: form.age?.value || "",
+      occupation: form.occupation?.value?.trim() || form.department?.value || "",
+      communityName: form.colony?.value || account.communityName,
+    });
+
     if (role === "authority") {
       navigate("/authority/home");
     } else {

@@ -1,5 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getColonies } from "../data/mockColonies";const AuthContext = createContext();
+const ACCOUNTS_STORAGE_KEY = 'sociosphere_accounts';
+
+const getAccounts = () => {
+  try {
+    return JSON.parse(localStorage.getItem(ACCOUNTS_STORAGE_KEY) || '{}');
+  } catch {
+    return {};
+  }
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
@@ -22,6 +31,9 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       localStorage.setItem('sociosphere_auth_user', JSON.stringify(user));
+      const accounts = getAccounts();
+      accounts[user.email.trim().toLowerCase()] = user;
+      localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts));
     }
     localStorage.setItem('sociosphere_is_auth', isAuthenticated ? 'true' : 'false');
   }, [user, isAuthenticated]);
@@ -32,10 +44,14 @@ export const AuthProvider = ({ children }) => {
     const colonies = getColonies();
     const foundColony = colonies.find(c => c.id === communityId || c.name === communityName) || colonies[0];
 
-    const newUser = {
+    const normalizedEmail = (email || 'user@sociosphere.io').trim().toLowerCase();
+    const existingUser = getAccounts()[normalizedEmail];
+    const newUser = existingUser || {
       id: `usr-${Date.now()}`,
       name: name || username || (role === 'authority' ? 'Authority Administrator' : 'Resident Citizen'),
       email: email || (username && username.includes("@") ? username : 'user@sociosphere.io'),
+      name: name || (role === 'authority' ? 'Authority Administrator' : 'Resident Citizen'),
+      email: normalizedEmail,
       role: role || 'citizen',
       communityId: foundColony ? foundColony.id : 'colony-1',
       communityName: communityName || (foundColony ? foundColony.name : 'Green Meadows Heights'),

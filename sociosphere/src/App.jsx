@@ -1,5 +1,6 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import BackToTop from "./components/ui/BackToTop";
 
 import PublicLayout from "./components/layout/PublicLayout";
 import CitizenLayout from "./components/layout/CitizenLayout";
@@ -15,6 +16,7 @@ import ReportCrime from "./pages/citizen/ReportCrime";
 
 import Home from "./pages/citizen/Home";
 import Profile from "./pages/citizen/Profile";
+import Settings from "./pages/citizen/Settings";
 import Dashboard from "./pages/citizen/Dashboard";
 // import Map from "./pages/citizen/Map";
 import Announcements from "./pages/citizen/Announcements";
@@ -30,7 +32,8 @@ import AuthorityProfile from "./pages/authority/AuthorityProfile";
 
 function App() {
   return (
-    <Routes>
+    <>
+      <Routes>
       {/* ================= PUBLIC ================= */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Landing />} />
@@ -48,6 +51,7 @@ function App() {
         <Route path="report" element={<Report />} />
         <Route path="report-crime" element={<ReportCrime />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="settings" element={<Settings />} />
         <Route path="announcements" element={<Announcements />} />
       </Route>
 
@@ -69,7 +73,9 @@ function App() {
         path="*"
         element={<Navigate to="/" replace />}
       />
-    </Routes>
+      </Routes>
+      <BackToTop />
+    </>
   );
 }
 

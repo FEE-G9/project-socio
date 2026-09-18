@@ -162,33 +162,23 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
   reportType: "civic",
 };
 
-		// Save to mock storage so Authority gets it, and save to local user history
+		// Save one shared record: citizens see only their own records, while authorities see all.
 		try {
-			// Save to citizen local storage (used by Home.jsx)
-			const stored = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
-			localStorage.setItem("sociosphere_user_reports", JSON.stringify([newIssue, ...stored]));
-			
-			// Sync to Authority Database & global mock issues storage
-			addIssue({
-			  id: newIssue.id,
-			  title: newIssue.title,
-			  category: newIssue.category,
-			  severity: newIssue.priorityClass === "high" || newIssue.priorityClass === "critical" ? "High" : newIssue.priorityClass === "medium" ? "Medium" : "Low",
-			  location: newIssue.location,
-			  description: newIssue.description,
-			  reportedBy: "Resident Citizen",
-			  reportedByEmail: "citizen@sociosphere.io",
-			  reporterAvatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=150&q=80",
-			  image: newIssue.image,
-			  status: newIssue.status || "In Progress"
+			const savedIssue = addIssue({
+				...newIssue,
+				severity: priorityObj.class === "high" || priorityObj.class === "critical" ? "High" : priorityObj.class === "medium" ? "Medium" : "Low",
+				reporterAvatar: user?.avatar || null,
 			});
 
+			const stored = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
+			localStorage.setItem("sociosphere_user_reports", JSON.stringify([savedIssue, ...stored]));
+
 			window.dispatchEvent(new Event("sociosphere_data_updated"));
+			setSubmittedIssue(savedIssue);
 		} catch (e) {
 			console.error("Failed to save report to localStorage:", e);
 		}
 
-		setSubmittedIssue(newIssue);
 		setSubmitted(true);
 
 		if (onSuccess) {
