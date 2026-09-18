@@ -167,9 +167,14 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
   reportType: "civic",
 };
 
-		// Save to mock storage so Authority gets it, and save to local user history
+		// Save one shared record: citizens see only their own records, while authorities see all.
 		try {
-			// Save to citizen local storage (used by Home.jsx)
+			const savedIssue = addIssue({
+				...newIssue,
+				severity: priorityObj.class === "high" || priorityObj.class === "critical" ? "High" : priorityObj.class === "medium" ? "Medium" : "Low",
+				reporterAvatar: user?.avatar || null,
+			});
+
 			const stored = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
 			localStorage.setItem("sociosphere_user_reports", JSON.stringify([newIssue, ...stored]));
 			
@@ -191,11 +196,11 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
 			});
 
 			window.dispatchEvent(new Event("sociosphere_data_updated"));
+			setSubmittedIssue(savedIssue);
 		} catch (e) {
 			console.error("Failed to save report to localStorage:", e);
 		}
 
-		setSubmittedIssue(newIssue);
 		setSubmitted(true);
 
 		if (onSuccess) {

@@ -63,6 +63,7 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 	const navigate = useNavigate();
 	const { theme } = useTheme();
 	const { user } = useAuth();
+	const { user } = useAuth();
 	const [category, setCategory] = useState("");
 	const [severity, setSeverity] = useState("high");
 	const [description, setDescription] = useState("");
@@ -81,7 +82,7 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 
 	const canSubmit = category && description.trim() && location.trim();
 
-	const handleSubmit = (event) => {
+	const handleSubmit = async (event) => {
 		event.preventDefault();
 		if (!canSubmit) return;
 
@@ -148,6 +149,11 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 		};
 
 		try {
+			const savedIssue = addIssue({
+				...newCrimeIssue,
+				severity: severity === "critical" ? "Critical" : severity === "high" ? "High" : "Medium",
+				reporterAvatar: user?.avatar || null,
+			});
 			const stored = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
 			localStorage.setItem("sociosphere_user_reports", JSON.stringify([newCrimeIssue, ...stored]));
 			window.dispatchEvent(new Event("sociosphere_data_updated"));

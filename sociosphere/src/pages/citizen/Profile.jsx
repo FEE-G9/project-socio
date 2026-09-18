@@ -30,20 +30,36 @@ import {
   Hash,
 } from "lucide-react";
 
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import { getIssues } from "../../data/mockIssues";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { theme, toggleTheme } = useTheme();
   const { user, updateUserProfile, logout } = useAuth();
+  const isSettingsPage = location.pathname.endsWith("/settings");
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [avatarHover, setAvatarHover] = useState(false);
+  const [ownIssues, setOwnIssues] = useState([]);
+
+  useEffect(() => {
+    const loadOwnIssues = () => {
+      const email = user?.email?.trim().toLowerCase();
+      setOwnIssues(getIssues().filter((issue) =>
+        issue.reportedByEmail?.trim().toLowerCase() === email || issue.reportedById === user?.id
+      ));
+    };
+    loadOwnIssues();
+    window.addEventListener("sociosphere_data_updated", loadOwnIssues);
+    return () => window.removeEventListener("sociosphere_data_updated", loadOwnIssues);
+  }, [user?.email, user?.id]);
 
   // ---------------------------------------
   // Convert unitNumber into block/apartment
@@ -121,8 +137,8 @@ const Profile = () => {
         .join(" - ");
 
       const updatedUserFields = {
-        name: editProfile.name,
-        email: editProfile.email,
+        name: profile.name,
+        email: profile.email,
         phone: editProfile.phone,
         communityName: editProfile.society,
         unitNumber: updatedUnitNumber,
@@ -154,6 +170,12 @@ const Profile = () => {
     }));
   };
 
+  const resolvedIssues = ownIssues.filter((issue) => issue.status === "Resolved");
+  const inProgressIssues = ownIssues.filter((issue) => issue.status === "In Progress");
+  const openIssues = ownIssues.filter((issue) => issue.status !== "Resolved");
+  const getActivityPercentage = (count) =>
+    ownIssues.length === 0 ? 0 : Math.round((count / ownIssues.length) * 100);
+
   if (!user) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -165,7 +187,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="space-y-8 pb-8">
+    <div className={`profile-page space-y-8 pb-8 ${theme === "dark" ? "theme-dark" : "theme-light"}`}>
       {/* ==================== SAVE SUCCESS TOAST ==================== */}
       {showSaveSuccess && (
         <div className="fixed right-4 top-4 z-50 animate-slide-in-right">
@@ -189,60 +211,22 @@ const Profile = () => {
           </div>
 
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 sm:text-4xl">
-            My Profile
+            {isSettingsPage ? "Account Settings" : "My Profile"}
           </h1>
 
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            Manage your personal information and account preferences.
+            {isSettingsPage
+              ? "Manage your SocioSphere account, status, and sign-out preferences."
+              : "Manage your personal information and account preferences."}
           </p>
         </div>
 
-        {!isEditing ? (
-          <button
-            onClick={handleEdit}
-            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-400"
-          >
-            <Pencil
-              size={16}
-              className="transition-transform group-hover:rotate-12"
-            />
-            Edit Profile
-          </button>
-        ) : (
-          <div className="flex gap-3">
-            <button
-              onClick={handleCancel}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-5 py-3 text-sm font-semibold text-slate-200 transition-all duration-200 hover:bg-slate-700"
-            >
-              <X size={16} />
-              Cancel
-            </button>
-
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isSaving ? (
-                <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Check size={16} />
-                  Save Changes
-                </>
-              )}
-            </button>
-          </div>
-        )}
       </div>
 
       {/* ==================== PROFILE HERO ==================== */}
-      <section className="overflow-hidden rounded-2xl border border-slate-800 bg-[#0D1524]">
+      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70 dark:border-slate-800 dark:bg-[#0D1524] dark:shadow-none">
         {/* Cover */}
-        <div className="relative h-32 overflow-hidden bg-slate-950 sm:h-40">
+        <div className="relative h-36 overflow-hidden bg-slate-950 sm:h-44">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.22),transparent_40%),radial-gradient(circle_at_80%_30%,rgba(56,189,248,0.16),transparent_35%),radial-gradient(circle_at_50%_60%,rgba(139,92,246,0.12),transparent_45%)]" />
 
           <div className="absolute inset-0 opacity-10">
@@ -262,16 +246,16 @@ const Profile = () => {
         </div>
 
         {/* Profile info */}
-        <div className="relative px-5 pb-6 sm:px-7 sm:pb-8">
-          <div className="-mt-12 flex flex-col gap-5 sm:-mt-16 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+        <div className="relative px-5 pb-6 sm:px-8 sm:pb-7">
+          <div className="-mt-14 flex flex-col gap-5 sm:-mt-16 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end">
               {/* Avatar */}
               <div
                 className="relative"
                 onMouseEnter={() => setAvatarHover(true)}
                 onMouseLeave={() => setAvatarHover(false)}
               >
-                <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border-4 border-[#0D1524] bg-gradient-to-br from-emerald-500 to-teal-600 text-4xl font-extrabold text-white shadow-xl transition-all duration-300 hover:scale-105 sm:h-32 sm:w-32 sm:text-5xl">
+                <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-gradient-to-br from-emerald-500 to-teal-600 text-4xl font-extrabold text-white shadow-xl transition-all duration-300 hover:scale-105 dark:border-[#0D1524] sm:h-32 sm:w-32 sm:text-5xl">
                   {user.avatar ? (
                     <img
                       src={user.avatar}
@@ -299,7 +283,7 @@ const Profile = () => {
                   </button>
                 )}
 
-                <div className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#0D1524] bg-emerald-500 shadow-lg">
+                <div className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-emerald-500 shadow-lg dark:border-[#0D1524]">
                   <BadgeCheck
                     size={16}
                     strokeWidth={2.5}
@@ -308,13 +292,13 @@ const Profile = () => {
                 </div>
               </div>
 
-              <div className="sm:pb-2">
+              <div className="min-w-0 sm:pb-2">
                 <div className="flex flex-wrap items-center gap-3">
-                  <h2 className="text-2xl font-extrabold text-slate-50 sm:text-3xl">
+                  <h2 className="truncate text-2xl font-extrabold tracking-tight text-slate-800 dark:text-slate-50 sm:text-3xl">
                     {profile.name}
                   </h2>
 
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-400">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
                     <ShieldCheck size={13} />
                     {user.role === "authority"
                       ? "Verified Authority"
@@ -322,14 +306,14 @@ const Profile = () => {
                   </span>
                 </div>
 
-                <p className="mt-2 flex items-center gap-2 text-sm text-slate-400">
+                <p className="mt-2 flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
                   <Home size={14} className="text-emerald-500" />
                   {profile.society || "Community not available"}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 rounded-xl bg-slate-800/60 px-3 py-2 text-xs font-medium text-slate-300">
+            <div className="flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-2 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
               <MapPin size={14} className="text-emerald-500" />
               {profile.city || "Location unavailable"}
             </div>
@@ -341,7 +325,7 @@ const Profile = () => {
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         {/* PERSONAL INFORMATION */}
         <section className="rounded-2xl border border-slate-800 bg-[#0D1524] p-6 sm:p-7">
-          <div className="mb-7">
+          <div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500 shadow-lg shadow-emerald-500/20">
                 <User size={20} className="text-slate-950" />
@@ -355,8 +339,54 @@ const Profile = () => {
                 <p className="text-xs text-slate-400">
                   Your basic account information
                 </p>
+                {isEditing && (
+                  <p className="mt-1 text-xs font-medium text-amber-400">
+                    Name and email are linked to your account and cannot be changed.
+                  </p>
+                )}
               </div>
             </div>
+
+            {!isEditing ? (
+              <button
+                onClick={handleEdit}
+                className="group inline-flex w-fit items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-400"
+              >
+                <Pencil
+                  size={16}
+                  className="transition-transform group-hover:rotate-12"
+                />
+                Edit details
+              </button>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={handleCancel}
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-200 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                >
+                  <X size={16} />
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSaving ? (
+                    <>
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Check size={16} />
+                      Save Changes
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2">
@@ -364,8 +394,7 @@ const Profile = () => {
               icon={User}
               label="Full Name"
               value={isEditing ? editProfile.name : profile.name}
-              editing={isEditing}
-              onChange={(value) => handleChange("name", value)}
+              editing={false}
               placeholder="Enter your full name"
             />
 
@@ -373,9 +402,8 @@ const Profile = () => {
               icon={Mail}
               label="Email Address"
               value={isEditing ? editProfile.email : profile.email}
-              editing={isEditing}
+              editing={false}
               type="email"
-              onChange={(value) => handleChange("email", value)}
               placeholder="Enter your email"
             />
 
@@ -418,7 +446,7 @@ const Profile = () => {
         </section>
 
         {/* ACCOUNT STATUS */}
-        <section className="rounded-2xl border border-slate-800 bg-[#0D1524] p-6 sm:p-7">
+        <section className="hidden">
           <div className="mb-6 flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500 shadow-lg shadow-blue-500/20">
               <ShieldCheck size={20} className="text-white" />
@@ -506,41 +534,41 @@ const Profile = () => {
           <StatCard
             icon={AlertCircle}
             label="Issues Reported"
-            value="12"
-            description="Total reports"
+            value={String(ownIssues.length)}
+            description="Reports you submitted"
             iconClass="bg-blue-500"
-            trend="+18%"
-            trendUp
+            trend={`${ownIssues.length ? 100 : 0}%`}
+            trendUp={ownIssues.length > 0}
           />
 
           <StatCard
             icon={CheckCircle2}
             label="Issues Resolved"
-            value="8"
+            value={String(resolvedIssues.length)}
             description="Successfully resolved"
             iconClass="bg-emerald-500"
-            trend="+24%"
-            trendUp
+            trend={`${getActivityPercentage(resolvedIssues.length)}%`}
+            trendUp={resolvedIssues.length > 0}
           />
 
           <StatCard
             icon={Clock3}
             label="In Progress"
-            value="3"
+            value={String(inProgressIssues.length)}
             description="Currently being handled"
             iconClass="bg-amber-500"
-            trend="-8%"
-            trendUp={false}
+            trend={`${getActivityPercentage(inProgressIssues.length)}%`}
+            trendUp={inProgressIssues.length > 0}
           />
 
           <StatCard
             icon={Users}
-            label="Community Score"
-            value="87%"
-            description="Above community average"
+            label="Open Reports"
+            value={String(openIssues.length)}
+            description="Awaiting resolution"
             iconClass="bg-purple-500"
-            trend="+6%"
-            trendUp
+            trend={`${getActivityPercentage(openIssues.length)}%`}
+            trendUp={openIssues.length > 0}
           />
         </div>
       </section>
@@ -570,42 +598,22 @@ const Profile = () => {
           </div>
 
           <div className="space-y-5">
-            <ActivityItem
-              icon={CheckCircle2}
-              iconClass="bg-emerald-500"
-              title="Streetlight issue resolved"
-              description="Your reported issue was marked as resolved."
-              time="2 hours ago"
-            />
-
-            <ActivityItem
-              icon={AlertCircle}
-              iconClass="bg-blue-500"
-              title="New issue reported"
-              description="Garbage collection issue reported."
-              time="Yesterday"
-            />
-
-            <ActivityItem
-              icon={Users}
-              iconClass="bg-purple-500"
-              title="Community participation"
-              description="You participated in a community poll."
-              time="3 days ago"
-            />
-
-            <ActivityItem
-              icon={Award}
-              iconClass="bg-amber-500"
-              title="Community milestone"
-              description="You reached 10 issue reports."
-              time="1 week ago"
-            />
+            {ownIssues.slice(0, 4).map((issue) => (
+              <ActivityItem
+                key={issue.id}
+                icon={issue.status === "Resolved" ? CheckCircle2 : AlertCircle}
+                iconClass={issue.status === "Resolved" ? "bg-emerald-500" : "bg-blue-500"}
+                title={issue.title}
+                description={`${issue.category} · ${issue.status}`}
+                time={new Date(issue.createdAt || issue.timestamp).toLocaleDateString()}
+              />
+            ))}
+            {ownIssues.length === 0 && <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Your submitted reports will appear here.</p>}
           </div>
         </section>
 
         {/* PREFERENCES */}
-        <section className="rounded-2xl border border-slate-800 bg-[#0D1524] p-6 sm:p-7">
+        <section className="hidden rounded-2xl border border-slate-800 bg-[#0D1524] p-6 sm:p-7">
           <div className="mb-6">
             <h3 className="text-lg font-bold text-slate-50">
               Preferences
@@ -705,7 +713,7 @@ const Profile = () => {
       </div>
 
       {/* ==================== LOGOUT ==================== */}
-      <section className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-6 transition-all duration-300 hover:border-rose-500/30 sm:p-7">
+      <section className="hidden rounded-2xl border border-rose-500/20 bg-rose-500/5 p-6 transition-all duration-300 hover:border-rose-500/30 sm:p-7">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-rose-500 shadow-lg shadow-rose-500/20">
@@ -864,6 +872,9 @@ const StatCard = ({
   trend,
   trendUp,
 }) => {
+  const numericTrend = Number.parseFloat(trend);
+  const isNeutralTrend = Number.isFinite(numericTrend) && numericTrend === 0;
+
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-[#0D1524] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-slate-700">
       <div className="relative">
@@ -877,15 +888,21 @@ const StatCard = ({
           {trend && (
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold ${
-                trendUp
+                isNeutralTrend
+                  ? "bg-slate-500/10 text-slate-400"
+                  : trendUp
                   ? "bg-emerald-500/10 text-emerald-500"
                   : "bg-rose-500/10 text-rose-500"
               }`}
             >
-              <TrendingUp
-                size={12}
-                className={trendUp ? "" : "rotate-180"}
-              />
+              {isNeutralTrend ? (
+                <span className="block h-0.5 w-3 rounded-full bg-slate-400" aria-hidden="true" />
+              ) : (
+                <TrendingUp
+                  size={12}
+                  className={trendUp ? "" : "rotate-180"}
+                />
+              )}
               {trend}
             </span>
           )}
