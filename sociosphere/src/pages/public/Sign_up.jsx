@@ -69,15 +69,6 @@ const SignUp = () => {
       department,
       age,
       occupation,
-      name: fullName,
-      email: email,
-      username: username,
-      role: role,
-      communityName: colony,
-      communityId: colony ? `col-${colony.substring(0, 3).toLowerCase()}` : undefined,
-      department: department,
-      age: age,
-      occupation: occupation,
     });
 
     updateUserProfile({
