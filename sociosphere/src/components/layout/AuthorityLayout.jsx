@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   AlertCircle,
   ShieldAlert,
+  User,
 } from "lucide-react";
 
 import Navbar from "./Navbar";
@@ -33,6 +34,11 @@ const AuthorityLayout = () => {
       href: "/authority/crimes",
       icon: ShieldAlert,
     },
+    {
+      label: "Profile",
+      href: "/authority/profile",
+      icon: User,
+    },
   ];
 
   const handleLogout = () => {
@@ -57,7 +63,7 @@ const AuthorityLayout = () => {
         <Sidebar links={links} />
 
         <main className="min-w-0 flex-1 pb-20 md:pb-0">
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-[1440px] px-6 py-6 sm:px-8 lg:px-10">
             <ScrollReveal key={location.pathname} className="w-full">
               <Outlet />
             </ScrollReveal>
