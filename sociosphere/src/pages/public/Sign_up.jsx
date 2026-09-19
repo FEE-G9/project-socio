@@ -60,6 +60,15 @@ const SignUp = () => {
     const department = form.department?.value || "";
 
     const account = login({
+      name: fullName.trim(),
+      email: email.trim(),
+      username: username.trim(),
+      role,
+      communityName: colony,
+      communityId: colony ? `col-${colony.substring(0, 3).toLowerCase()}` : undefined,
+      department,
+      age,
+      occupation,
       name: fullName,
       email: email,
       username: username,
@@ -82,6 +91,7 @@ const SignUp = () => {
     if (role === "authority") {
       navigate("/authority/home");
     } else {
+      sessionStorage.setItem("sociosphere_show_welcome", "true");
       navigate("/citizen/home");
     }
   };

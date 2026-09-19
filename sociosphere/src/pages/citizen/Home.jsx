@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
@@ -94,6 +95,21 @@ export default function Home() {
   };
 
   /* =========================================================
+     LOAD REPORTS FROM THE CURRENT USER'S SOCIETY
+  ========================================================= */
+
+ const loadUserReports = () => {
+  try {
+    const currentEmail =
+      user?.email?.trim().toLowerCase();
+
+    const currentUserId = user?.id;
+    const currentCommunityId = user?.communityId;
+    const currentCommunityName = user?.communityName?.trim().toLowerCase();
+
+    if (!currentEmail && !currentUserId && !currentCommunityId && !currentCommunityName) {
+      setUserReports([]);
+      return;
      INITIAL SAMPLE COLONY REPORTS FOR SEEDING IF EMPTY
   ========================================================= */
 
@@ -206,6 +222,102 @@ export default function Home() {
         storedRaw = JSON.stringify(INITIAL_COLONY_REPORTS);
       }
 
+        const emailMatches =
+          currentEmail &&
+          reportEmail === currentEmail;
+
+        const idMatches =
+          currentUserId &&
+          report?.reportedById === currentUserId;
+
+        const reportCommunityId = report?.communityId;
+        const reportCommunityName = (
+          report?.communityName ||
+          report?.colonyName ||
+          report?.society ||
+          report?.community
+        )?.trim().toLowerCase();
+
+        const communityMatches =
+          (currentCommunityId && reportCommunityId === currentCommunityId) ||
+          (currentCommunityName && reportCommunityName === currentCommunityName);
+
+        // Legacy records without society metadata remain visible only to their author.
+        return communityMatches || (
+          !reportCommunityId &&
+          !reportCommunityName &&
+          (emailMatches || idMatches)
+        );
+      })
+      .map((report) => {
+        const isCrime =
+          report?.reportType === "crime" ||
+          report?.id?.startsWith("CRM-");
+
+        return {
+          ...report,
+
+          priority:
+            report.priority ||
+            (report.severity
+              ? `${report.severity} Priority`
+              : isCrime
+                ? "High Priority"
+                : "Medium Priority"),
+
+          priorityClass:
+            report.priorityClass ||
+            (
+              report.severity ||
+              (isCrime ? "critical" : "medium")
+            ).toLowerCase(),
+
+          status:
+            report.status ||
+            "In Progress",
+
+          statusClass:
+            report.statusClass ||
+            (
+              report.status === "Resolved"
+                ? "resolved"
+                : "progress"
+            ),
+
+          date:
+            report.date ||
+            (
+              report.createdAt ||
+              report.timestamp
+            )
+              ? new Date(
+                  report.createdAt ||
+                  report.timestamp
+                ).toLocaleDateString()
+              : "Recently",
+
+          eta:
+            report.eta ||
+            report.aiAnalysis
+              ?.estimatedResolutionTime ||
+            (isCrime
+              ? "Security Dispatched"
+              : "Pending Dispatch"),
+
+          image:
+            report.image || null,
+
+          reportType:
+            isCrime ? "crime" : "civic",
+        };
+      });
+
+    setUserReports(filteredReports);
+  } catch (error) {
+    console.error(
+      "Failed to load user reports:",
+      error
+    );
       const storedReports = JSON.parse(storedRaw || "[]");
 
       const filteredReports = storedReports
@@ -328,56 +440,6 @@ export default function Home() {
   }, [user?.email, user?.id]);
 
   /* =========================================================
-     DELETE REPORT
-  ========================================================= */
-
-  const handleDeleteReport = (issue) => {
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this report?"
-  );
-
-  if (!confirmed) return;
-
-  try {
-    const reports = JSON.parse(
-      localStorage.getItem(
-        "sociosphere_user_reports"
-      ) || "[]"
-    );
-
-    const updatedReports = reports.filter(
-      (report) => report.id !== issue.id
-    );
-
-    localStorage.setItem(
-      "sociosphere_user_reports",
-      JSON.stringify(updatedReports)
-    );
-
-    saveIssues(getIssues().filter((report) => report.id !== issue.id));
-
-    window.dispatchEvent(
-      new Event("sociosphere_data_updated")
-    );
-
-    loadUserReports();
-
-    showToast(
-      "Report deleted successfully."
-    );
-  } catch (error) {
-    console.error(
-      "Failed to delete report:",
-      error
-    );
-
-    showToast(
-      "Unable to delete report."
-    );
-  }
-};
-
-  /* =========================================================
      QUICK ACTIONS
   ========================================================= */
 
@@ -397,12 +459,47 @@ export default function Home() {
     //   return;
     // }
 
-    if (
-      title === "Community Hub" ||
-      title === "Maintenance"
-    ) {
+    if (title === "Maintenance") {
+      setComingSoonFeature(title);
+      return;
+    }
+
+    if (title === "Community Hub") {
       setComingSoonFeature(title);
     }
+  };
+
+  const isOwnReport = (report) => {
+    const currentEmail = user?.email?.trim().toLowerCase();
+    return Boolean(
+      report?.reportedById === user?.id ||
+      (currentEmail &&
+        report?.reportedByEmail?.trim().toLowerCase() === currentEmail)
+    );
+  };
+
+  const handleDeleteReport = (report) => {
+    if (!isOwnReport(report)) {
+      showToast("You can only delete reports submitted by you.");
+      return;
+    }
+
+    if (!window.confirm("Delete this report? This action cannot be undone.")) {
+      return;
+    }
+
+    const remainingIssues = getIssues().filter((issue) => issue.id !== report.id);
+    saveIssues(remainingIssues);
+
+    const storedReports = JSON.parse(
+      localStorage.getItem("sociosphere_user_reports") || "[]"
+    );
+    localStorage.setItem(
+      "sociosphere_user_reports",
+      JSON.stringify(storedReports.filter((issue) => issue.id !== report.id))
+    );
+    window.dispatchEvent(new Event("sociosphere_data_updated"));
+    showToast("Report deleted.");
   };
 
   /* =========================================================
@@ -605,6 +702,26 @@ export default function Home() {
             .includes("HIGH"))
     ).length;
 
+  const displayName = user?.name && !user.name.includes("@")
+    ? user.name.split(" ")[0]
+    : "Resident";
+  const currentHour = new Date().getHours();
+  const timeGreeting =
+    currentHour >= 5 && currentHour < 12
+      ? "Good morning"
+      : currentHour >= 12 && currentHour < 17
+        ? "Good afternoon"
+        : currentHour >= 17 && currentHour < 21
+          ? "Good evening"
+          : "Good night";
+
+  const getProgressStep = (issue) => {
+    if (issue.status === "Resolved") return 4;
+    if (issue.status === "In Progress" || issue.status === "Security Dispatched") return 3;
+    if (issue.status === "Pending Dispatch") return 2;
+    return 1;
+  };
+
   return (
     <div
       className={`home-page ${
@@ -650,6 +767,10 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      <section className="home-welcome">
+        <h1>{timeGreeting}, {displayName}</h1>
+      </section>
 
       {/* =====================================================
           NOTIFICATIONS
@@ -738,6 +859,7 @@ export default function Home() {
           <div className="issues-heading">
             <div>
               <h2>
+                Society Civic Issues
                 Community Civic Issues
 
                 <span className="count-badge">
@@ -746,8 +868,8 @@ export default function Home() {
               </h2>
 
               <p>
-                Track real-time progress, municipal technician
-                dispatch, and infrastructure resolution
+                Track civic reports and resolution progress across
+                your society
               </p>
             </div>
 
@@ -890,6 +1012,15 @@ export default function Home() {
                       </div>
                     </div>
 
+                    <div className="issue-progress" aria-label={`Report progress: step ${getProgressStep(issue)} of 4`}>
+                      {["Reported", "Reviewed", "Assigned", "Resolved"].map((step, index) => (
+                        <span key={step} className={index < getProgressStep(issue) ? "complete" : ""}>
+                          <i />
+                          <em>{step}</em>
+                        </span>
+                      ))}
+                    </div>
+
                     <div className="issue-footer">
                       <div className="issue-time">
                         <span>{issue.date}</span>
@@ -914,6 +1045,17 @@ export default function Home() {
 
                           <ChevronRight size={16} />
                         </button>
+
+                        {isOwnReport(issue) ? (
+                          <button
+                            type="button"
+                            className="timeline-button text-rose-500 hover:text-rose-400"
+                            onClick={() => handleDeleteReport(issue)}
+                          >
+                            <Trash2 size={15} />
+                            Delete
+                          </button>
+                        ) : null}
                       </div>
                     </div>
                   </article>
@@ -1082,6 +1224,15 @@ export default function Home() {
                       </div>
                     </div>
 
+                    <div className="issue-progress" aria-label={`Report progress: step ${getProgressStep(crime)} of 4`}>
+                      {["Reported", "Reviewed", "Assigned", "Resolved"].map((step, index) => (
+                        <span key={step} className={index < getProgressStep(crime) ? "complete" : ""}>
+                          <i />
+                          <em>{step}</em>
+                        </span>
+                      ))}
+                    </div>
+
                     <div className="issue-footer">
                       <div className="issue-time">
                         <span>{crime.date}</span>
@@ -1108,6 +1259,17 @@ export default function Home() {
 
                           <ChevronRight size={16} />
                         </button>
+
+                        {isOwnReport(crime) ? (
+                          <button
+                            type="button"
+                            className="timeline-button text-rose-500 hover:text-rose-400"
+                            onClick={() => handleDeleteReport(crime)}
+                          >
+                            <Trash2 size={15} />
+                            Delete
+                          </button>
+                        ) : null}
                       </div>
                     </div>
                   </article>
@@ -1232,9 +1394,9 @@ export default function Home() {
           EMERGENCY CALL MODAL
       ===================================================== */}
 
-      {activeModal === "emergency" && (
+      {activeModal === "emergency" && createPortal(
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/55 p-4 backdrop-blur-sm dark:bg-slate-950/85"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/10 p-4 backdrop-blur-sm dark:bg-slate-950/15"
           onClick={() => setActiveModal(null)}
           role="dialog"
           aria-modal="true"
@@ -1291,7 +1453,8 @@ export default function Home() {
               It is not immediate — report a crime or safety issue
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* =====================================================
@@ -1514,9 +1677,9 @@ export default function Home() {
           COMING SOON MODAL
       ===================================================== */}
 
-      {comingSoonFeature && (
+      {comingSoonFeature && createPortal(
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/55 p-4 backdrop-blur-sm dark:bg-black/70"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/10 p-4 backdrop-blur-sm dark:bg-slate-950/15"
           onClick={() =>
             setComingSoonFeature(null)
           }
@@ -1552,7 +1715,8 @@ export default function Home() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* =====================================================

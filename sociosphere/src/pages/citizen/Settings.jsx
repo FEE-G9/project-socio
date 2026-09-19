@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Bell,
+  BellOff,
   CalendarDays,
   CheckCircle2,
   Globe,
@@ -78,7 +79,7 @@ export default function Settings() {
   }
 
   return (
-    <div className={`space-y-8 pb-8 ${theme === "dark" ? "theme-dark" : "theme-light"}`}>
+    <div className={`settings-page space-y-8 pb-8 ${theme === "dark" ? "theme-dark" : "theme-light"}`}>
       <ScrollReveal direction="left">
         <header>
         <p className="mb-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">SocioSphere</p>
@@ -138,10 +139,18 @@ export default function Settings() {
             action={
               <button
                 onClick={() => setNotificationsEnabled((enabled) => !enabled)}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold text-white ${notificationsEnabled ? "bg-emerald-500" : "bg-slate-700"}`}
-              >
-                {notificationsEnabled ? "On" : "Off"}
-              </button>
+              type="button"
+              aria-label={notificationsEnabled ? "Turn notifications off" : "Turn notifications on"}
+              aria-pressed={notificationsEnabled}
+              title={notificationsEnabled ? "Notifications on" : "Notifications off"}
+              className={`flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors ${
+                notificationsEnabled
+                  ? "bg-emerald-500 hover:bg-emerald-400"
+                  : "bg-slate-700 hover:bg-slate-600"
+              }`}
+            >
+              {notificationsEnabled ? <Bell size={17} /> : <BellOff size={17} />}
+            </button>
             }
             />
           </ScrollReveal>

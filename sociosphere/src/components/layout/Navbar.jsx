@@ -19,6 +19,7 @@ import {
 } from "react-router-dom";
 
 import { useTheme } from "../../context/ThemeContext";
+import UserAvatar from "../ui/UserAvatar";
 
 const navbarNotifications = [
   { title: "Water supply maintenance", detail: "Service resumes at 4:00 PM", color: "bg-blue-500" },
@@ -83,13 +84,13 @@ const Navbar = ({
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-md transition-colors duration-200 dark:border-slate-800 dark:bg-slate-950/95">
 
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 items-center justify-between pr-4 sm:pr-6 lg:pr-8">
 
         {/* BRAND */}
         {showBrand && (
           <button
             onClick={() => navigate("/")}
-            className="group flex items-center gap-2"
+            className="group flex items-center gap-2 md:w-[260px] md:justify-center"
             aria-label="Go to home"
           >
             <img
@@ -199,17 +200,11 @@ const Navbar = ({
             >
 
               {/* AVATAR */}
-              {user?.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.name || "User"}
-                  className="h-9 w-9 rounded-full object-cover ring-2 ring-transparent transition-all duration-200 group-hover:ring-emerald-500/40"
-                />
-              ) : (
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 transition-all duration-200 group-hover:bg-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400">
-                  <User size={18} />
-                </div>
-              )}
+              <UserAvatar
+                user={user}
+                className="h-9 w-9 ring-2 ring-transparent transition-all duration-200 group-hover:ring-emerald-500/40"
+                iconSize={18}
+              />
 
               {/* NAME */}
               <div className="hidden text-left lg:block">
@@ -239,17 +234,7 @@ const Navbar = ({
                 {/* PROFILE HEADER */}
                 <div className="mb-2 flex items-center gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
 
-                  {user?.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt={user.name || "User"}
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
-                      <User size={18} />
-                    </div>
-                  )}
+                  <UserAvatar user={user} className="h-10 w-10" iconSize={18} />
 
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">

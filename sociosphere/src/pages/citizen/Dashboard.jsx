@@ -142,13 +142,32 @@ const Dashboard = () => {
       try {
         const stored = JSON.parse(localStorage.getItem('sociosphere_issues') || '[]');
         const currentEmail = user?.email?.trim().toLowerCase();
-        const ownIssues = stored.filter((issue) =>
-          issue.reportedByEmail?.trim().toLowerCase() === currentEmail ||
-          issue.reportedById === user?.id
-        );
-        if (ownIssues.length > 0) {
+        const communityId = user?.communityId;
+        const communityName = user?.communityName?.trim().toLowerCase();
+        const societyIssues = stored.filter((issue) => {
+          const issueCommunityName = (
+            issue.communityName ||
+            issue.colonyName ||
+            issue.society ||
+            issue.community
+          )?.trim().toLowerCase();
+
+          return (
+            (communityId && issue.communityId === communityId) ||
+            (communityName && issueCommunityName === communityName) ||
+            (
+              !issue.communityId &&
+              !issueCommunityName &&
+              (
+                issue.reportedByEmail?.trim().toLowerCase() === currentEmail ||
+                issue.reportedById === user?.id
+              )
+            )
+          );
+        });
+        if (societyIssues.length > 0) {
           // format top 4 for preview
-          const preview = ownIssues.slice(0, 4).map(iss => ({
+          const preview = societyIssues.slice(0, 4).map(iss => ({
             id: iss.id,
             title: iss.title,
             category: iss.category,
@@ -550,10 +569,10 @@ const Dashboard = () => {
                 onClick={() =>
                   navigate(`/citizen/issues/${issue.id}`)
                 }
-                className="group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/40"
+                className="group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-500/60 dark:hover:bg-white/[0.04]"
               >
 
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors group-hover:bg-emerald-50 group-hover:text-emerald-600 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700 dark:group-hover:text-slate-200">
                   <AlertCircle size={18} />
                 </div>
 

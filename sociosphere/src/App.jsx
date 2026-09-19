@@ -20,6 +20,7 @@ import Settings from "./pages/citizen/Settings";
 import Dashboard from "./pages/citizen/Dashboard";
 // import Map from "./pages/citizen/Map";
 import Announcements from "./pages/citizen/Announcements";
+import Maintenance from "./pages/citizen/Maintenance";
 
 import AdminHome from "./pages/authority/Admin";
 import Analytics from "./pages/authority/Analytics";
@@ -52,6 +53,7 @@ function App() {
         <Route path="report-crime" element={<ReportCrime />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="fees" element={<Maintenance />} />
         <Route path="announcements" element={<Announcements />} />
       </Route>
 

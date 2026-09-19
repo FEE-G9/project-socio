@@ -36,6 +36,7 @@ function Login() {
     if (isAuthority) {
       navigate("/authority/dashboard");
     } else {
+      sessionStorage.setItem("sociosphere_show_welcome", "true");
       navigate("/citizen/home");
     }
   };

@@ -10,12 +10,49 @@ const getAccounts = () => {
   }
 };
 
+const normalizeUser = (candidate) => {
+  if (!candidate) return null;
+
+  const email = candidate.email?.trim().toLowerCase() || '';
+  const storedName = candidate.name?.trim() || '';
+  const validName = storedName && storedName.toLowerCase() !== email && !storedName.includes('@');
+
+  return {
+    ...candidate,
+    name: validName
+      ? storedName
+      : candidate.role === 'authority'
+        ? 'Authority Administrator'
+        : 'Resident Citizen',
+    email,
+    city: candidate.city === 'Chandigarh' || !candidate.city ? 'Rajpura' : candidate.city,
+    communityCity: candidate.communityCity === 'Chandigarh' || !candidate.communityCity
+      ? 'Rajpura'
+      : candidate.communityCity,
+    avatarStyle: candidate.avatarStyle || 'classic',
+  };
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('sociosphere_auth_user');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        const storedAccount = parsed.email
+          ? getAccounts()[parsed.email.trim().toLowerCase()]
+          : null;
+        const accountName = storedAccount?.name?.trim();
+        const parsedName = parsed.name?.trim();
+        const nameIsEmail = !parsedName || parsedName.toLowerCase() === parsed.email?.trim().toLowerCase();
+
+        return normalizeUser({
+          ...storedAccount,
+          ...parsed,
+          name: nameIsEmail && accountName && !accountName.includes('@')
+            ? accountName
+            : parsed.name,
+        });
       } catch (e) {
         // Fallback
       }
@@ -57,6 +94,45 @@ export const AuthProvider = ({ children }) => {
     const colonies = getColonies();
     const foundColony = colonies.find(c => c.id === communityId || c.name === communityName) || colonies[0];
 
+    const normalizedEmail = (email || 'user@sociosphere.io').trim().toLowerCase();
+    const suppliedName = (name || username || '').trim();
+    const accounts = getAccounts();
+    const existingUser = accounts[normalizedEmail] || Object.values(accounts).find(account => {
+      const accountName = account?.name?.trim().toLowerCase();
+      const accountUsername = account?.username?.trim().toLowerCase();
+      const accountEmail = account?.email?.trim().toLowerCase();
+      const suppliedValue = suppliedName.toLowerCase();
+
+      return suppliedValue && (
+        accountName === suppliedValue ||
+        accountUsername === suppliedValue ||
+        accountEmail === suppliedValue
+      );
+    });
+    const fallbackName = role === 'authority'
+      ? 'Authority Administrator'
+      : 'Resident Citizen';
+    const existingName = existingUser?.name?.trim();
+    const suppliedNameIsEmail = suppliedName.includes('@');
+    const resolvedName = existingName && !existingName.includes('@') && existingName !== fallbackName
+      ? existingName
+      : suppliedName && !suppliedNameIsEmail
+        ? suppliedName
+        : fallbackName;
+    const newUser = existingUser
+      ? {
+          ...normalizeUser(existingUser),
+          name: resolvedName,
+          email: existingUser.email?.trim().toLowerCase() || normalizedEmail,
+          city: existingUser.city === 'Chandigarh' || !existingUser.city ? 'Rajpura' : existingUser.city,
+          communityCity: existingUser.communityCity === 'Chandigarh' || !existingUser.communityCity
+            ? 'Rajpura'
+            : existingUser.communityCity,
+          avatarStyle: existingUser.avatarStyle || 'classic',
+        }
+      : {
+      id: `usr-${Date.now()}`,
+      name: resolvedName,
     const normalizedEmail = (email || username || 'user@sociosphere.io').trim().toLowerCase();
     const existingUser = getAccounts()[normalizedEmail];
     const fallbackName = name || username || (role === 'authority' ? 'Authority Administrator' : 'Resident Citizen');
@@ -77,6 +153,8 @@ export const AuthProvider = ({ children }) => {
       avatar: role === 'authority'
         ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80'
         : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+      avatarStyle: 'classic',
+      joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
       joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
     };
 
