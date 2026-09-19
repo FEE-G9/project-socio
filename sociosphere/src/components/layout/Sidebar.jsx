@@ -1,14 +1,12 @@
 import React, { useState } from "react";
-import { Menu, ChevronRight, Building2 } from "lucide-react";
+import { Menu, ChevronRight } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { resolveCommunity, useAuth } from "../../context/AuthContext";
 
 const Sidebar = ({ links = [] }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
 
   const isActive = (href) => {
     if (href === "/citizen/home") {
@@ -108,31 +106,6 @@ const Sidebar = ({ links = [] }) => {
             );
           })}
         </nav>
-
-        <div className="border-t border-slate-200 p-3 dark:border-slate-800">
-          <button
-            type="button"
-            onClick={() => navigate("/citizen/profile")}
-            title={collapsed ? (resolveCommunity(user) || "Set community") : undefined}
-            className={`group flex w-full rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-left transition-all hover:border-emerald-500/50 hover:bg-emerald-500/10 dark:bg-emerald-500/10 ${
-              collapsed ? "justify-center p-2.5" : "items-center gap-3 p-3"
-            }`}
-          >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-              <Building2 size={18} />
-            </span>
-            {!collapsed && (
-              <span className="min-w-0">
-                <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  My community
-                </span>
-                <span className="mt-0.5 block truncate text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  {resolveCommunity(user) || "Set your community"}
-                </span>
-              </span>
-            )}
-          </button>
-        </div>
       </div>
     </aside>
   );
