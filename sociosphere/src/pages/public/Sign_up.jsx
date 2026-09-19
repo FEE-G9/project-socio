@@ -20,6 +20,7 @@ import {
 
 const SignUp = () => {
   const navigate = useNavigate();
+  
   const { login, updateUserProfile } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -68,14 +69,23 @@ const SignUp = () => {
       department,
       age,
       occupation,
+      name: fullName,
+      email: email,
+      username: username,
+      role: role,
+      communityName: colony,
+      communityId: colony ? `col-${colony.substring(0, 3).toLowerCase()}` : undefined,
+      department: department,
+      age: age,
+      occupation: occupation,
     });
 
     updateUserProfile({
       ...account,
-      username: form.username?.value?.trim() || "",
-      age: form.age?.value || "",
-      occupation: form.occupation?.value?.trim() || form.department?.value || "",
-      communityName: form.colony?.value || account.communityName,
+      username: username.trim(),
+      age: age,
+      occupation: occupation.trim() || department,
+      communityName: colony || account.communityName,
     });
 
     if (role === "authority") {

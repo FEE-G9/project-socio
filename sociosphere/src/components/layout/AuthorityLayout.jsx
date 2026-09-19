@@ -3,11 +3,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   AlertCircle,
-  BarChart3,
-  Users,
-  IndianRupee,
-  Megaphone,
-  ShieldAlert
+  ShieldAlert,
 } from "lucide-react";
 
 import Navbar from "./Navbar";
@@ -15,6 +11,7 @@ import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
 import { useAuth } from "../../context/AuthContext";
 import ScrollReveal from "../ui/ScrollReveal";
+import { useAuth } from "../../context/AuthContext";
 
 const AuthorityLayout = () => {
   const navigate = useNavigate();

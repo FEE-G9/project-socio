@@ -17,6 +17,7 @@ import {
   MapPin,
   Bell,
   Users,
+  User,
   Trash2,
   CreditCard,
   Plus,
@@ -109,30 +110,117 @@ export default function Home() {
     if (!currentEmail && !currentUserId && !currentCommunityId && !currentCommunityName) {
       setUserReports([]);
       return;
+     INITIAL SAMPLE COLONY REPORTS FOR SEEDING IF EMPTY
+  ========================================================= */
+
+  const INITIAL_COLONY_REPORTS = [
+    {
+      id: "ISSUE-101",
+      title: "Main Avenue Water Pipeline Leakage near Block B Park",
+      category: "Water Supply & Plumbing",
+      priority: "HIGH PRIORITY",
+      priorityClass: "high",
+      status: "In Progress",
+      statusClass: "progress",
+      location: "Block B, Near Central Fountain",
+      description: "Clean drinking water is leaking profusely from the main pipeline connection. Water pressure in Block B apartments has dropped by 40%.",
+      date: "Sep 5, 2026",
+      eta: "24 Hours",
+      reportedBy: "Aarav Sharma",
+      personName: "Aarav Sharma",
+      reportedByEmail: "aarav@sociosphere.io",
+      communityId: "colony-1",
+      communityName: "Green Meadows Heights",
+      colony: "Green Meadows Heights",
+      reportType: "civic",
+      image: "https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "ISSUE-102",
+      title: "Broken Solar Streetlights along Perimeter Road",
+      category: "Electrical & Lighting",
+      priority: "MEDIUM PRIORITY",
+      priorityClass: "medium",
+      status: "In Progress",
+      statusClass: "progress",
+      location: "Perimeter Wall Gate 3 to Gate 4",
+      description: "Three consecutive solar streetlights have gone dark since yesterday evening. The stretch is dark during night hours.",
+      date: "Sep 6, 2026",
+      eta: "48 Hours",
+      reportedBy: "Priya Patel",
+      personName: "Priya Patel",
+      reportedByEmail: "priya@sociosphere.io",
+      communityId: "colony-1",
+      communityName: "Green Meadows Heights",
+      colony: "Green Meadows Heights",
+      reportType: "civic",
+      image: "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "ISSUE-103",
+      title: "Uncollected Green Waste after Garden Pruning",
+      category: "Sanitation & Waste",
+      priority: "LOW PRIORITY",
+      priorityClass: "low",
+      status: "Resolved",
+      statusClass: "resolved",
+      location: "Community Center Lawn",
+      description: "Tree branches and garden clippings were left piled near the recycling bin area following seasonal tree trimming.",
+      date: "Sep 2, 2026",
+      eta: "Cleared",
+      reportedBy: "Rohan Verma",
+      personName: "Rohan Verma",
+      reportedByEmail: "rohan@sociosphere.io",
+      communityId: "colony-1",
+      communityName: "Green Meadows Heights",
+      colony: "Green Meadows Heights",
+      reportType: "civic",
+      image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "CRM-2026-104",
+      title: "Bicycle Theft Attempt near Underground Parking B2",
+      category: "Theft & Burglary Incident",
+      priority: "CRITICAL PRIORITY",
+      priorityClass: "critical",
+      status: "In Progress",
+      statusClass: "progress",
+      location: "Basement B2, Pillar #14",
+      description: "Lock on gear cycle was tampered with between 10 PM and 11 PM. CCTV footage request submitted to security desk.",
+      date: "Sep 6, 2026",
+      eta: "Security Dispatched",
+      reportedBy: "Vikram Malhotra",
+      personName: "Vikram Malhotra",
+      reportedByEmail: "vikram@sociosphere.io",
+      communityId: "colony-1",
+      communityName: "Green Meadows Heights",
+      colony: "Green Meadows Heights",
+      reportType: "crime",
+      image: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=800&q=80"
     }
+  ];
 
-    // =====================================================
-    // ALL USER REPORTS
-    // Civic + Crime
-    // =====================================================
+  /* =========================================================
+     LOAD REPORTS OF ALL INDIVIDUALS IN THE SAME COLONY
+  ========================================================= */
 
-    const legacyReports = JSON.parse(
-      localStorage.getItem("sociosphere_user_reports") || "[]"
-    );
-    const authorityIssues = getIssues();
-    const storedReports = [
-      ...authorityIssues,
-      ...legacyReports.filter((report) =>
-        !authorityIssues.some((issue) => issue.id === report.id)
-      ),
-    ];
+  const loadUserReports = () => {
+    try {
+      const currentEmail = user?.email?.trim().toLowerCase();
+      const currentUserId = user?.id;
+      const userColonyId = user?.communityId || "colony-1";
+      const userColonyName = (user?.communityName || "Green Meadows Heights")
+        .trim()
+        .toLowerCase();
 
-    const filteredReports = storedReports
-      .filter((report) => {
-        const reportEmail =
-          report?.reportedByEmail
-            ?.trim()
-            .toLowerCase();
+      let storedRaw = localStorage.getItem("sociosphere_user_reports");
+      if (!storedRaw) {
+        localStorage.setItem(
+          "sociosphere_user_reports",
+          JSON.stringify(INITIAL_COLONY_REPORTS)
+        );
+        storedRaw = JSON.stringify(INITIAL_COLONY_REPORTS);
+      }
 
         const emailMatches =
           currentEmail &&
@@ -230,10 +318,106 @@ export default function Home() {
       "Failed to load user reports:",
       error
     );
+      const storedReports = JSON.parse(storedRaw || "[]");
 
-    setUserReports([]);
-  }
-};
+      const filteredReports = storedReports
+        .filter((report) => {
+          const reportEmail = report?.reportedByEmail?.trim().toLowerCase();
+          const reportColonyId = report?.communityId || report?.colonyId;
+          const reportColonyName = (
+            report?.communityName ||
+            report?.colonyName ||
+            report?.colony ||
+            ""
+          )
+            .trim()
+            .toLowerCase();
+
+          // Match by current user
+          const emailMatches = currentEmail && reportEmail === currentEmail;
+          const idMatches = currentUserId && report?.reportedById === currentUserId;
+
+          // Match by colony / community of user
+          const colonyIdMatches =
+            userColonyId && reportColonyId && reportColonyId === userColonyId;
+          const colonyNameMatches =
+            userColonyName &&
+            reportColonyName &&
+            reportColonyName === userColonyName;
+
+          // Fallback matching if report has no colony specified
+          const noColonySet = !reportColonyId && !reportColonyName;
+
+          return (
+            emailMatches ||
+            idMatches ||
+            colonyIdMatches ||
+            colonyNameMatches ||
+            noColonySet
+          );
+        })
+        .map((report) => {
+          const isCrime =
+            report?.reportType === "crime" ||
+            report?.id?.startsWith("CRM-");
+
+          const reporterPersonName =
+            report?.reportedBy ||
+            report?.personName ||
+            (isCrime ? "Anonymous Resident" : "Resident Citizen");
+
+          return {
+            ...report,
+
+            reportedBy: reporterPersonName,
+            personName: reporterPersonName,
+
+            priority:
+              report.priority ||
+              (report.severity
+                ? `${report.severity} Priority`
+                : isCrime
+                  ? "High Priority"
+                  : "Medium Priority"),
+
+            priorityClass:
+              report.priorityClass ||
+              (
+                report.severity ||
+                (isCrime ? "critical" : "medium")
+              ).toLowerCase(),
+
+            status: report.status || "In Progress",
+
+            statusClass:
+              report.statusClass ||
+              (report.status === "Resolved" ? "resolved" : "progress"),
+
+            date:
+              report.date ||
+              (report.createdAt || report.timestamp
+                ? new Date(
+                    report.createdAt || report.timestamp
+                  ).toLocaleDateString()
+                : "Recently"),
+
+            eta:
+              report.eta ||
+              report.aiAnalysis?.estimatedResolutionTime ||
+              (isCrime ? "Security Dispatched" : "Pending Dispatch"),
+
+            image: report.image || null,
+
+            reportType: isCrime ? "crime" : "civic",
+          };
+        });
+
+      setUserReports(filteredReports);
+    } catch (error) {
+      console.error("Failed to load user reports:", error);
+      setUserReports([]);
+    }
+  };
 
   /* =========================================================
      LOAD ON USER CHANGE + DATA UPDATE
@@ -676,6 +860,7 @@ export default function Home() {
             <div>
               <h2>
                 Society Civic Issues
+                Community Civic Issues
 
                 <span className="count-badge">
                   {displayedCivicIssues.length}
@@ -819,6 +1004,11 @@ export default function Home() {
                           <MapPin size={15} />
                           {issue.location}
                         </div>
+
+                        <div className="issue-reporter flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mt-2">
+                          <User size={14} className="text-emerald-500 dark:text-emerald-400 shrink-0" />
+                          <span>Reported by: <strong className="text-slate-800 dark:text-slate-100 font-semibold">{issue.reportedBy || issue.personName || "Resident"}</strong></span>
+                        </div>
                       </div>
                     </div>
 
@@ -888,7 +1078,7 @@ export default function Home() {
                   className="text-rose-400"
                 />
 
-                Reported Crime & Safety Incidents
+                Community Crime & Safety Incidents
 
                 <span className="count-badge crime-badge">
                   {displayedCrimeIssues.length}
@@ -1025,6 +1215,11 @@ export default function Home() {
                         <div className="issue-location text-rose-400">
                           <MapPin size={15} />
                           {crime.location}
+                        </div>
+
+                        <div className="issue-reporter flex items-center gap-1.5 text-xs text-rose-400 dark:text-rose-300 font-medium mt-2">
+                          <User size={14} className="text-rose-400 dark:text-rose-400 shrink-0" />
+                          <span>Reported by: <strong className="text-rose-200 dark:text-rose-100 font-semibold">{crime.reportedBy || crime.personName || "Resident"}</strong></span>
                         </div>
                       </div>
                     </div>
@@ -1414,6 +1609,7 @@ export default function Home() {
           MAP MODAL
       ===================================================== */}
 
+      {/* {activeModal === "map" && (
       {/* {activeModal === "map" && (
         <div
           className="modal-overlay"
