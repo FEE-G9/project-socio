@@ -4,6 +4,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { addIssue } from "../../data/mockIssues";
 import { addCrime } from "../../data/mockCrimes";
+import { UploadEvidence } from "./Report";
 import {
 	AlertCircle,
 	AlertTriangle,
@@ -612,7 +613,7 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 							</div>
 						</section>
 
-						<section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-[#0D1524]">
+						{/* <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-[#0D1524]">
 							<div className="mb-3 flex items-center gap-2 text-slate-900 dark:text-slate-200 font-bold text-sm">
 								<ShieldCheck size={18} className="text-emerald-600 dark:text-emerald-400" />
 								<span>Evidence & Safety Tips</span>
@@ -631,7 +632,10 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 									<span>Note vehicle license numbers and precise direction of travel if safe.</span>
 								</li>
 							</ul>
-						</section>
+						</section> */}
+
+						{/* Miljot's WOW feature */}
+						<UploadEvidence/>
 					</aside>
 				</div>
 			</div>
