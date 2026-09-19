@@ -3,7 +3,6 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   LayoutDashboard,
-  Map,
   FileWarning,
   ShieldAlert,
   User,
@@ -13,7 +12,6 @@ import { useAuth } from "../../context/AuthContext";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
-import { useAuth } from "../../context/AuthContext";
 import ScrollReveal from "../ui/ScrollReveal";
 
 const CitizenLayout = () => {
@@ -42,11 +40,6 @@ const CitizenLayout = () => {
       href: "/citizen/report-crime",
       icon: ShieldAlert,
     },
-    // {
-    //   label: "Map",
-    //   href: "/citizen/map",
-    //   icon: Map,
-    // },
     {
       label: "Profile",
       href: "/citizen/profile",
@@ -59,26 +52,18 @@ const CitizenLayout = () => {
     navigate("/login");
   };
 
-return (
+  return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-     <Navbar
-  links={links}
-  showBrand={true}
-  showNotifications={true}
-  notificationCount={3}
-  onLogout={handleLogout}
-  user={user || {
-    name: "Citizen",
-    role: "Resident",
-  }}
-/>
       <Navbar
         links={links}
         showBrand={true}
         showNotifications={true}
         notificationCount={3}
         onLogout={handleLogout}
-        user={user}
+        user={user || {
+          name: "Citizen",
+          role: "Resident",
+        }}
       />
 
       <div className="flex">
@@ -86,9 +71,9 @@ return (
 
         <main className="min-w-0 flex-1 pb-20 md:pb-0">
           <div className="mx-auto max-w-[1440px] px-6 py-6 sm:px-8 lg:px-10">
-             <ScrollReveal key={location.pathname} className="w-full">
-               <Outlet />
-             </ScrollReveal>
+            <ScrollReveal key={location.pathname} className="w-full">
+              <Outlet />
+            </ScrollReveal>
           </div>
         </main>
       </div>

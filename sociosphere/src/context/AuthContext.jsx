@@ -39,18 +39,31 @@ export const AuthProvider = ({ children }) => {
   }, [user, isAuthenticated]);
 
   const login = (userData) => {
-    const { name, email, communityId, communityName, role, unitNumber, phone, city, department, username, age, occupation } = userData;
-    
+    const {
+      name,
+      email,
+      communityId,
+      communityName,
+      role,
+      unitNumber,
+      phone,
+      city,
+      department,
+      username,
+      age,
+      occupation,
+    } = userData;
+
     const colonies = getColonies();
     const foundColony = colonies.find(c => c.id === communityId || c.name === communityName) || colonies[0];
 
-    const normalizedEmail = (email || 'user@sociosphere.io').trim().toLowerCase();
+    const normalizedEmail = (email || username || 'user@sociosphere.io').trim().toLowerCase();
     const existingUser = getAccounts()[normalizedEmail];
+    const fallbackName = name || username || (role === 'authority' ? 'Authority Administrator' : 'Resident Citizen');
+
     const newUser = existingUser || {
       id: `usr-${Date.now()}`,
-      name: name || username || (role === 'authority' ? 'Authority Administrator' : 'Resident Citizen'),
-      email: email || (username && username.includes("@") ? username : 'user@sociosphere.io'),
-      name: name || (role === 'authority' ? 'Authority Administrator' : 'Resident Citizen'),
+      name: fallbackName,
       email: normalizedEmail,
       role: role || 'citizen',
       communityId: foundColony ? foundColony.id : 'colony-1',
@@ -61,10 +74,10 @@ export const AuthProvider = ({ children }) => {
       department: department || '',
       age: age || '',
       occupation: occupation || '',
-      avatar: role === 'authority' 
+      avatar: role === 'authority'
         ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80'
         : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
     };
 
     setUser(newUser);
