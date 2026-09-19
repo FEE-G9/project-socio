@@ -251,7 +251,7 @@ const AuthorityProfile = () => {
                   <div className="absolute left-0 top-full z-20 mt-3 flex gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
                     {avatarStyles.map((style) => {
                       const Icon = style.icon;
-                      const isSelected = user.avatarStyle === style.id || (!user.avatarStyle && style.id === "classic");
+                      const isSelected = user?.avatarStyle === style.id || (!user?.avatarStyle && style.id === "classic");
 
                       return (
                         <button
@@ -967,4 +967,4 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-export default Profile; 
+export default AuthorityProfile; 
