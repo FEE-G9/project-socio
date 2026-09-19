@@ -39,8 +39,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import UserAvatar, { avatarStyles } from "../../components/ui/UserAvatar";
 
-const Profile = () => {
+const AuthorityProfile = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { user, updateUserProfile } = useAuth();
@@ -50,6 +51,7 @@ const Profile = () => {
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [avatarHover, setAvatarHover] = useState(false);
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
 
   const [profile, setProfile] = useState({
     name: user?.name || "",
@@ -225,19 +227,51 @@ const Profile = () => {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
               {/* Avatar */}
               <div 
-                className="relative"
+                className="relative shrink-0"
                 onMouseEnter={() => setAvatarHover(true)}
                 onMouseLeave={() => setAvatarHover(false)}
               >
-                <div className="flex h-28 w-28 items-center justify-center rounded-2xl border-4 border-white bg-gradient-to-br from-emerald-500 to-teal-600 text-4xl font-extrabold text-white shadow-xl transition-all duration-300 hover:scale-105 dark:border-[#0D1524] sm:h-32 sm:w-32 sm:text-5xl">
-                  {profile.name.split(' ').map(word => word[0]).join('')}
+                <div className="flex h-28 w-28 overflow-hidden items-center justify-center rounded-2xl border-4 border-white bg-gradient-to-br from-emerald-500 to-teal-600 text-4xl font-extrabold text-white shadow-xl transition-all duration-300 hover:scale-105 dark:border-[#0D1524] sm:h-32 sm:w-32 sm:text-5xl">
+                  <UserAvatar user={user} className="h-full w-full rounded-none" iconSize={48} />
                 </div>
 
                 {/* Camera overlay on hover */}
                 {avatarHover && (
-                  <button className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/40 opacity-0 transition-opacity duration-200 hover:opacity-100">
+                  <button 
+                    type="button"
+                    onClick={() => setAvatarPickerOpen((open) => !open)}
+                    className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/40 transition-opacity duration-200"
+                    aria-label="Choose avatar style"
+                  >
                     <Camera size={24} className="text-white" />
                   </button>
+                )}
+
+                {avatarPickerOpen && (
+                  <div className="absolute left-0 top-full z-20 mt-3 flex gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                    {avatarStyles.map((style) => {
+                      const Icon = style.icon;
+                      const isSelected = user?.avatarStyle === style.id || (!user?.avatarStyle && style.id === "classic");
+
+                      return (
+                        <button
+                          key={style.id}
+                          type="button"
+                          onClick={() => {
+                            updateUserProfile({ avatarStyle: style.id });
+                            setAvatarPickerOpen(false);
+                          }}
+                          className={`flex h-10 w-10 items-center justify-center rounded-full ${style.className} ring-2 ring-offset-2 transition-transform hover:scale-110 dark:ring-offset-slate-900 ${
+                            isSelected ? "ring-emerald-500" : "ring-transparent"
+                          }`}
+                          title={style.label}
+                          aria-label={`Choose ${style.label} avatar`}
+                        >
+                          <Icon size={18} />
+                        </button>
+                      );
+                    })}
+                  </div>
                 )}
 
                 {/* Verified badge */}
@@ -933,4 +967,4 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-export default Profile; 
+export default AuthorityProfile; 
