@@ -139,7 +139,7 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
 
   photoName: photoName || null,
 
-  image: photoUrl || null,
+  image: null,
 
   // ================================
   // CURRENT LOGGED-IN USER & COLONY

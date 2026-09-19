@@ -11,6 +11,7 @@ import {
   Settings,
   LayoutDashboard,
   MapPin,
+  Radio,
 } from "lucide-react";
 
 import {
@@ -20,6 +21,7 @@ import {
 
 import { useTheme } from "../../context/ThemeContext";
 import UserAvatar from "../ui/UserAvatar";
+import CitizenSOSModal from "../ui/CitizenSOSModal";
 
 const navbarNotifications = [
   { title: "Water supply maintenance", detail: "Service resumes at 4:00 PM", color: "bg-blue-500" },
@@ -40,6 +42,7 @@ const Navbar = ({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [sosModalOpen, setSosModalOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -133,6 +136,19 @@ const Navbar = ({
 
         {/* RIGHT SIDE */}
         <div className="hidden items-center gap-2 md:flex">
+
+          {/* CITIZEN SOS BUTTON */}
+          {!location.pathname.startsWith('/authority') && (
+            <button
+              onClick={() => setSosModalOpen(true)}
+              className="group relative flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 px-3.5 py-2 text-xs font-black tracking-wider text-white shadow-md shadow-red-600/30 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-600/40 active:scale-95 animate-pulse"
+              title="Emergency SOS Dispatch"
+              aria-label="Emergency SOS Dispatch"
+            >
+              <Radio size={15} className="text-white shrink-0" />
+              <span>SOS EMERGENCY</span>
+            </button>
+          )}
 
           {/* THEME */}
           <button
@@ -357,6 +373,20 @@ const Navbar = ({
               );
             })} */}
 
+            {/* MOBILE SOS BUTTON */}
+            {!location.pathname.startsWith('/authority') && (
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  setSosModalOpen(true);
+                }}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-4 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-red-600/30 hover:from-red-500 hover:to-rose-500 transition-all animate-pulse"
+              >
+                <Radio size={18} />
+                TRIGGER EMERGENCY SOS
+              </button>
+            )}
+
             {/* MOBILE THEME */}
             <button
               onClick={toggleTheme}
@@ -422,6 +452,12 @@ const Navbar = ({
           </nav>
         </div>
       )}
+
+      {/* CITIZEN SOS MODAL */}
+      <CitizenSOSModal
+        isOpen={sosModalOpen}
+        onClose={() => setSosModalOpen(false)}
+      />
     </header>
   );
 };
