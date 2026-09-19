@@ -9,13 +9,14 @@ import {
   IndianRupee,
   Search,
   MoreVertical,
-  Activity
+  Activity,
+  Trash2
 } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
-import { getIssues, updateIssueStatus } from '../../data/mockIssues';
+import { deleteIssue, getIssues, updateIssueStatus } from '../../data/mockIssues';
 
 const Issues = () => {
   const [issues, setIssues] = useState([]);
@@ -72,6 +73,11 @@ const Issues = () => {
       updateIssueStatus(selectedIssueId, newStatus);
     }
     setIsStatusModalOpen(false);
+  };
+
+  const handleDeleteIssue = (issue) => {
+    if (!window.confirm(`Delete issue "${issue.title}"?`)) return;
+    deleteIssue(issue.id);
   };
 
   return (
@@ -221,6 +227,15 @@ const Issues = () => {
                       >
                         Update Status
                       </Button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteIssue(issue)}
+                        className="h-9 w-9 flex shrink-0 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition-colors hover:bg-rose-100 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20"
+                        title="Delete issue"
+                        aria-label={`Delete issue ${issue.id}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
                       <button className="h-9 w-9 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-[#070B14] border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <MoreVertical size={16} />
                       </button>

@@ -20,6 +20,7 @@ import {
 
 const SignUp = () => {
   const navigate = useNavigate();
+  
   const { login, updateUserProfile } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -53,41 +54,32 @@ const SignUp = () => {
       form.elements.occupation?.value.trim() || "";
     const department = form.elements.department?.value || "";
 
-    // Create the account once with the submitted details.
     const account = login({
-      name: fullName,
-      email,
-      username,
+      name: fullName.trim(),
+      email: email.trim(),
+      username: username.trim(),
       role,
       communityName: colony,
-      communityId: colony
-        ? `col-${colony.substring(0, 3).toLowerCase()}`
-        : undefined,
+      communityId: colony ? `col-${colony.substring(0, 3).toLowerCase()}` : undefined,
       department,
       age,
-      occupation: occupation || department,
+      occupation,
     });
 
     // Save the additional profile information.
     updateUserProfile({
-      ...(account || {}),
-      name: fullName,
-      email,
-      username,
-      role,
-      age,
-      occupation: occupation || department,
-      department,
-      communityName: colony,
-      communityId: colony
-        ? `col-${colony.substring(0, 3).toLowerCase()}`
-        : undefined,
+      ...account,
+      username: username.trim(),
+      age: age,
+      occupation: occupation.trim() || department,
+      communityName: colony || account.communityName,
     });
 
     // Temporary navigation until backend authentication is connected.
     if (role === "authority") {
       navigate("/authority/home");
     } else {
+      sessionStorage.setItem("sociosphere_show_welcome", "true");
       navigate("/citizen/home");
     }
   };

@@ -3,11 +3,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   AlertCircle,
-  BarChart3,
-  Users,
-  IndianRupee,
-  Megaphone,
-  ShieldAlert
+  ShieldAlert,
 } from "lucide-react";
 
 import Navbar from "./Navbar";

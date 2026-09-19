@@ -34,6 +34,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { getIssues } from "../../data/mockIssues";
+import UserAvatar, { avatarStyles } from "../../components/ui/UserAvatar";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ const Profile = () => {
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [avatarHover, setAvatarHover] = useState(false);
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const [ownIssues, setOwnIssues] = useState([]);
 
   useEffect(() => {
@@ -91,7 +93,7 @@ const Profile = () => {
       society: currentUser?.communityName || "",
       block: unitDetails.block,
       apartment: unitDetails.apartment,
-      city: currentUser?.communityCity || "Chandigarh",
+      city: currentUser?.communityCity || currentUser?.city || "Rajpura",
     };
   };
 
@@ -113,6 +115,7 @@ const Profile = () => {
     user?.phone,
     user?.communityName,
     user?.communityCity,
+    user?.city,
     user?.unitNumber,
   ]);
 
@@ -224,9 +227,9 @@ const Profile = () => {
       </div>
 
       {/* ==================== PROFILE HERO ==================== */}
-      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70 dark:border-slate-800 dark:bg-[#0D1524] dark:shadow-none">
+      <section className="overflow-visible rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70 dark:border-slate-800 dark:bg-[#0D1524] dark:shadow-none">
         {/* Cover */}
-        <div className="relative h-36 overflow-hidden bg-slate-950 sm:h-44">
+        <div className="relative h-36 overflow-hidden rounded-t-3xl bg-slate-950 sm:h-44">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.22),transparent_40%),radial-gradient(circle_at_80%_30%,rgba(56,189,248,0.16),transparent_35%),radial-gradient(circle_at_50%_60%,rgba(139,92,246,0.12),transparent_45%)]" />
 
           <div className="absolute inset-0 opacity-10">
@@ -248,39 +251,54 @@ const Profile = () => {
         {/* Profile info */}
         <div className="relative px-5 pb-6 sm:px-8 sm:pb-7">
           <div className="-mt-14 flex flex-col gap-5 sm:-mt-16 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end">
+            <div className="flex min-w-0 flex-col gap-4 sm:flex-1 sm:flex-row sm:items-end">
               {/* Avatar */}
               <div
-                className="relative"
+                className="relative shrink-0"
                 onMouseEnter={() => setAvatarHover(true)}
                 onMouseLeave={() => setAvatarHover(false)}
               >
                 <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-gradient-to-br from-emerald-500 to-teal-600 text-4xl font-extrabold text-white shadow-xl transition-all duration-300 hover:scale-105 dark:border-[#0D1524] sm:h-32 sm:w-32 sm:text-5xl">
-                  {user.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt={user.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    profile.name
-                      .split(" ")
-                      .filter(Boolean)
-                      .map((word) => word[0])
-                      .join("")
-                      .slice(0, 2)
-                      .toUpperCase()
-                  )}
+                  <UserAvatar user={user} className="h-full w-full rounded-none" iconSize={48} />
                 </div>
 
                 {avatarHover && (
                   <button
                     type="button"
+                    onClick={() => setAvatarPickerOpen((open) => !open)}
                     className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/40"
-                    aria-label="Change profile photo"
+                    aria-label="Choose avatar style"
                   >
                     <Camera size={24} className="text-white" />
                   </button>
+                )}
+
+                {avatarPickerOpen && (
+                  <div className="absolute left-0 top-full z-20 mt-3 flex gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                    {avatarStyles.map((style) => {
+                      const Icon = style.icon;
+                      const isSelected = user.avatarStyle === style.id ||
+                        (!user.avatarStyle && style.id === "classic");
+
+                      return (
+                        <button
+                          key={style.id}
+                          type="button"
+                          onClick={() => {
+                            updateUserProfile({ avatarStyle: style.id });
+                            setAvatarPickerOpen(false);
+                          }}
+                          className={`flex h-10 w-10 items-center justify-center rounded-full ${style.className} ring-2 ring-offset-2 transition-transform hover:scale-110 dark:ring-offset-slate-900 ${
+                            isSelected ? "ring-emerald-500" : "ring-transparent"
+                          }`}
+                          title={style.label}
+                          aria-label={`Choose ${style.label} avatar`}
+                        >
+                          <Icon size={18} />
+                        </button>
+                      );
+                    })}
+                  </div>
                 )}
 
                 <div className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-emerald-500 shadow-lg dark:border-[#0D1524]">
@@ -292,9 +310,17 @@ const Profile = () => {
                 </div>
               </div>
 
-              <div className="min-w-0 sm:pb-2">
+              <button
+                type="button"
+                onClick={() => setAvatarPickerOpen((open) => !open)}
+                className="absolute left-0 top-[8.5rem] rounded-lg border border-emerald-500/30 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-bold text-emerald-700 shadow-sm transition hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 sm:top-[9.5rem]"
+              >
+                Choose avatar
+              </button>
+
+              <div className="min-w-0 flex-1 sm:pb-2">
                 <div className="flex flex-wrap items-center gap-3">
-                  <h2 className="truncate text-2xl font-extrabold tracking-tight text-slate-800 dark:text-slate-50 sm:text-3xl">
+                  <h2 className="min-w-0 break-words text-2xl font-extrabold tracking-tight text-slate-800 dark:text-slate-50 sm:text-3xl">
                     {profile.name}
                   </h2>
 

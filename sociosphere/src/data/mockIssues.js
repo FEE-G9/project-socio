@@ -259,6 +259,21 @@ export const saveIssues = (issues) => {
   window.dispatchEvent(new Event('sociosphere_data_updated'));
 };
 
+export const deleteIssue = (issueId) => {
+  const issues = getIssues().filter((issue) => issue.id !== issueId);
+  saveIssues(issues);
+
+  const reports = JSON.parse(
+    localStorage.getItem('sociosphere_user_reports') || '[]'
+  );
+  localStorage.setItem(
+    'sociosphere_user_reports',
+    JSON.stringify(reports.filter((report) => report.id !== issueId))
+  );
+  window.dispatchEvent(new Event('sociosphere_data_updated'));
+  return issues;
+};
+
 export const addIssue = (newIssue) => {
   const issues = getIssues();
 

@@ -7,13 +7,14 @@ import {
   Search,
   MoreVertical,
   Activity,
-  AlertTriangle
+  AlertTriangle,
+  Trash2
 } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
-import { getCrimes, updateCrimeStatus } from '../../data/mockCrimes';
+import { deleteCrime, getCrimes, updateCrimeStatus } from '../../data/mockCrimes';
 
 const Crimes = () => {
   const [crimes, setCrimes] = useState([]);
@@ -70,6 +71,11 @@ const Crimes = () => {
       updateCrimeStatus(selectedCrimeId, newStatus);
     }
     setIsStatusModalOpen(false);
+  };
+
+  const handleDeleteCrime = (crime) => {
+    if (!window.confirm(`Delete incident "${crime.title}"?`)) return;
+    deleteCrime(crime.id);
   };
 
   return (
@@ -167,6 +173,15 @@ const Crimes = () => {
                       >
                         Update Status
                       </Button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteCrime(crime)}
+                        className="h-9 w-9 flex shrink-0 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition-colors hover:bg-rose-100 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20"
+                        title="Delete incident"
+                        aria-label={`Delete incident ${crime.id}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </div>
 
