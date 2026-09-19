@@ -14,15 +14,12 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
 import { useAuth } from "../../context/AuthContext";
-
-const AuthorityLayout = () => {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
 import ScrollReveal from "../ui/ScrollReveal";
 
 const AuthorityLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const links = [
     {
