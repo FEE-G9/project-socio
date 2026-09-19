@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
@@ -98,21 +98,6 @@ export default function Home() {
      LOAD REPORTS FROM THE CURRENT USER'S SOCIETY
   ========================================================= */
 
- const loadUserReports = () => {
-  try {
-    const currentEmail =
-      user?.email?.trim().toLowerCase();
-
-    const currentUserId = user?.id;
-    const currentCommunityId = user?.communityId;
-    const currentCommunityName = user?.communityName?.trim().toLowerCase();
-
-    if (!currentEmail && !currentUserId && !currentCommunityId && !currentCommunityName) {
-      setUserReports([]);
-      return;
-     INITIAL SAMPLE COLONY REPORTS FOR SEEDING IF EMPTY
-  ========================================================= */
-
   const INITIAL_COLONY_REPORTS = [
     {
       id: "ISSUE-101",
@@ -200,225 +185,43 @@ export default function Home() {
     }
   ];
 
-  /* =========================================================
-     LOAD REPORTS OF ALL INDIVIDUALS IN THE SAME COLONY
-  ========================================================= */
-
   const loadUserReports = () => {
     try {
       const currentEmail = user?.email?.trim().toLowerCase();
       const currentUserId = user?.id;
-      const userColonyId = user?.communityId || "colony-1";
-      const userColonyName = (user?.communityName || "Green Meadows Heights")
-        .trim()
-        .toLowerCase();
-
-      let storedRaw = localStorage.getItem("sociosphere_user_reports");
-      if (!storedRaw) {
-        localStorage.setItem(
-          "sociosphere_user_reports",
-          JSON.stringify(INITIAL_COLONY_REPORTS)
-        );
-        storedRaw = JSON.stringify(INITIAL_COLONY_REPORTS);
-      }
-
-        const emailMatches =
-          currentEmail &&
-          reportEmail === currentEmail;
-
-        const idMatches =
-          currentUserId &&
-          report?.reportedById === currentUserId;
-
+      const currentCommunityId = user?.communityId;
+      const currentCommunityName = user?.communityName?.trim().toLowerCase();
+      const storedReports = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
+      const authorityIssues = getIssues();
+      const reports = [...authorityIssues, ...storedReports.filter((report) => !authorityIssues.some((issue) => issue.id === report.id))];
+      const filteredReports = reports.filter((report) => {
+        const reportEmail = report?.reportedByEmail?.trim().toLowerCase();
+        const emailMatches = currentEmail && reportEmail === currentEmail;
+        const idMatches = currentUserId && report?.reportedById === currentUserId;
         const reportCommunityId = report?.communityId;
-        const reportCommunityName = (
-          report?.communityName ||
-          report?.colonyName ||
-          report?.society ||
-          report?.community
-        )?.trim().toLowerCase();
-
-        const communityMatches =
-          (currentCommunityId && reportCommunityId === currentCommunityId) ||
-          (currentCommunityName && reportCommunityName === currentCommunityName);
-
-        // Legacy records without society metadata remain visible only to their author.
-        return communityMatches || (
-          !reportCommunityId &&
-          !reportCommunityName &&
-          (emailMatches || idMatches)
-        );
-      })
-      .map((report) => {
-        const isCrime =
-          report?.reportType === "crime" ||
-          report?.id?.startsWith("CRM-");
-
+        const reportCommunityName = (report?.communityName || report?.colonyName || report?.society || report?.community)?.trim().toLowerCase();
+        const communityMatches = (currentCommunityId && reportCommunityId === currentCommunityId) || (currentCommunityName && reportCommunityName === currentCommunityName);
+        return communityMatches || (!reportCommunityId && !reportCommunityName && (emailMatches || idMatches));
+      }).map((report) => {
+        const isCrime = report?.reportType === "crime" || report?.id?.startsWith("CRM-");
         return {
           ...report,
-
-          priority:
-            report.priority ||
-            (report.severity
-              ? `${report.severity} Priority`
-              : isCrime
-                ? "High Priority"
-                : "Medium Priority"),
-
-          priorityClass:
-            report.priorityClass ||
-            (
-              report.severity ||
-              (isCrime ? "critical" : "medium")
-            ).toLowerCase(),
-
-          status:
-            report.status ||
-            "In Progress",
-
-          statusClass:
-            report.statusClass ||
-            (
-              report.status === "Resolved"
-                ? "resolved"
-                : "progress"
-            ),
-
-          date:
-            report.date ||
-            (
-              report.createdAt ||
-              report.timestamp
-            )
-              ? new Date(
-                  report.createdAt ||
-                  report.timestamp
-                ).toLocaleDateString()
-              : "Recently",
-
-          eta:
-            report.eta ||
-            report.aiAnalysis
-              ?.estimatedResolutionTime ||
-            (isCrime
-              ? "Security Dispatched"
-              : "Pending Dispatch"),
-
-          image:
-            report.image || null,
-
-          reportType:
-            isCrime ? "crime" : "civic",
+          priority: report.priority || (report.severity ? `${report.severity} Priority` : isCrime ? "High Priority" : "Medium Priority"),
+          priorityClass: report.priorityClass || (report.severity || (isCrime ? "critical" : "medium")).toLowerCase(),
+          status: report.status || "In Progress",
+          statusClass: report.statusClass || (report.status === "Resolved" ? "resolved" : "progress"),
+          date: report.date || (report.createdAt || report.timestamp ? new Date(report.createdAt || report.timestamp).toLocaleDateString() : "Recently"),
+          eta: report.eta || report.aiAnalysis?.estimatedResolutionTime || (isCrime ? "Security Dispatched" : "Pending Dispatch"),
+          image: report.image || null,
+          reportType: isCrime ? "crime" : "civic",
         };
       });
-
-    setUserReports(filteredReports);
-  } catch (error) {
-    console.error(
-      "Failed to load user reports:",
-      error
-    );
-      const storedReports = JSON.parse(storedRaw || "[]");
-
-      const filteredReports = storedReports
-        .filter((report) => {
-          const reportEmail = report?.reportedByEmail?.trim().toLowerCase();
-          const reportColonyId = report?.communityId || report?.colonyId;
-          const reportColonyName = (
-            report?.communityName ||
-            report?.colonyName ||
-            report?.colony ||
-            ""
-          )
-            .trim()
-            .toLowerCase();
-
-          // Match by current user
-          const emailMatches = currentEmail && reportEmail === currentEmail;
-          const idMatches = currentUserId && report?.reportedById === currentUserId;
-
-          // Match by colony / community of user
-          const colonyIdMatches =
-            userColonyId && reportColonyId && reportColonyId === userColonyId;
-          const colonyNameMatches =
-            userColonyName &&
-            reportColonyName &&
-            reportColonyName === userColonyName;
-
-          // Fallback matching if report has no colony specified
-          const noColonySet = !reportColonyId && !reportColonyName;
-
-          return (
-            emailMatches ||
-            idMatches ||
-            colonyIdMatches ||
-            colonyNameMatches ||
-            noColonySet
-          );
-        })
-        .map((report) => {
-          const isCrime =
-            report?.reportType === "crime" ||
-            report?.id?.startsWith("CRM-");
-
-          const reporterPersonName =
-            report?.reportedBy ||
-            report?.personName ||
-            (isCrime ? "Anonymous Resident" : "Resident Citizen");
-
-          return {
-            ...report,
-
-            reportedBy: reporterPersonName,
-            personName: reporterPersonName,
-
-            priority:
-              report.priority ||
-              (report.severity
-                ? `${report.severity} Priority`
-                : isCrime
-                  ? "High Priority"
-                  : "Medium Priority"),
-
-            priorityClass:
-              report.priorityClass ||
-              (
-                report.severity ||
-                (isCrime ? "critical" : "medium")
-              ).toLowerCase(),
-
-            status: report.status || "In Progress",
-
-            statusClass:
-              report.statusClass ||
-              (report.status === "Resolved" ? "resolved" : "progress"),
-
-            date:
-              report.date ||
-              (report.createdAt || report.timestamp
-                ? new Date(
-                    report.createdAt || report.timestamp
-                  ).toLocaleDateString()
-                : "Recently"),
-
-            eta:
-              report.eta ||
-              report.aiAnalysis?.estimatedResolutionTime ||
-              (isCrime ? "Security Dispatched" : "Pending Dispatch"),
-
-            image: report.image || null,
-
-            reportType: isCrime ? "crime" : "civic",
-          };
-        });
-
       setUserReports(filteredReports);
     } catch (error) {
       console.error("Failed to load user reports:", error);
       setUserReports([]);
     }
   };
-
   /* =========================================================
      LOAD ON USER CHANGE + DATA UPDATE
   ========================================================= */
@@ -1025,7 +828,7 @@ export default function Home() {
                       <div className="issue-time">
                         <span>{issue.date}</span>
 
-                        <span>•</span>
+                        <span>â€¢</span>
 
                         <strong>
                           ETA: {issue.eta || "Pending"}
@@ -1237,7 +1040,7 @@ export default function Home() {
                       <div className="issue-time">
                         <span>{crime.date}</span>
 
-                        <span>•</span>
+                        <span>â€¢</span>
 
                         <strong className="text-rose-300">
                           Status:{" "}
@@ -1313,7 +1116,7 @@ export default function Home() {
               </strong>
 
               <p>
-                Tomorrow • 10:00 AM • Open Amphitheatre
+                Tomorrow â€¢ 10:00 AM â€¢ Open Amphitheatre
               </p>
             </div>
           </div>
@@ -1351,7 +1154,7 @@ export default function Home() {
           </strong>
 
           <span>
-            • {user?.communityName || "Your Community"}
+            â€¢ {user?.communityName || "Your Community"}
           </span>
         </div>
 
@@ -1360,7 +1163,7 @@ export default function Home() {
             Powered by SocioAI Civic Engine
           </span>
 
-          <span>•</span>
+          <span>â€¢</span>
 
           <button
             onClick={() =>
@@ -1450,7 +1253,7 @@ export default function Home() {
               onClick={() => setActiveModal("reportCrime")}
               className="mt-5 w-full text-sm font-semibold text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
             >
-              It is not immediate — report a crime or safety issue
+              It is not immediate â€” report a crime or safety issue
             </button>
           </div>
         </div>,
@@ -1731,3 +1534,4 @@ export default function Home() {
     </div>
   );
 }
+

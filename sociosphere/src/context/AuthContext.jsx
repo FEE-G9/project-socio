@@ -131,32 +131,25 @@ export const AuthProvider = ({ children }) => {
           avatarStyle: existingUser.avatarStyle || 'classic',
         }
       : {
-      id: `usr-${Date.now()}`,
-      name: resolvedName,
-    const normalizedEmail = (email || username || 'user@sociosphere.io').trim().toLowerCase();
-    const existingUser = getAccounts()[normalizedEmail];
-    const fallbackName = name || username || (role === 'authority' ? 'Authority Administrator' : 'Resident Citizen');
-
-    const newUser = existingUser || {
-      id: `usr-${Date.now()}`,
-      name: fallbackName,
-      email: normalizedEmail,
-      role: role || 'citizen',
-      communityId: foundColony ? foundColony.id : 'colony-1',
-      communityName: communityName || (foundColony ? foundColony.name : 'Green Meadows Heights'),
-      unitNumber: unitNumber || '',
-      phone: phone || '',
-      city: city || '',
-      department: department || '',
-      age: age || '',
-      occupation: occupation || '',
-      avatar: role === 'authority'
-        ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80'
-        : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      avatarStyle: 'classic',
-      joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-      joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-    };
+          id: `usr-${Date.now()}`,
+          name: resolvedName,
+          email: normalizedEmail,
+          role: role || 'citizen',
+          communityId: foundColony ? foundColony.id : 'colony-1',
+          communityName: communityName || (foundColony ? foundColony.name : 'Green Meadows Heights'),
+          unitNumber: unitNumber || '',
+          phone: phone || '',
+          city: city || 'Rajpura',
+          communityCity: city || 'Rajpura',
+          department: department || '',
+          age: age || '',
+          occupation: occupation || '',
+          avatar: role === 'authority'
+            ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80'
+            : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+          avatarStyle: 'classic',
+          joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        };
 
     setUser(newUser);
     setIsAuthenticated(true);
