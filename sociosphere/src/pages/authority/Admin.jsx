@@ -20,9 +20,11 @@ import Spinner from '../../components/ui/Spinner';
 import { mockFinance } from '../../data/mockFinance';
 import { getIssues } from '../../data/mockIssues';
 import { getCrimes } from '../../data/mockCrimes';
+import { useAlert } from '../../context/AlertContext';
 
 const AdminHome = () => {
   const navigate = useNavigate();
+  const { triggerAdminAlert } = useAlert();
   const [activeModal, setActiveModal] = useState(null); // 'reports', 'announcement', 'logs', 'members'
   const [isLoading, setIsLoading] = useState(false);
   
@@ -90,11 +92,10 @@ const AdminHome = () => {
             <Button variant="secondary" className="text-sm" onClick={() => handleAction('reports')}>
               View Reports
             </Button>
-            {/* 
-            <Button className="text-sm" onClick={() => handleAction('announcement')}>
-              Post Announcement
+            <Button className="bg-red-600 hover:bg-red-700 text-white text-sm border-0 flex items-center gap-2" onClick={() => handleAction('redAlert')}>
+              <AlertTriangle size={16} className="animate-pulse" />
+              Red Alert
             </Button>
-            */}
           </div>
       </div>
 
@@ -287,6 +288,48 @@ const AdminHome = () => {
           </div>
           <Button className="w-full mt-2" onClick={simulateLoadingAction} disabled={isLoading}>
             {isLoading ? <Spinner size="sm" /> : "Download PDF"}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Red Alert Modal */}
+      <Modal isOpen={activeModal === 'redAlert'} onClose={closeModal} title="Initialize Red Alert">
+        <div className="space-y-4">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Send a mass emergency warning to all residents. This will immediately override their screens with a high-priority alarm.
+          </p>
+          
+          <div>
+            <label className="block text-sm font-bold mb-1 text-slate-900 dark:text-slate-100">Emergency Category</label>
+            <select id="redAlertCategory" className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-xl p-3 focus:ring-2 focus:ring-red-500 outline-none text-slate-900 dark:text-slate-100">
+              <option value="Fire">🔥 Fire</option>
+              <option value="Robbery / Intruder">🦹 Robbery / Intruder</option>
+              <option value="Medical Emergency">🚑 Medical Emergency</option>
+              <option value="Natural Disaster">🌪️ Natural Disaster</option>
+              <option value="Other">⚠️ Other</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-bold mb-1 text-slate-900 dark:text-slate-100">Directive to Residents</label>
+            <input 
+              type="text" 
+              id="redAlertDirective" 
+              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-xl p-3 outline-none focus:ring-2 focus:ring-red-500 text-slate-900 dark:text-slate-100" 
+              placeholder="e.g., Block C Evacuation: Avoid Main Elevator" 
+            />
+          </div>
+          
+          <Button 
+            className="w-full bg-red-600 hover:bg-red-700 text-white mt-4 border-0" 
+            onClick={() => {
+              const category = document.getElementById('redAlertCategory').value;
+              const directive = document.getElementById('redAlertDirective').value || 'Please evacuate the area and follow standard emergency procedures.';
+              triggerAdminAlert(category, directive);
+              closeModal();
+            }}
+          >
+            Dispatch Red Alert
           </Button>
         </div>
       </Modal>
