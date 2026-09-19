@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Home.css";
+import "./home.css";
 
 import Report from "./Report";
 import ReportCrime from "./ReportCrime";
@@ -8,7 +8,6 @@ import Map from "./Map";
 
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
-import { getIssues, saveIssues } from "../../data/mockIssues";
 // import Map from "./Map";
 
 import {
@@ -31,7 +30,6 @@ import {
   MessageSquare,
   FileText,
   ShieldAlert,
-  PhoneCall,
 } from "lucide-react";
 
 const quickActions = [
@@ -113,16 +111,9 @@ export default function Home() {
     // Civic + Crime
     // =====================================================
 
-    const legacyReports = JSON.parse(
+    const storedReports = JSON.parse(
       localStorage.getItem("sociosphere_user_reports") || "[]"
     );
-    const authorityIssues = getIssues();
-    const storedReports = [
-      ...authorityIssues,
-      ...legacyReports.filter((report) =>
-        !authorityIssues.some((issue) => issue.id === report.id)
-      ),
-    ];
 
     const filteredReports = storedReports
       .filter((report) => {
@@ -261,8 +252,6 @@ export default function Home() {
       "sociosphere_user_reports",
       JSON.stringify(updatedReports)
     );
-
-    saveIssues(getIssues().filter((report) => report.id !== issue.id));
 
     window.dispatchEvent(
       new Event("sociosphere_data_updated")
@@ -542,10 +531,13 @@ export default function Home() {
             <button
               className="emergency-button"
               onClick={() => {
-                setActiveModal("emergency");
+                navigate("/citizen/report-crime");
+                setActiveModal("reportCrime");
+
+                showToast(
+                  "Emergency Crime & Safety portal opened"
+                );
               }}
-              aria-haspopup="dialog"
-              aria-label="Open emergency call options"
             >
               <span className="emergency-icon">
                 !
@@ -604,11 +596,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* ===================================================
-          QUICK ACTIONS
-      =================================================== */}
+      <main className="home-main">
+        {/* ===================================================
+            QUICK ACTIONS
+        =================================================== */}
 
-      <section className="section-header quick-header">
+        <section className="section-header quick-header">
           <h2>Quick Civic Actions</h2>
           <span>One-tap resident utilities</span>
         </section>
@@ -1095,6 +1088,7 @@ export default function Home() {
             </div>
           </div>
         </section>
+      </main>
 
       {/* =====================================================
           FOOTER
@@ -1214,6 +1208,8 @@ export default function Home() {
         </div>
       )}
 
+      {/* MAP MODAL - COMMENTED OUT FOR FUTURE USE */}
+      {/* {activeModal === "map" && (
       {/* =====================================================
           REPORT ISSUE MODAL
       ===================================================== */}
@@ -1366,7 +1362,7 @@ export default function Home() {
           MAP MODAL
       ===================================================== */}
 
-      {/* {activeModal === "map" && (
+      {activeModal === "map" && (
         <div
           className="modal-overlay"
           onClick={() => setActiveModal(null)}
@@ -1427,7 +1423,7 @@ export default function Home() {
             />
           </div>
         </div>
-      )}
+      )} 
 
       {/* =====================================================
           COMING SOON MODAL
@@ -1435,27 +1431,27 @@ export default function Home() {
 
       {comingSoonFeature && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/55 p-4 backdrop-blur-sm dark:bg-black/70"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
           onClick={() =>
             setComingSoonFeature(null)
           }
         >
           <div
-            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-[#0D1524]"
+            className="w-full max-w-md rounded-2xl border border-slate-700 bg-[#0D1524] p-6 shadow-2xl"
             onClick={(event) =>
               event.stopPropagation()
             }
           >
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
               <Sparkles size={22} />
             </div>
 
             <div className="mt-4 text-center">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+              <h3 className="text-xl font-bold text-slate-100">
                 {comingSoonFeature}
               </h3>
 
-              <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              <p className="mt-2 text-sm leading-relaxed text-slate-400">
                 This feature is currently under
                 development and will be available soon
                 on SocioSphere.
@@ -1465,7 +1461,7 @@ export default function Home() {
                 onClick={() =>
                   setComingSoonFeature(null)
                 }
-                className="mt-6 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:bg-emerald-500 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
+                className="mt-6 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 transition-all duration-200 hover:bg-emerald-400"
               >
                 Got it
               </button>
