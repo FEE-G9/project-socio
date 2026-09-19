@@ -136,7 +136,7 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 			updatedAt: now.toISOString(),
 			eta: "Security Dispatched",
 			fileName: fileName || null,
-			image: fileUrl || null,
+			image: null,
 
 			// Person's name and reporter metadata
 			reporterName: personName,
@@ -184,23 +184,7 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 
 			console.log("Crime report saved successfully to LocalStorage:", newCrimeIssue.id);
 		} catch (e) {
-			console.error("Failed to save crime report to localStorage, attempting fallback without image:", e);
-			try {
-				const fallbackCrime = { ...newCrimeIssue, image: null };
-				addCrime(fallbackCrime);
-				addIssue({
-					...fallbackCrime,
-					severity: severity === "critical" ? "Critical" : severity === "high" ? "High" : "Medium",
-					reporterAvatar: user?.avatar || null,
-				});
-				const stored = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
-				const nextStored = [fallbackCrime, ...stored.filter((item) => item.id !== fallbackCrime.id)];
-				localStorage.setItem("sociosphere_user_reports", JSON.stringify(nextStored));
-				window.dispatchEvent(new Event("sociosphere_data_updated"));
-				window.dispatchEvent(new Event("sociosphere_crimes_updated"));
-			} catch (fallbackError) {
-				console.error("Fallback save also failed:", fallbackError);
-			}
+			console.error("Failed to save crime report to localStorage:", e);
 		}
 
 		setSubmitted(true);
@@ -216,34 +200,7 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 			setFileName(file.name);
 			const reader = new FileReader();
 			reader.onload = (e) => {
-				const img = new Image();
-				img.onload = () => {
-					const canvas = document.createElement("canvas");
-					const MAX_WIDTH = 800;
-					const MAX_HEIGHT = 800;
-					let width = img.width;
-					let height = img.height;
-
-					if (width > height) {
-						if (width > MAX_WIDTH) {
-							height *= MAX_WIDTH / width;
-							width = MAX_WIDTH;
-						}
-					} else {
-						if (height > MAX_HEIGHT) {
-							width *= MAX_HEIGHT / height;
-							height = MAX_HEIGHT;
-						}
-					}
-
-					canvas.width = width;
-					canvas.height = height;
-					const ctx = canvas.getContext("2d");
-					ctx.drawImage(img, 0, 0, width, height);
-					const compressedUrl = canvas.toDataURL("image/jpeg", 0.7);
-					setFileUrl(compressedUrl);
-				};
-				img.src = e.target.result;
+				setFileUrl(e.target.result);
 			};
 			reader.readAsDataURL(file);
 		} else {
