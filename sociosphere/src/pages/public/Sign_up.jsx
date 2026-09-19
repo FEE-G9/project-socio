@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import {
   User,
   Mail,
@@ -16,11 +17,11 @@ import {
   ShieldCheck,
   Building2,
 } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  
+  const { login, updateUserProfile } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -58,22 +59,30 @@ const SignUp = () => {
     const occupation = form.occupation?.value || "";
     const department = form.department?.value || "";
 
-    login({
-      name: fullName,
-      email: email,
-      username: username,
-      role: role,
+    const account = login({
+      name: fullName.trim(),
+      email: email.trim(),
+      username: username.trim(),
+      role,
       communityName: colony,
       communityId: colony ? `col-${colony.substring(0, 3).toLowerCase()}` : undefined,
-      department: department,
-      age: age,
-      occupation: occupation,
+      department,
+      age,
+      occupation,
     });
 
-    // Temporary navigation until backend/authentication is connected
+    updateUserProfile({
+      ...account,
+      username: username.trim(),
+      age: age,
+      occupation: occupation.trim() || department,
+      communityName: colony || account.communityName,
+    });
+
     if (role === "authority") {
       navigate("/authority/home");
     } else {
+      sessionStorage.setItem("sociosphere_show_welcome", "true");
       navigate("/citizen/home");
     }
   };

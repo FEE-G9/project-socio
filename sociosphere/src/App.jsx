@@ -15,8 +15,10 @@ import ReportCrime from "./pages/citizen/ReportCrime";
 
 import Home from "./pages/citizen/Home";
 import Profile from "./pages/citizen/Profile";
+import Settings from "./pages/citizen/Settings";
 import Dashboard from "./pages/citizen/Dashboard";
 import Announcements from "./pages/citizen/Announcements";
+import Maintenance from "./pages/citizen/Maintenance";
 
 import AdminHome from "./pages/authority/Admin";
 import Analytics from "./pages/authority/Analytics";
@@ -28,6 +30,7 @@ import PostAnnouncement from "./pages/authority/PostAnnouncement";
 import AuthorityProfile from "./pages/authority/AuthorityProfile";
 
 import RedAlertOverlay from "./components/ui/RedAlertOverlay";
+import BackToTop from "./components/ui/BackToTop";
 
 function App() {
   return (
@@ -50,6 +53,8 @@ function App() {
           <Route path="report" element={<Report />} />
           <Route path="report-crime" element={<ReportCrime />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="fees" element={<Maintenance />} />
           <Route path="announcements" element={<Announcements />} />
         </Route>
 
@@ -72,6 +77,7 @@ function App() {
           element={<Navigate to="/" replace />}
         />
       </Routes>
+      <BackToTop />
     </>
   );
 }

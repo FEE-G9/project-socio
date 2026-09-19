@@ -77,6 +77,21 @@ export const saveCrimes = (crimes) => {
   window.dispatchEvent(new Event('sociosphere_crimes_updated'));
 };
 
+export const deleteCrime = (crimeId) => {
+  const crimes = getCrimes().filter((crime) => crime.id !== crimeId);
+  saveCrimes(crimes);
+
+  const reports = JSON.parse(
+    localStorage.getItem('sociosphere_user_reports') || '[]'
+  );
+  localStorage.setItem(
+    'sociosphere_user_reports',
+    JSON.stringify(reports.filter((report) => report.id !== crimeId))
+  );
+  window.dispatchEvent(new Event('sociosphere_data_updated'));
+  return crimes;
+};
+
 export const addCrime = (newCrime) => {
   const crimes = getCrimes();
   const updated = [newCrime, ...crimes];

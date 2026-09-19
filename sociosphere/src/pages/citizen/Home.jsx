@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
-import "./home.css";
+import "./Home.css";
 
 import Report from "./Report";
 import ReportCrime from "./ReportCrime";
@@ -8,6 +9,7 @@ import Map from "./Map";
 
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import { getIssues, saveIssues } from "../../data/mockIssues";
 // import Map from "./Map";
 
 import {
@@ -15,6 +17,7 @@ import {
   MapPin,
   Bell,
   Users,
+  User,
   Trash2,
   CreditCard,
   Plus,
@@ -30,6 +33,7 @@ import {
   MessageSquare,
   FileText,
   ShieldAlert,
+  PhoneCall,
 } from "lucide-react";
 
 const quickActions = [
@@ -91,121 +95,133 @@ export default function Home() {
   };
 
   /* =========================================================
-     LOAD ONLY CURRENT USER'S REPORTS
+     LOAD REPORTS FROM THE CURRENT USER'S SOCIETY
   ========================================================= */
 
- const loadUserReports = () => {
-  try {
-    const currentEmail =
-      user?.email?.trim().toLowerCase();
-
-    const currentUserId = user?.id;
-
-    if (!currentEmail && !currentUserId) {
-      setUserReports([]);
-      return;
+  const INITIAL_COLONY_REPORTS = [
+    {
+      id: "ISSUE-101",
+      title: "Main Avenue Water Pipeline Leakage near Block B Park",
+      category: "Water Supply & Plumbing",
+      priority: "HIGH PRIORITY",
+      priorityClass: "high",
+      status: "In Progress",
+      statusClass: "progress",
+      location: "Block B, Near Central Fountain",
+      description: "Clean drinking water is leaking profusely from the main pipeline connection. Water pressure in Block B apartments has dropped by 40%.",
+      date: "Sep 5, 2026",
+      eta: "24 Hours",
+      reportedBy: "Aarav Sharma",
+      personName: "Aarav Sharma",
+      reportedByEmail: "aarav@sociosphere.io",
+      communityId: "colony-1",
+      communityName: "Green Meadows Heights",
+      colony: "Green Meadows Heights",
+      reportType: "civic",
+      image: "https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "ISSUE-102",
+      title: "Broken Solar Streetlights along Perimeter Road",
+      category: "Electrical & Lighting",
+      priority: "MEDIUM PRIORITY",
+      priorityClass: "medium",
+      status: "In Progress",
+      statusClass: "progress",
+      location: "Perimeter Wall Gate 3 to Gate 4",
+      description: "Three consecutive solar streetlights have gone dark since yesterday evening. The stretch is dark during night hours.",
+      date: "Sep 6, 2026",
+      eta: "48 Hours",
+      reportedBy: "Priya Patel",
+      personName: "Priya Patel",
+      reportedByEmail: "priya@sociosphere.io",
+      communityId: "colony-1",
+      communityName: "Green Meadows Heights",
+      colony: "Green Meadows Heights",
+      reportType: "civic",
+      image: "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "ISSUE-103",
+      title: "Uncollected Green Waste after Garden Pruning",
+      category: "Sanitation & Waste",
+      priority: "LOW PRIORITY",
+      priorityClass: "low",
+      status: "Resolved",
+      statusClass: "resolved",
+      location: "Community Center Lawn",
+      description: "Tree branches and garden clippings were left piled near the recycling bin area following seasonal tree trimming.",
+      date: "Sep 2, 2026",
+      eta: "Cleared",
+      reportedBy: "Rohan Verma",
+      personName: "Rohan Verma",
+      reportedByEmail: "rohan@sociosphere.io",
+      communityId: "colony-1",
+      communityName: "Green Meadows Heights",
+      colony: "Green Meadows Heights",
+      reportType: "civic",
+      image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "CRM-2026-104",
+      title: "Bicycle Theft Attempt near Underground Parking B2",
+      category: "Theft & Burglary Incident",
+      priority: "CRITICAL PRIORITY",
+      priorityClass: "critical",
+      status: "In Progress",
+      statusClass: "progress",
+      location: "Basement B2, Pillar #14",
+      description: "Lock on gear cycle was tampered with between 10 PM and 11 PM. CCTV footage request submitted to security desk.",
+      date: "Sep 6, 2026",
+      eta: "Security Dispatched",
+      reportedBy: "Vikram Malhotra",
+      personName: "Vikram Malhotra",
+      reportedByEmail: "vikram@sociosphere.io",
+      communityId: "colony-1",
+      communityName: "Green Meadows Heights",
+      colony: "Green Meadows Heights",
+      reportType: "crime",
+      image: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=800&q=80"
     }
+  ];
 
-    // =====================================================
-    // ALL USER REPORTS
-    // Civic + Crime
-    // =====================================================
-
-    const storedReports = JSON.parse(
-      localStorage.getItem("sociosphere_user_reports") || "[]"
-    );
-
-    const filteredReports = storedReports
-      .filter((report) => {
-        const reportEmail =
-          report?.reportedByEmail
-            ?.trim()
-            .toLowerCase();
-
-        const emailMatches =
-          currentEmail &&
-          reportEmail === currentEmail;
-
-        const idMatches =
-          currentUserId &&
-          report?.reportedById === currentUserId;
-
-        return emailMatches || idMatches;
-      })
-      .map((report) => {
-        const isCrime =
-          report?.reportType === "crime" ||
-          report?.id?.startsWith("CRM-");
-
+  const loadUserReports = () => {
+    try {
+      const currentEmail = user?.email?.trim().toLowerCase();
+      const currentUserId = user?.id;
+      const currentCommunityId = user?.communityId;
+      const currentCommunityName = user?.communityName?.trim().toLowerCase();
+      const storedReports = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
+      const authorityIssues = getIssues();
+      const reports = [...authorityIssues, ...storedReports.filter((report) => !authorityIssues.some((issue) => issue.id === report.id))];
+      const filteredReports = reports.filter((report) => {
+        const reportEmail = report?.reportedByEmail?.trim().toLowerCase();
+        const emailMatches = currentEmail && reportEmail === currentEmail;
+        const idMatches = currentUserId && report?.reportedById === currentUserId;
+        const reportCommunityId = report?.communityId;
+        const reportCommunityName = (report?.communityName || report?.colonyName || report?.society || report?.community)?.trim().toLowerCase();
+        const communityMatches = (currentCommunityId && reportCommunityId === currentCommunityId) || (currentCommunityName && reportCommunityName === currentCommunityName);
+        return communityMatches || (!reportCommunityId && !reportCommunityName && (emailMatches || idMatches));
+      }).map((report) => {
+        const isCrime = report?.reportType === "crime" || report?.id?.startsWith("CRM-");
         return {
           ...report,
-
-          priority:
-            report.priority ||
-            (report.severity
-              ? `${report.severity} Priority`
-              : isCrime
-                ? "High Priority"
-                : "Medium Priority"),
-
-          priorityClass:
-            report.priorityClass ||
-            (
-              report.severity ||
-              (isCrime ? "critical" : "medium")
-            ).toLowerCase(),
-
-          status:
-            report.status ||
-            "In Progress",
-
-          statusClass:
-            report.statusClass ||
-            (
-              report.status === "Resolved"
-                ? "resolved"
-                : "progress"
-            ),
-
-          date:
-            report.date ||
-            (
-              report.createdAt ||
-              report.timestamp
-            )
-              ? new Date(
-                  report.createdAt ||
-                  report.timestamp
-                ).toLocaleDateString()
-              : "Recently",
-
-          eta:
-            report.eta ||
-            report.aiAnalysis
-              ?.estimatedResolutionTime ||
-            (isCrime
-              ? "Security Dispatched"
-              : "Pending Dispatch"),
-
-          image:
-            report.image || null,
-
-          reportType:
-            isCrime ? "crime" : "civic",
+          priority: report.priority || (report.severity ? `${report.severity} Priority` : isCrime ? "High Priority" : "Medium Priority"),
+          priorityClass: report.priorityClass || (report.severity || (isCrime ? "critical" : "medium")).toLowerCase(),
+          status: report.status || "In Progress",
+          statusClass: report.statusClass || (report.status === "Resolved" ? "resolved" : "progress"),
+          date: report.date || (report.createdAt || report.timestamp ? new Date(report.createdAt || report.timestamp).toLocaleDateString() : "Recently"),
+          eta: report.eta || report.aiAnalysis?.estimatedResolutionTime || (isCrime ? "Security Dispatched" : "Pending Dispatch"),
+          image: report.image || null,
+          reportType: isCrime ? "crime" : "civic",
         };
       });
-
-    setUserReports(filteredReports);
-  } catch (error) {
-    console.error(
-      "Failed to load user reports:",
-      error
-    );
-
-    setUserReports([]);
-  }
-};
-
+      setUserReports(filteredReports);
+    } catch (error) {
+      console.error("Failed to load user reports:", error);
+      setUserReports([]);
+    }
+  };
   /* =========================================================
      LOAD ON USER CHANGE + DATA UPDATE
   ========================================================= */
@@ -227,54 +243,6 @@ export default function Home() {
   }, [user?.email, user?.id]);
 
   /* =========================================================
-     DELETE REPORT
-  ========================================================= */
-
-  const handleDeleteReport = (issue) => {
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this report?"
-  );
-
-  if (!confirmed) return;
-
-  try {
-    const reports = JSON.parse(
-      localStorage.getItem(
-        "sociosphere_user_reports"
-      ) || "[]"
-    );
-
-    const updatedReports = reports.filter(
-      (report) => report.id !== issue.id
-    );
-
-    localStorage.setItem(
-      "sociosphere_user_reports",
-      JSON.stringify(updatedReports)
-    );
-
-    window.dispatchEvent(
-      new Event("sociosphere_data_updated")
-    );
-
-    loadUserReports();
-
-    showToast(
-      "Report deleted successfully."
-    );
-  } catch (error) {
-    console.error(
-      "Failed to delete report:",
-      error
-    );
-
-    showToast(
-      "Unable to delete report."
-    );
-  }
-};
-
-  /* =========================================================
      QUICK ACTIONS
   ========================================================= */
 
@@ -294,12 +262,47 @@ export default function Home() {
     //   return;
     // }
 
-    if (
-      title === "Community Hub" ||
-      title === "Maintenance"
-    ) {
+    if (title === "Maintenance") {
+      setComingSoonFeature(title);
+      return;
+    }
+
+    if (title === "Community Hub") {
       setComingSoonFeature(title);
     }
+  };
+
+  const isOwnReport = (report) => {
+    const currentEmail = user?.email?.trim().toLowerCase();
+    return Boolean(
+      report?.reportedById === user?.id ||
+      (currentEmail &&
+        report?.reportedByEmail?.trim().toLowerCase() === currentEmail)
+    );
+  };
+
+  const handleDeleteReport = (report) => {
+    if (!isOwnReport(report)) {
+      showToast("You can only delete reports submitted by you.");
+      return;
+    }
+
+    if (!window.confirm("Delete this report? This action cannot be undone.")) {
+      return;
+    }
+
+    const remainingIssues = getIssues().filter((issue) => issue.id !== report.id);
+    saveIssues(remainingIssues);
+
+    const storedReports = JSON.parse(
+      localStorage.getItem("sociosphere_user_reports") || "[]"
+    );
+    localStorage.setItem(
+      "sociosphere_user_reports",
+      JSON.stringify(storedReports.filter((issue) => issue.id !== report.id))
+    );
+    window.dispatchEvent(new Event("sociosphere_data_updated"));
+    showToast("Report deleted.");
   };
 
   /* =========================================================
@@ -502,6 +505,26 @@ export default function Home() {
             .includes("HIGH"))
     ).length;
 
+  const displayName = user?.name && !user.name.includes("@")
+    ? user.name.split(" ")[0]
+    : "Resident";
+  const currentHour = new Date().getHours();
+  const timeGreeting =
+    currentHour >= 5 && currentHour < 12
+      ? "Good morning"
+      : currentHour >= 12 && currentHour < 17
+        ? "Good afternoon"
+        : currentHour >= 17 && currentHour < 21
+          ? "Good evening"
+          : "Good night";
+
+  const getProgressStep = (issue) => {
+    if (issue.status === "Resolved") return 4;
+    if (issue.status === "In Progress" || issue.status === "Security Dispatched") return 3;
+    if (issue.status === "Pending Dispatch") return 2;
+    return 1;
+  };
+
   return (
     <div
       className={`home-page ${
@@ -531,13 +554,10 @@ export default function Home() {
             <button
               className="emergency-button"
               onClick={() => {
-                navigate("/citizen/report-crime");
-                setActiveModal("reportCrime");
-
-                showToast(
-                  "Emergency Crime & Safety portal opened"
-                );
+                setActiveModal("emergency");
               }}
+              aria-haspopup="dialog"
+              aria-label="Open emergency call options"
             >
               <span className="emergency-icon">
                 !
@@ -550,6 +570,10 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      <section className="home-welcome">
+        <h1>{timeGreeting}, {displayName}</h1>
+      </section>
 
       {/* =====================================================
           NOTIFICATIONS
@@ -596,12 +620,11 @@ export default function Home() {
         </div>
       )}
 
-      <main className="home-main">
-        {/* ===================================================
-            QUICK ACTIONS
-        =================================================== */}
+      {/* ===================================================
+          QUICK ACTIONS
+      =================================================== */}
 
-        <section className="section-header quick-header">
+      <section className="section-header quick-header">
           <h2>Quick Civic Actions</h2>
           <span>One-tap resident utilities</span>
         </section>
@@ -639,7 +662,8 @@ export default function Home() {
           <div className="issues-heading">
             <div>
               <h2>
-                My Reported Civic Issues
+                Society Civic Issues
+                Community Civic Issues
 
                 <span className="count-badge">
                   {displayedCivicIssues.length}
@@ -647,8 +671,8 @@ export default function Home() {
               </h2>
 
               <p>
-                Track real-time progress, municipal technician
-                dispatch, and infrastructure resolution
+                Track civic reports and resolution progress across
+                your society
               </p>
             </div>
 
@@ -783,14 +807,28 @@ export default function Home() {
                           <MapPin size={15} />
                           {issue.location}
                         </div>
+
+                        <div className="issue-reporter flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mt-2">
+                          <User size={14} className="text-emerald-500 dark:text-emerald-400 shrink-0" />
+                          <span>Reported by: <strong className="text-slate-800 dark:text-slate-100 font-semibold">{issue.reportedBy || issue.personName || "Resident"}</strong></span>
+                        </div>
                       </div>
+                    </div>
+
+                    <div className="issue-progress" aria-label={`Report progress: step ${getProgressStep(issue)} of 4`}>
+                      {["Reported", "Reviewed", "Assigned", "Resolved"].map((step, index) => (
+                        <span key={step} className={index < getProgressStep(issue) ? "complete" : ""}>
+                          <i />
+                          <em>{step}</em>
+                        </span>
+                      ))}
                     </div>
 
                     <div className="issue-footer">
                       <div className="issue-time">
                         <span>{issue.date}</span>
 
-                        <span>•</span>
+                        <span>â€¢</span>
 
                         <strong>
                           ETA: {issue.eta || "Pending"}
@@ -811,16 +849,16 @@ export default function Home() {
                           <ChevronRight size={16} />
                         </button>
 
-                        <button
-                          onClick={() =>
-                            handleDeleteReport(issue)
-                          }
-                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-400 transition-all duration-200 hover:bg-rose-500/20 hover:text-rose-300"
-                          title="Delete report"
-                          aria-label={`Delete report ${issue.id}`}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {isOwnReport(issue) ? (
+                          <button
+                            type="button"
+                            className="timeline-button text-rose-500 hover:text-rose-400"
+                            onClick={() => handleDeleteReport(issue)}
+                          >
+                            <Trash2 size={15} />
+                            Delete
+                          </button>
+                        ) : null}
                       </div>
                     </div>
                   </article>
@@ -843,7 +881,7 @@ export default function Home() {
                   className="text-rose-400"
                 />
 
-                Reported Crime & Safety Incidents
+                Community Crime & Safety Incidents
 
                 <span className="count-badge crime-badge">
                   {displayedCrimeIssues.length}
@@ -981,14 +1019,28 @@ export default function Home() {
                           <MapPin size={15} />
                           {crime.location}
                         </div>
+
+                        <div className="issue-reporter flex items-center gap-1.5 text-xs text-rose-400 dark:text-rose-300 font-medium mt-2">
+                          <User size={14} className="text-rose-400 dark:text-rose-400 shrink-0" />
+                          <span>Reported by: <strong className="text-rose-200 dark:text-rose-100 font-semibold">{crime.reportedBy || crime.personName || "Resident"}</strong></span>
+                        </div>
                       </div>
+                    </div>
+
+                    <div className="issue-progress" aria-label={`Report progress: step ${getProgressStep(crime)} of 4`}>
+                      {["Reported", "Reviewed", "Assigned", "Resolved"].map((step, index) => (
+                        <span key={step} className={index < getProgressStep(crime) ? "complete" : ""}>
+                          <i />
+                          <em>{step}</em>
+                        </span>
+                      ))}
                     </div>
 
                     <div className="issue-footer">
                       <div className="issue-time">
                         <span>{crime.date}</span>
 
-                        <span>•</span>
+                        <span>â€¢</span>
 
                         <strong className="text-rose-300">
                           Status:{" "}
@@ -1011,16 +1063,16 @@ export default function Home() {
                           <ChevronRight size={16} />
                         </button>
 
-                        <button
-                          onClick={() =>
-                            handleDeleteReport(crime)
-                          }
-                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-400 transition-all duration-200 hover:bg-rose-500/20 hover:text-rose-300"
-                          title="Delete crime report"
-                          aria-label={`Delete crime report ${crime.id}`}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {isOwnReport(crime) ? (
+                          <button
+                            type="button"
+                            className="timeline-button text-rose-500 hover:text-rose-400"
+                            onClick={() => handleDeleteReport(crime)}
+                          >
+                            <Trash2 size={15} />
+                            Delete
+                          </button>
+                        ) : null}
                       </div>
                     </div>
                   </article>
@@ -1064,7 +1116,7 @@ export default function Home() {
               </strong>
 
               <p>
-                Tomorrow • 10:00 AM • Open Amphitheatre
+                Tomorrow â€¢ 10:00 AM â€¢ Open Amphitheatre
               </p>
             </div>
           </div>
@@ -1088,7 +1140,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-      </main>
 
       {/* =====================================================
           FOOTER
@@ -1103,7 +1154,7 @@ export default function Home() {
           </strong>
 
           <span>
-            • {user?.communityName || "Your Community"}
+            â€¢ {user?.communityName || "Your Community"}
           </span>
         </div>
 
@@ -1112,7 +1163,7 @@ export default function Home() {
             Powered by SocioAI Civic Engine
           </span>
 
-          <span>•</span>
+          <span>â€¢</span>
 
           <button
             onClick={() =>
@@ -1142,8 +1193,73 @@ export default function Home() {
 
       {/* FOOTER */}
 
-      {/* MAP MODAL - COMMENTED OUT FOR FUTURE USE */}
-      {/* {activeModal === "map" && (
+      {/* =====================================================
+          EMERGENCY CALL MODAL
+      ===================================================== */}
+
+      {activeModal === "emergency" && createPortal(
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/10 p-4 backdrop-blur-sm dark:bg-slate-950/15"
+          onClick={() => setActiveModal(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="emergency-title"
+        >
+          <div
+            className="relative w-full max-w-md rounded-2xl border border-rose-500/40 bg-white p-6 shadow-2xl dark:bg-[#0D1524]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setActiveModal(null)}
+              className="absolute right-4 top-4 rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+              aria-label="Close emergency options"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400">
+              <PhoneCall size={27} />
+            </div>
+
+            <h2 id="emergency-title" className="mt-4 text-2xl font-extrabold text-slate-900 dark:text-white">
+              Emergency assistance
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              If there is immediate danger, call emergency services now. Your device will open its calling app.
+            </p>
+
+            <div className="mt-6 space-y-3">
+              <a
+                href="tel:112"
+                onClick={() => setActiveModal(null)}
+                className="flex items-center justify-between rounded-xl bg-rose-500 px-5 py-4 font-bold text-white transition hover:bg-rose-400"
+              >
+                <span className="flex items-center gap-3"><PhoneCall size={20} /> Call 112</span>
+                <span className="text-sm">National Emergency</span>
+              </a>
+              <a
+                href="tel:108"
+                onClick={() => setActiveModal(null)}
+                className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 font-bold text-slate-900 transition hover:border-rose-400 hover:bg-rose-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+              >
+                <span className="flex items-center gap-3"><PhoneCall size={20} /> Call 108</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">Ambulance</span>
+              </a>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setActiveModal("reportCrime")}
+              className="mt-5 w-full text-sm font-semibold text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+            >
+              It is not immediate â€” report a crime or safety issue
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* =====================================================
           REPORT ISSUE MODAL
       ===================================================== */}
@@ -1297,6 +1413,7 @@ export default function Home() {
       ===================================================== */}
 
       {/* {activeModal === "map" && (
+      {/* {activeModal === "map" && (
         <div
           className="modal-overlay"
           onClick={() => setActiveModal(null)}
@@ -1357,35 +1474,35 @@ export default function Home() {
             />
           </div>
         </div>
-      )} */}
+      )}
 
       {/* =====================================================
           COMING SOON MODAL
       ===================================================== */}
 
-      {comingSoonFeature && (
+      {comingSoonFeature && createPortal(
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/10 p-4 backdrop-blur-sm dark:bg-slate-950/15"
           onClick={() =>
             setComingSoonFeature(null)
           }
         >
           <div
-            className="w-full max-w-md rounded-2xl border border-slate-700 bg-[#0D1524] p-6 shadow-2xl"
+            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-[#0D1524]"
             onClick={(event) =>
               event.stopPropagation()
             }
           >
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
               <Sparkles size={22} />
             </div>
 
             <div className="mt-4 text-center">
-              <h3 className="text-xl font-bold text-slate-100">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                 {comingSoonFeature}
               </h3>
 
-              <p className="mt-2 text-sm leading-relaxed text-slate-400">
+              <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                 This feature is currently under
                 development and will be available soon
                 on SocioSphere.
@@ -1395,13 +1512,14 @@ export default function Home() {
                 onClick={() =>
                   setComingSoonFeature(null)
                 }
-                className="mt-6 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 transition-all duration-200 hover:bg-emerald-400"
+                className="mt-6 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:bg-emerald-500 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
               >
                 Got it
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* =====================================================
@@ -1416,3 +1534,4 @@ export default function Home() {
     </div>
   );
 }
+

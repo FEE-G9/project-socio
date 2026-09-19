@@ -14,23 +14,29 @@ function Login() {
   const handleLogin = (e) => {
     e.preventDefault();
 
+    const enteredUsername = username.trim();
+    const accountEmail = enteredUsername.includes("@")
+      ? enteredUsername.toLowerCase()
+      : enteredUsername
+        ? `${enteredUsername.toLowerCase().replace(/\s+/g, ".")}@sociosphere.local`
+        : "resident@sociosphere.io";
+
     const isAuthority =
-      username.toLowerCase().includes("admin") ||
-      username.toLowerCase().includes("authority");
+      enteredUsername.toLowerCase().includes("admin") ||
+      enteredUsername.toLowerCase().includes("authority");
 
     const role = isAuthority ? "authority" : "citizen";
 
     login({
-      name: username.trim() || (isAuthority ? "Authority Administrator" : "Resident Citizen"),
-      email: username.includes("@")
-        ? username.trim()
-        : (isAuthority ? "admin@sociosphere.io" : "resident@sociosphere.io"),
+      name: enteredUsername || (isAuthority ? "Authority Administrator" : "Resident Citizen"),
+      email: accountEmail,
       role: role,
     });
 
     if (isAuthority) {
       navigate("/authority/dashboard");
     } else {
+      sessionStorage.setItem("sociosphere_show_welcome", "true");
       navigate("/citizen/home");
     }
   };

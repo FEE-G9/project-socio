@@ -6,7 +6,6 @@ import {
   User,
   LogOut,
   ChevronDown,
-  Shield,
   Sun,
   Moon,
   Settings,
@@ -20,6 +19,13 @@ import {
 } from "react-router-dom";
 
 import { useTheme } from "../../context/ThemeContext";
+import UserAvatar from "../ui/UserAvatar";
+
+const navbarNotifications = [
+  { title: "Water supply maintenance", detail: "Service resumes at 4:00 PM", color: "bg-blue-500" },
+  { title: "Community meeting", detail: "RWA meeting starts tomorrow at 6:30 PM", color: "bg-emerald-500" },
+  { title: "Security update", detail: "Visitor verification is now active", color: "bg-amber-500" },
+];
 
 const Navbar = ({
   links = [],
@@ -33,6 +39,7 @@ const Navbar = ({
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,21 +74,30 @@ const Navbar = ({
     navigate(href);
   };
 
+  const settingsPath = location.pathname.startsWith("/authority")
+    ? "/authority/profile"
+    : "/citizen/settings";
+  const profilePath = location.pathname.startsWith("/authority")
+    ? "/authority/profile"
+    : "/citizen/profile";
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-md transition-colors duration-200 dark:border-slate-800 dark:bg-slate-950/95">
 
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 items-center justify-between pr-4 sm:pr-6 lg:pr-8">
 
         {/* BRAND */}
         {showBrand && (
           <button
             onClick={() => navigate("/")}
-            className="group flex items-center gap-2"
+            className="group flex items-center gap-2 md:w-[260px] md:justify-center"
             aria-label="Go to home"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white transition-all duration-200 group-hover:scale-105 group-hover:bg-emerald-500 group-hover:shadow-lg group-hover:shadow-emerald-500/20">
-              <Shield size={19} />
-            </div>
+            <img
+              src="/logo_main.png"
+              alt="SocioSphere"
+              className="h-10 w-10 object-contain transition-transform duration-200 group-hover:scale-105"
+            />
 
             <span className="text-lg font-bold text-slate-900 dark:text-white">
               Socio
@@ -138,21 +154,38 @@ const Navbar = ({
 
           {/* NOTIFICATIONS */}
           {showNotifications && (
-            <button
-              onClick={onNotificationClick}
-              className="relative rounded-xl p-2.5 text-slate-500 transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
-              aria-label="Notifications"
-            >
-              <Bell size={20} />
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setNotificationsOpen((open) => !open);
+                  onNotificationClick?.();
+                }}
+                className="relative rounded-xl p-2.5 text-slate-500 transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+                aria-label="Notifications"
+                aria-expanded={notificationsOpen}
+              >
+                <Bell size={20} />
 
-              {notificationCount > 0 && (
                 <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
-                  {notificationCount > 9
-                    ? "9+"
-                    : notificationCount}
+                  {notificationCount || navbarNotifications.length}
                 </span>
+              </button>
+
+              {notificationsOpen && (
+                <div className="absolute right-0 mt-2 w-80 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                  <div className="px-3 py-2 text-sm font-bold text-slate-900 dark:text-white">Notifications</div>
+                  {navbarNotifications.map((notification) => (
+                    <div key={notification.title} className="flex gap-3 rounded-xl px-3 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/70">
+                      <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${notification.color}`} />
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{notification.title}</p>
+                        <p className="mt-0.5 text-xs leading-5 text-slate-500 dark:text-slate-400">{notification.detail}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
-            </button>
+            </div>
           )}
 
           {/* PROFILE */}
@@ -167,17 +200,11 @@ const Navbar = ({
             >
 
               {/* AVATAR */}
-              {user?.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.name || "User"}
-                  className="h-9 w-9 rounded-full object-cover ring-2 ring-transparent transition-all duration-200 group-hover:ring-emerald-500/40"
-                />
-              ) : (
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 transition-all duration-200 group-hover:bg-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400">
-                  <User size={18} />
-                </div>
-              )}
+              <UserAvatar
+                user={user}
+                className="h-9 w-9 ring-2 ring-transparent transition-all duration-200 group-hover:ring-emerald-500/40"
+                iconSize={18}
+              />
 
               {/* NAME */}
               <div className="hidden text-left lg:block">
@@ -207,17 +234,7 @@ const Navbar = ({
                 {/* PROFILE HEADER */}
                 <div className="mb-2 flex items-center gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
 
-                  {user?.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt={user.name || "User"}
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
-                      <User size={18} />
-                    </div>
-                  )}
+                  <UserAvatar user={user} className="h-10 w-10" iconSize={18} />
 
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
@@ -249,11 +266,7 @@ const Navbar = ({
 
                 {/* PROFILE */}
                 <button
-                  onClick={() =>
-                    handleProfileNavigation(
-                      location.pathname.startsWith('/authority') ? '/authority/profile' : '/citizen/profile'
-                    )
-                  }
+                  onClick={() => handleProfileNavigation(profilePath)}
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                 >
                   <User size={16} />
@@ -275,15 +288,11 @@ const Navbar = ({
 
                 {/* SETTINGS */}
                 <button
-                  onClick={() =>
-                    handleProfileNavigation(
-                      location.pathname.startsWith('/authority') ? '/authority/profile' : '/citizen/profile'
-                    )
-                  }
+                  onClick={() => handleProfileNavigation(settingsPath)}
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                 >
                   <Settings size={16} />
-                  Settings
+                  Account settings
                 </button>
 
                 <div className="my-2 border-t border-slate-200 dark:border-slate-700" />
@@ -367,16 +376,34 @@ const Navbar = ({
             </button>
 
             {/* MOBILE PROFILE */}
+            {showNotifications && (
+              <div className="rounded-xl bg-slate-50 px-4 py-3 dark:bg-slate-800/60">
+                <p className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100"><Bell size={16} /> Notifications</p>
+                <div className="space-y-2">
+                  {navbarNotifications.map((notification) => (
+                    <div key={notification.title} className="flex gap-2 text-xs text-slate-600 dark:text-slate-300">
+                      <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${notification.color}`} />
+                      <span>{notification.title}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <button
-              onClick={() =>
-                handleProfileNavigation(
-                  location.pathname.startsWith('/authority') ? '/authority/profile' : '/citizen/profile'
-                )
-              }
+              onClick={() => handleProfileNavigation(profilePath)}
               className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               <User size={18} />
               Profile
+            </button>
+
+            <button
+              onClick={() => handleProfileNavigation(settingsPath)}
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              <Settings size={18} />
+              Settings
             </button>
 
             {/* MOBILE LOGOUT */}
