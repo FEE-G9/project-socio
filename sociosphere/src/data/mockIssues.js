@@ -243,14 +243,20 @@ export const getIssues = () => {
   const stored = localStorage.getItem('sociosphere_issues');
 
   if (!stored) {
-    return [];
+    localStorage.setItem('sociosphere_issues', JSON.stringify(INITIAL_ISSUES));
+    return INITIAL_ISSUES;
   }
 
   try {
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      localStorage.setItem('sociosphere_issues', JSON.stringify(INITIAL_ISSUES));
+      return INITIAL_ISSUES;
+    }
+    return parsed;
   } catch (error) {
     console.error('Failed to parse stored issues:', error);
-    return [];
+    return INITIAL_ISSUES;
   }
 };
 

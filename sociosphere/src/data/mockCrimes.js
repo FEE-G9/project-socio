@@ -1,6 +1,6 @@
-const STORAGE_KEY = 'sociosphere_crimes_v2';
+export const STORAGE_KEY = 'sociosphere_crimes_v2';
 
-const INITIAL_CRIMES = [
+export const INITIAL_CRIMES = [
   {
     id: "CRM-2026-84721",
     title: "Chain Snatching Incident",

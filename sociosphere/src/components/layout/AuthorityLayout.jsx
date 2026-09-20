@@ -12,6 +12,7 @@ import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
 import { useAuth } from "../../context/AuthContext";
 import ScrollReveal from "../ui/ScrollReveal";
+import AdminSOSReceiver from "../ui/AdminSOSReceiver";
 
 const AuthorityLayout = () => {
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ const AuthorityLayout = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <AdminSOSReceiver />
       <Navbar
         links={links}
         showBrand={true}

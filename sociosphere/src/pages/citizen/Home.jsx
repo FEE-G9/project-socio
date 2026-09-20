@@ -5,12 +5,13 @@ import "./Home.css";
 
 import Report from "./Report";
 import ReportCrime from "./ReportCrime";
-import Map from "./Map";
+// import Map from "./Map";
+import CitizenSOSModal from "../../components/ui/CitizenSOSModal";
 
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
-import { getIssues, saveIssues } from "../../data/mockIssues";
-// import Map from "./Map";
+import { getIssues, saveIssues, deleteIssue } from "../../data/mockIssues";
+import { getCrimes, saveCrimes, deleteCrime } from "../../data/mockCrimes";
 
 import {
   Shield,
@@ -187,22 +188,38 @@ export default function Home() {
 
   const loadUserReports = () => {
     try {
-      const currentEmail = user?.email?.trim().toLowerCase();
-      const currentUserId = user?.id;
-      const currentCommunityId = user?.communityId;
-      const currentCommunityName = user?.communityName?.trim().toLowerCase();
       const storedReports = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
       const authorityIssues = getIssues();
-      const reports = [...authorityIssues, ...storedReports.filter((report) => !authorityIssues.some((issue) => issue.id === report.id))];
-      const filteredReports = reports.filter((report) => {
-        const reportEmail = report?.reportedByEmail?.trim().toLowerCase();
-        const emailMatches = currentEmail && reportEmail === currentEmail;
-        const idMatches = currentUserId && report?.reportedById === currentUserId;
-        const reportCommunityId = report?.communityId;
-        const reportCommunityName = (report?.communityName || report?.colonyName || report?.society || report?.community)?.trim().toLowerCase();
-        const communityMatches = (currentCommunityId && reportCommunityId === currentCommunityId) || (currentCommunityName && reportCommunityName === currentCommunityName);
-        return communityMatches || (!reportCommunityId && !reportCommunityName && (emailMatches || idMatches));
-      }).map((report) => {
+      const authorityCrimes = getCrimes();
+
+      // Merge all items from localStorage: authority issues, authority crimes, and user reports
+      const combinedMap = new Map();
+
+      // 1. Add authority issues
+      (authorityIssues || []).forEach((item) => {
+        if (item && item.id) {
+          combinedMap.set(item.id, { ...item, reportType: item.reportType || "civic" });
+        }
+      });
+
+      // 2. Add authority crimes
+      (authorityCrimes || []).forEach((item) => {
+        if (item && item.id) {
+          combinedMap.set(item.id, { ...item, reportType: "crime" });
+        }
+      });
+
+      // 3. Add stored user reports
+      (storedReports || []).forEach((item) => {
+        if (item && item.id) {
+          const isCrime = item.reportType === "crime" || item.id.startsWith("CRM-");
+          combinedMap.set(item.id, { ...item, reportType: isCrime ? "crime" : "civic" });
+        }
+      });
+
+      const allReports = Array.from(combinedMap.values());
+
+      const normalized = allReports.map((report) => {
         const isCrime = report?.reportType === "crime" || report?.id?.startsWith("CRM-");
         return {
           ...report,
@@ -210,18 +227,20 @@ export default function Home() {
           priorityClass: report.priorityClass || (report.severity || (isCrime ? "critical" : "medium")).toLowerCase(),
           status: report.status || "In Progress",
           statusClass: report.statusClass || (report.status === "Resolved" ? "resolved" : "progress"),
-          date: report.date || (report.createdAt || report.timestamp ? new Date(report.createdAt || report.timestamp).toLocaleDateString() : "Recently"),
+          date: report.date || (report.createdAt || report.timestamp ? new Date(report.createdAt || report.timestamp).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "Recently"),
           eta: report.eta || report.aiAnalysis?.estimatedResolutionTime || (isCrime ? "Security Dispatched" : "Pending Dispatch"),
           image: report.image || null,
           reportType: isCrime ? "crime" : "civic",
         };
       });
-      setUserReports(filteredReports);
+
+      setUserReports(normalized);
     } catch (error) {
       console.error("Failed to load user reports:", error);
       setUserReports([]);
     }
   };
+
   /* =========================================================
      LOAD ON USER CHANGE + DATA UPDATE
   ========================================================= */
@@ -229,20 +248,16 @@ export default function Home() {
   useEffect(() => {
     loadUserReports();
 
-    window.addEventListener(
-      "sociosphere_data_updated",
-      loadUserReports
-    );
+    window.addEventListener("sociosphere_data_updated", loadUserReports);
+    window.addEventListener("sociosphere_crimes_updated", loadUserReports);
     window.addEventListener("storage", loadUserReports);
 
     return () => {
-      window.removeEventListener(
-        "sociosphere_data_updated",
-        loadUserReports
-      );
+      window.removeEventListener("sociosphere_data_updated", loadUserReports);
+      window.removeEventListener("sociosphere_crimes_updated", loadUserReports);
       window.removeEventListener("storage", loadUserReports);
     };
-  }, [user?.email, user?.id]);
+  }, [user?.email, user?.id, user?.communityName]);
 
   /* =========================================================
      QUICK ACTIONS
@@ -293,17 +308,11 @@ export default function Home() {
       return;
     }
 
-    const remainingIssues = getIssues().filter((issue) => issue.id !== report.id);
-    saveIssues(remainingIssues);
-
-    const storedReports = JSON.parse(
-      localStorage.getItem("sociosphere_user_reports") || "[]"
-    );
-    localStorage.setItem(
-      "sociosphere_user_reports",
-      JSON.stringify(storedReports.filter((issue) => issue.id !== report.id))
-    );
-    window.dispatchEvent(new Event("sociosphere_data_updated"));
+    if (report.id?.startsWith("CRM-") || report.reportType === "crime") {
+      deleteCrime(report.id);
+    } else {
+      deleteIssue(report.id);
+    }
     showToast("Report deleted.");
   };
 
@@ -552,7 +561,7 @@ export default function Home() {
             <span className="online-dot" />
           </div>
 
-          <div className="navbar-actions">
+          {/* <div className="navbar-actions">
             <button
               className="emergency-button"
               onClick={() => {
@@ -569,7 +578,7 @@ export default function Home() {
 
               <strong>Emergency</strong>
             </button>
-          </div>
+          </div> */}
         </div>
       </header>
 
@@ -786,14 +795,6 @@ export default function Home() {
                     </div>
 
                     <div className="issue-body">
-                      {issue.image ? (
-                        <img
-                          className="issue-image"
-                          src={issue.image}
-                          alt={issue.title}
-                        />
-                      ) : null}
-
                       <div className="issue-details">
                         <span className="issue-id">
                           {issue.id}
@@ -998,14 +999,6 @@ export default function Home() {
                     </div>
 
                     <div className="issue-body">
-                      {crime.image ? (
-                        <img
-                          className="issue-image border border-rose-500/20"
-                          src={crime.image}
-                          alt={crime.title}
-                        />
-                      ) : null}
-
                       <div className="issue-details">
                         <span className="issue-id text-rose-400">
                           {crime.id}
@@ -1411,11 +1404,10 @@ export default function Home() {
       )}
 
       {/* =====================================================
-          MAP MODAL
+          MAP MODAL (COMMENTED OUT - NOT NEEDED CURRENTLY)
       ===================================================== */}
 
-      {/* {activeModal === "map" && (
-      {/* {activeModal === "map" && (
+      {/* activeModal === "map" && (
         <div
           className="modal-overlay"
           onClick={() => setActiveModal(null)}
@@ -1476,7 +1468,7 @@ export default function Home() {
             />
           </div>
         </div>
-      )}
+      ) */}
 
       {/* =====================================================
           COMING SOON MODAL
@@ -1523,6 +1515,14 @@ export default function Home() {
         </div>,
         document.body
       )}
+
+      {/* =====================================================
+          EMERGENCY SOS MODAL
+      ===================================================== */}
+      <CitizenSOSModal
+        isOpen={activeModal === "emergency"}
+        onClose={() => setActiveModal(null)}
+      />
 
       {/* =====================================================
           TOAST
