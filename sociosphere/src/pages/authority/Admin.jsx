@@ -22,6 +22,31 @@ import { getIssues } from '../../data/mockIssues';
 import { getCrimes } from '../../data/mockCrimes';
 import { useAlert } from '../../context/AlertContext';
 
+const TrendArrow = ({ direction = "up" }) => {
+  const isUp = direction === "up";
+  return (
+    <svg
+      viewBox="0 0 90 60"
+      className={`h-10 w-14 ${isUp ? "text-emerald-400" : "text-rose-500"}`}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      {isUp ? (
+        <>
+          <polyline points="6,40 25,50 48,27 62,38 84,8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          <polyline points="69,8 84,8 84,23" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        </>
+      ) : (
+        <>
+          <polyline points="6,15 27,7 47,30 61,20 84,48" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          <polyline points="69,48 84,48 84,33" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        </>
+      )}
+    </svg>
+  );
+};
+
 const AdminHome = () => {
   const navigate = useNavigate();
   const { triggerAdminAlert } = useAlert();
@@ -97,50 +122,53 @@ const AdminHome = () => {
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Overview of your society's metrics and modules.</p>
         </div>
           <div className="flex items-center gap-3">
-            <Button variant="secondary" className="text-sm" onClick={() => handleAction('reports')}>
+            <button
+              onClick={() => handleAction('reports')}
+              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm border border-slate-200 transition-all hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
               View Reports
-            </Button>
-            <Button className="bg-red-600 hover:bg-red-700 text-white text-sm border-0 flex items-center gap-2" onClick={() => handleAction('redAlert')}>
-              <AlertTriangle size={16} className="animate-pulse" />
-              Red Alert
-            </Button>
+            </button>
+            <button
+              onClick={() => handleAction('redAlert')}
+              className="group relative flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 px-4 py-2 text-sm font-black tracking-wider text-white shadow-md shadow-red-600/30 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-600/40 active:scale-95 animate-pulse"
+              title="Trigger Society Red Alert"
+            >
+              <AlertTriangle size={18} className="text-white shrink-0" />
+              <span>RED ALERT</span>
+            </button>
           </div>
       </div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
-          title="Total Issues"
-          value={totalIssues.toString()}
-          icon={AlertTriangle}
-          trend="Live"
-          trendLabel="synced"
-          trendUp={false}
-        />
-        <StatCard 
-          title="Active Members"
-          value="892"
-          icon={Users}
-          trend="+4"
-          trendLabel="new this week"
-          trendUp={true}
-        />
-        <StatCard 
-          title="Total Collected"
-          value={`₹${(mockFinance.totalCollected / 1000).toFixed(1)}k`}
-          icon={Wallet}
-          trend="+8%"
-          trendLabel="vs last month"
-          trendUp={true}
-        />
-        <StatCard 
-          title="Resolution Rate"
-          value={`${resolutionRate}%`}
-          icon={Activity}
-          trend="Live"
-          trendLabel="tracked"
-          trendUp={true}
-        />
+        {[
+          { label: "Total Issues", value: totalIssues.toString(), trendLabel: "synced", trendDirection: "down", icon: AlertTriangle, iconBg: "bg-blue-500/10", iconColor: "text-blue-500 dark:text-blue-400" },
+          { label: "Active Members", value: "892", trendLabel: "new this week", trendDirection: "up", icon: Users, iconBg: "bg-purple-500/10", iconColor: "text-purple-500 dark:text-purple-400" },
+          { label: "Total Collected", value: `₹${(mockFinance.totalCollected / 1000).toFixed(1)}k`, trendLabel: "vs last month", trendDirection: "up", icon: Wallet, iconBg: "bg-amber-500/10", iconColor: "text-amber-500 dark:text-amber-400" },
+          { label: "Resolution Rate", value: `${resolutionRate}%`, trendLabel: "tracked", trendDirection: "up", icon: Activity, iconBg: "bg-emerald-500/10", iconColor: "text-emerald-500 dark:text-emerald-400" }
+        ].map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <div
+              key={stat.label}
+              className="group rounded-2xl border border-slate-200 bg-white p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:bg-[#0D1524] dark:hover:border-slate-700"
+            >
+              <div className="flex items-start justify-between">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.iconBg}`}>
+                  <Icon size={19} className={stat.iconColor} />
+                </div>
+                <div className="transition-transform duration-200 group-hover:scale-105">
+                  <TrendArrow direction={stat.trendDirection} />
+                </div>
+              </div>
+              <div className="mt-5">
+                <p className="text-2xl font-extrabold text-slate-900 dark:text-slate-50">{stat.value}</p>
+                <p className="mt-1 text-sm font-medium text-slate-600 dark:text-slate-300">{stat.label}</p>
+                <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{stat.trendLabel}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -154,24 +182,26 @@ const AdminHome = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Link to="/authority/issues" className="block p-5 bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/60 rounded-2xl hover:border-emerald-500 dark:hover:border-emerald-500 transition-all group shadow-sm">
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="p-3 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-xl group-hover:scale-110 transition-transform">
-                    <AlertTriangle size={24} />
-                  </div>
-                  <h3 className="font-bold text-slate-900 dark:text-slate-100">Issue Tracker</h3>
+              <Link to="/authority/issues" className="group relative flex flex-col items-start justify-between min-h-[146px] p-5 rounded-[15px] border transition-all duration-300 ease-out bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/30 hover:-translate-y-1 hover:border-emerald-500/60 hover:shadow-[0_12px_30px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_12px_30px_rgba(0,0,0,0.4)]">
+                <div className="p-3 bg-emerald-500 text-white rounded-xl shadow-md shadow-emerald-500/40 mb-3 group-hover:scale-110 transition-transform">
+                  <AlertTriangle size={26} />
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Manage and update all society issues reported by citizens.</p>
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-lg mb-1">Issue Tracker</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Manage and update all society issues reported by citizens.</p>
+                </div>
+                <ChevronRight className="absolute bottom-5 right-5 text-emerald-500 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" size={24} />
               </Link>
 
-              <Link to="/authority/crimes" className="block p-5 bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/60 rounded-2xl hover:border-blue-500 dark:hover:border-blue-500 transition-all group shadow-sm">
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="p-3 bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 rounded-xl group-hover:scale-110 transition-transform">
-                    <ShieldAlert size={24} />
-                  </div>
-                  <h3 className="font-bold text-slate-900 dark:text-slate-100">Crime Log</h3>
+              <Link to="/authority/crimes" className="group relative flex flex-col items-start justify-between min-h-[146px] p-5 rounded-[15px] border transition-all duration-300 ease-out bg-gradient-to-br from-rose-500/10 to-rose-500/5 border-rose-500/30 hover:-translate-y-1 hover:border-rose-500/60 hover:shadow-[0_12px_30px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_12px_30px_rgba(0,0,0,0.4)]">
+                <div className="p-3 bg-rose-500 text-white rounded-xl shadow-md shadow-rose-500/40 mb-3 group-hover:scale-110 transition-transform">
+                  <ShieldAlert size={26} />
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">View and update statuses for security and crime reports.</p>
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-lg mb-1">Crime Log</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">View and update statuses for security and crime reports.</p>
+                </div>
+                <ChevronRight className="absolute bottom-5 right-5 text-rose-500 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" size={24} />
               </Link>
             </div>
           </section>
