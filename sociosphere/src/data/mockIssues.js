@@ -422,5 +422,17 @@ export const updateIssueStatus = (
 
   saveIssues(updated);
 
+  // Sync with user reports cache so Citizen Home updates correctly
+  const reports = JSON.parse(localStorage.getItem('sociosphere_user_reports') || '[]');
+  const updatedReports = reports.map(report => {
+    if (report.id === issueId) {
+      const updatedIssue = updated.find(i => i.id === issueId);
+      return { ...report, ...updatedIssue };
+    }
+    return report;
+  });
+  localStorage.setItem('sociosphere_user_reports', JSON.stringify(updatedReports));
+  window.dispatchEvent(new Event('sociosphere_data_updated'));
+
   return updated;
 };

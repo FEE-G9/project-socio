@@ -188,7 +188,11 @@ const Dashboard = () => {
     };
     loadIssues();
     window.addEventListener('sociosphere_data_updated', loadIssues);
-    return () => window.removeEventListener('sociosphere_data_updated', loadIssues);
+    window.addEventListener('storage', loadIssues);
+    return () => {
+      window.removeEventListener('sociosphere_data_updated', loadIssues);
+      window.removeEventListener('storage', loadIssues);
+    };
   }, [user?.email, user?.id]);
 
   /* =========================================================
@@ -222,7 +226,11 @@ const Dashboard = () => {
     };
     loadAnns();
     window.addEventListener('sociosphere_data_updated', loadAnns);
-    return () => window.removeEventListener('sociosphere_data_updated', loadAnns);
+    window.addEventListener('storage', loadAnns);
+    return () => {
+      window.removeEventListener('sociosphere_data_updated', loadAnns);
+      window.removeEventListener('storage', loadAnns);
+    };
   }, []);
 
   /* =========================================================

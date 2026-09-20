@@ -60,7 +60,11 @@ const Profile = () => {
     };
     loadOwnIssues();
     window.addEventListener("sociosphere_data_updated", loadOwnIssues);
-    return () => window.removeEventListener("sociosphere_data_updated", loadOwnIssues);
+    window.addEventListener("storage", loadOwnIssues);
+    return () => {
+      window.removeEventListener("sociosphere_data_updated", loadOwnIssues);
+      window.removeEventListener("storage", loadOwnIssues);
+    };
   }, [user?.email, user?.id]);
 
   // ---------------------------------------

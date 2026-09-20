@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import PublicLayout from "./components/layout/PublicLayout";
 import CitizenLayout from "./components/layout/CitizenLayout";
@@ -33,9 +33,12 @@ import RedAlertOverlay from "./components/ui/RedAlertOverlay";
 import BackToTop from "./components/ui/BackToTop";
 
 function App() {
+  const location = useLocation();
+  const isAuthority = location.pathname.startsWith("/authority");
+
   return (
     <>
-      <RedAlertOverlay />
+      {!isAuthority && <RedAlertOverlay />}
       <Routes>
         {/* ================= PUBLIC ================= */}
         <Route element={<PublicLayout />}>
