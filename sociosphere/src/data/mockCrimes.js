@@ -116,5 +116,18 @@ export const updateCrimeStatus = (crimeId, newStatus, note = '') => {
     return crm;
   });
   saveCrimes(updated);
+
+  // Sync with user reports cache so Citizen Home updates correctly
+  const reports = JSON.parse(localStorage.getItem('sociosphere_user_reports') || '[]');
+  const updatedReports = reports.map(report => {
+    if (report.id === crimeId) {
+      const updatedCrime = updated.find(c => c.id === crimeId);
+      return { ...report, ...updatedCrime };
+    }
+    return report;
+  });
+  localStorage.setItem('sociosphere_user_reports', JSON.stringify(updatedReports));
+  window.dispatchEvent(new Event('sociosphere_data_updated'));
+
   return updated;
 };
