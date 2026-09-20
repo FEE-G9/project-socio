@@ -561,7 +561,7 @@ export default function Home() {
             <span className="online-dot" />
           </div>
 
-          <div className="navbar-actions">
+          {/* <div className="navbar-actions">
             <button
               className="emergency-button"
               onClick={() => {
@@ -578,7 +578,7 @@ export default function Home() {
 
               <strong>Emergency</strong>
             </button>
-          </div>
+          </div> */}
         </div>
       </header>
 
