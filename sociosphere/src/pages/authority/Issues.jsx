@@ -32,7 +32,11 @@ const Issues = () => {
     
     const handleUpdate = () => setIssues(getIssues());
     window.addEventListener('sociosphere_data_updated', handleUpdate);
-    return () => window.removeEventListener('sociosphere_data_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('sociosphere_data_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
   }, []);
   
   const getStatusColor = (status) => {

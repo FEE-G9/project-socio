@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
@@ -233,12 +233,14 @@ export default function Home() {
       "sociosphere_data_updated",
       loadUserReports
     );
+    window.addEventListener("storage", loadUserReports);
 
     return () => {
       window.removeEventListener(
         "sociosphere_data_updated",
         loadUserReports
       );
+      window.removeEventListener("storage", loadUserReports);
     };
   }, [user?.email, user?.id]);
 

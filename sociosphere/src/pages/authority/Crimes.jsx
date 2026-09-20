@@ -30,7 +30,11 @@ const Crimes = () => {
     
     const handleUpdate = () => setCrimes(getCrimes());
     window.addEventListener('sociosphere_crimes_updated', handleUpdate);
-    return () => window.removeEventListener('sociosphere_crimes_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('sociosphere_crimes_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
   }, []);
   
   const getStatusColor = (status) => {

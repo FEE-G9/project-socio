@@ -33,7 +33,11 @@ const Analytics = () => {
     const loadIssues = () => setIssues(getIssues());
     loadIssues();
     window.addEventListener('sociosphere_data_updated', loadIssues);
-    return () => window.removeEventListener('sociosphere_data_updated', loadIssues);
+    window.addEventListener('storage', loadIssues);
+    return () => {
+      window.removeEventListener('sociosphere_data_updated', loadIssues);
+      window.removeEventListener('storage', loadIssues);
+    };
   }, []);
 
   const totalIssues = issues.length;

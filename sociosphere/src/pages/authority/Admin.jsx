@@ -36,14 +36,22 @@ const AdminHome = () => {
     const loadIssues = () => setIssues(getIssues());
     loadIssues();
     window.addEventListener('sociosphere_data_updated', loadIssues);
-    return () => window.removeEventListener('sociosphere_data_updated', loadIssues);
+    window.addEventListener('storage', loadIssues);
+    return () => {
+      window.removeEventListener('sociosphere_data_updated', loadIssues);
+      window.removeEventListener('storage', loadIssues);
+    };
   }, []);
 
   useEffect(() => {
     const loadCrimes = () => setCrimes(getCrimes());
     loadCrimes();
     window.addEventListener('sociosphere_crimes_updated', loadCrimes);
-    return () => window.removeEventListener('sociosphere_crimes_updated', loadCrimes);
+    window.addEventListener('storage', loadCrimes);
+    return () => {
+      window.removeEventListener('sociosphere_crimes_updated', loadCrimes);
+      window.removeEventListener('storage', loadCrimes);
+    };
   }, []);
 
   const totalIssues = issues.length;
