@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
-  LayoutDashboard,
   FileWarning,
   ShieldAlert,
   User,
@@ -42,11 +41,11 @@ const CitizenLayout = () => {
       href: "/citizen/home",
       icon: Home,
     },
-    {
-      label: "Dashboard",
-      href: "/citizen/dashboard",
-      icon: LayoutDashboard,
-    },
+    // {
+    //   label: "Dashboard",
+    //   href: "/citizen/dashboard",
+    //   icon: LayoutDashboard,
+    // },
     {
       label: "Report Issue",
       href: "/citizen/report",

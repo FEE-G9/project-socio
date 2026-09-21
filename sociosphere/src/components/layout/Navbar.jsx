@@ -289,18 +289,16 @@ const Navbar = ({
                   Profile
                 </button>
 
-                {/* DASHBOARD */}
-                <button
-                  onClick={() =>
-                    handleProfileNavigation(
-                      location.pathname.startsWith('/authority') ? '/authority/dashboard' : '/citizen/dashboard'
-                    )
-                  }
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-                >
-                  <LayoutDashboard size={16} />
-                  Dashboard
-                </button>
+                {/* Citizen Dashboard is currently disabled. */}
+                {location.pathname.startsWith('/authority') && (
+                  <button
+                    onClick={() => handleProfileNavigation("/authority/home")}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+                  >
+                    <LayoutDashboard size={16} />
+                    Dashboard
+                  </button>
+                )}
 
                 {/* SETTINGS */}
                 <button
