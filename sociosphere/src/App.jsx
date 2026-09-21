@@ -16,7 +16,7 @@ import ReportCrime from "./pages/citizen/ReportCrime";
 import Home from "./pages/citizen/Home";
 import Profile from "./pages/citizen/Profile";
 import Settings from "./pages/citizen/Settings";
-import Dashboard from "./pages/citizen/Dashboard";
+// import Dashboard from "./pages/citizen/Dashboard";
 import Announcements from "./pages/citizen/Announcements";
 import Maintenance from "./pages/citizen/Maintenance";
 
@@ -52,7 +52,7 @@ function App() {
           <Route index element={<Navigate to="home" replace />} />
           <Route path="home" element={<Home />} />
           <Route path="login" element={<Navigate to="/login" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          {/* <Route path="dashboard" element={<Dashboard />} /> */}
           <Route path="report" element={<Report />} />
           <Route path="report-crime" element={<ReportCrime />} />
           <Route path="profile" element={<Profile />} />
