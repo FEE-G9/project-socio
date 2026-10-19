@@ -75,10 +75,14 @@ const Members = () => {
 
   // Admin is strictly locked to their own society
   const adminSociety = currentAdmin?.society || currentAdmin?.communityName || 'Gandhi Colony';
-  const activeColonyObj = colonies.find(c => 
+  const adminSocietyCode = currentAdmin?.societyCode || (
+    adminSociety === 'Gandhi Colony' ? 'GC-101' :
+    adminSociety === 'Shayam Nagar' ? 'SN-202' : 'DV-303'
+  );
+  const activeColonyObj = (Array.isArray(colonies) ? colonies.find(c => 
     (c.name || '').toLowerCase() === adminSociety.toLowerCase() ||
-    (c.code || '').toLowerCase() === (currentAdmin?.societyCode || '').toLowerCase()
-  ) || colonies[0];
+    (c.code || '').toLowerCase() === adminSocietyCode.toLowerCase()
+  ) : null) || { name: adminSociety, code: adminSocietyCode };
 
   // URL query check (?tab=pending)
   const initialTab = new URLSearchParams(location.search).get('tab') || 'all';
@@ -487,7 +491,7 @@ const Members = () => {
       ===================================================== */}
       <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 px-1">
         <span>
-          Showing <strong className="text-slate-800 dark:text-slate-200">{filteredUsers.length}</strong> {filteredUsers.length === 1 ? 'person' : 'people'} in <strong className="text-emerald-600 dark:text-emerald-400">{selectedSociety}</strong>
+          Showing <strong className="text-slate-800 dark:text-slate-200">{filteredUsers.length}</strong> {filteredUsers.length === 1 ? 'person' : 'people'} in <strong className="text-emerald-600 dark:text-emerald-400">{adminSociety}</strong>
           {searchQuery && ` matching "${searchQuery}"`}
           {selectedBlock !== 'all' && ` (${selectedBlock})`}
         </span>
@@ -516,9 +520,9 @@ const Members = () => {
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">No people found</h3>
           <p className="mt-1 max-w-sm text-sm text-slate-500 dark:text-slate-400">
             {searchQuery
-              ? `No residents or committee members in ${selectedSociety} match "${searchQuery}".`
+              ? `No residents or committee members in ${adminSociety} match "${searchQuery}".`
               : activeTab === 'pending'
-              ? `No pending join requests waiting for approval in ${selectedSociety}.`
+              ? `No pending join requests waiting for approval in ${adminSociety}.`
               : `There are currently no records under this filter.`}
           </p>
           {(searchQuery || selectedBlock !== 'all') && (

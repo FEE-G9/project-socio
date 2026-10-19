@@ -59,8 +59,7 @@ export const getColonies = () => {
 
   try {
     const parsed = JSON.parse(stored);
-    // If old cache doesn't have Gandhi Colony, update to the 3 societies
-    if (Array.isArray(parsed) && !parsed.some(c => c.name === "Gandhi Colony")) {
+    if (!Array.isArray(parsed) || parsed.length === 0 || !parsed.some(c => c && c.name === "Gandhi Colony")) {
       localStorage.setItem("sociosphere_colonies", JSON.stringify(INITIAL_COLONIES));
       return INITIAL_COLONIES;
     }
