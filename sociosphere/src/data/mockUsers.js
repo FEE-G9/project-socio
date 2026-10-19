@@ -33,7 +33,7 @@ export const DEFAULT_USERS = [
     id: 'gc-mem-2',
     name: 'Rajesh Khanna',
     email: 'rajesh.k@sociosphere.io',
-    password: 'password123',
+    password: 'Rajesh#1982',
     age: 44,
     society: 'Gandhi Colony',
     societyCode: 'GC-101',
@@ -57,7 +57,7 @@ export const DEFAULT_USERS = [
     id: 'gc-mem-3',
     name: 'Meenakshi Sundaram',
     email: 'meenakshi.s@sociosphere.io',
-    password: 'password123',
+    password: 'Meena@302#',
     age: 41,
     society: 'Gandhi Colony',
     societyCode: 'GC-101',
@@ -81,7 +81,7 @@ export const DEFAULT_USERS = [
     id: 'gc-mem-4',
     name: 'Col. Devendra Pratap',
     email: 'devendra.p@sociosphere.io',
-    password: 'password123',
+    password: 'ColPratap@1968',
     age: 58,
     society: 'Gandhi Colony',
     societyCode: 'GC-101',
@@ -105,7 +105,7 @@ export const DEFAULT_USERS = [
     id: 'gc-res-1',
     name: 'Aarav Sharma',
     email: 'aarav@sociosphere.io',
-    password: 'password123',
+    password: 'Aarav@402!',
     age: 29,
     society: 'Gandhi Colony',
     societyCode: 'GC-101',
@@ -129,7 +129,7 @@ export const DEFAULT_USERS = [
     id: 'gc-res-2',
     name: 'Priya Patel',
     email: 'priya.p@gmail.com',
-    password: 'password123',
+    password: 'Priya#1993',
     age: 33,
     society: 'Gandhi Colony',
     societyCode: 'GC-101',
@@ -153,7 +153,7 @@ export const DEFAULT_USERS = [
     id: 'gc-res-3',
     name: 'Rohan Mehta',
     email: 'rohan.m@gmail.com',
-    password: 'password123',
+    password: 'RohanM@501',
     age: 27,
     society: 'Gandhi Colony',
     societyCode: 'GC-101',
@@ -177,7 +177,7 @@ export const DEFAULT_USERS = [
     id: 'gc-res-4',
     name: 'Sunita Rao',
     email: 'sunita.rao@outlook.com',
-    password: 'password123',
+    password: 'Sunita@1974',
     age: 52,
     society: 'Gandhi Colony',
     societyCode: 'GC-101',
@@ -201,7 +201,7 @@ export const DEFAULT_USERS = [
     id: 'gc-pend-1',
     name: 'Arjun Nambiar',
     email: 'arjun.n@gmail.com',
-    password: 'password123',
+    password: 'ArjunN#123',
     age: 31,
     society: 'Gandhi Colony',
     societyCode: 'GC-101',
@@ -253,7 +253,7 @@ export const DEFAULT_USERS = [
     id: 'sn-mem-2',
     name: 'Harish Batra',
     email: 'harish.b@sociosphere.io',
-    password: 'password123',
+    password: 'Batra@1980',
     age: 46,
     society: 'Shayam Nagar',
     societyCode: 'SN-202',
@@ -277,7 +277,7 @@ export const DEFAULT_USERS = [
     id: 'sn-mem-3',
     name: 'Dr. Ananya Sen',
     email: 'ananya.sen@sociosphere.io',
-    password: 'password123',
+    password: 'DrAnanya@504',
     age: 39,
     society: 'Shayam Nagar',
     societyCode: 'SN-202',
@@ -301,7 +301,7 @@ export const DEFAULT_USERS = [
     id: 'sn-res-1',
     name: 'Kabir Verma',
     email: 'kabir.v@techcorp.in',
-    password: 'password123',
+    password: 'KabirV@703#',
     age: 35,
     society: 'Shayam Nagar',
     societyCode: 'SN-202',
@@ -325,7 +325,7 @@ export const DEFAULT_USERS = [
     id: 'sn-res-2',
     name: 'Fatima Sheikh',
     email: 'fatima.s@gmail.com',
-    password: 'password123',
+    password: 'Fatima@1998!',
     age: 28,
     society: 'Shayam Nagar',
     societyCode: 'SN-202',
@@ -349,7 +349,7 @@ export const DEFAULT_USERS = [
     id: 'sn-res-3',
     name: 'Gurpreet Singh',
     email: 'gurpreet.s@gmail.com',
-    password: 'password123',
+    password: 'Gurpreet#1984',
     age: 42,
     society: 'Shayam Nagar',
     societyCode: 'SN-202',
@@ -373,7 +373,7 @@ export const DEFAULT_USERS = [
     id: 'sn-pend-1',
     name: 'Deepak Chopra',
     email: 'deepak.c@gmail.com',
-    password: 'password123',
+    password: 'Chopra@202#',
     age: 36,
     society: 'Shayam Nagar',
     societyCode: 'SN-202',
@@ -425,7 +425,7 @@ export const DEFAULT_USERS = [
     id: 'dv-mem-2',
     name: 'Shalini Murthy',
     email: 'shalini.m@sociosphere.io',
-    password: 'password123',
+    password: 'Shalini@1983',
     age: 43,
     society: 'Dalima Vihar',
     societyCode: 'DV-303',
@@ -449,7 +449,7 @@ export const DEFAULT_USERS = [
     id: 'dv-mem-3',
     name: 'Alok Srivastava',
     email: 'alok.s@sociosphere.io',
-    password: 'password123',
+    password: 'AlokS@102!',
     age: 47,
     society: 'Dalima Vihar',
     societyCode: 'DV-303',
@@ -473,7 +473,7 @@ export const DEFAULT_USERS = [
     id: 'dv-res-1',
     name: 'Vikramaditya Rathore',
     email: 'vikram.r@gmail.com',
-    password: 'password123',
+    password: 'Vikram#P1#',
     age: 38,
     society: 'Dalima Vihar',
     societyCode: 'DV-303',
@@ -497,7 +497,7 @@ export const DEFAULT_USERS = [
     id: 'dv-res-2',
     name: 'Neha Kapoor',
     email: 'neha.k@designstudio.co',
-    password: 'password123',
+    password: 'NehaK@2000',
     age: 26,
     society: 'Dalima Vihar',
     societyCode: 'DV-303',
@@ -521,7 +521,7 @@ export const DEFAULT_USERS = [
     id: 'dv-res-3',
     name: 'Tariq Mansoor',
     email: 'tariq.m@yahoo.com',
-    password: 'password123',
+    password: 'Tariq@401#',
     age: 45,
     society: 'Dalima Vihar',
     societyCode: 'DV-303',
@@ -545,7 +545,7 @@ export const DEFAULT_USERS = [
     id: 'dv-pend-1',
     name: 'Deepa Chawla',
     email: 'deepa.c@yahoo.com',
-    password: 'password123',
+    password: 'DeepaC@1989',
     age: 37,
     society: 'Dalima Vihar',
     societyCode: 'DV-303',
@@ -567,6 +567,13 @@ export const DEFAULT_USERS = [
   }
 ];
 
+// Pre-mapped human passwords for updating cached data
+const DEFAULT_PASSWORDS = DEFAULT_USERS.reduce((acc, user) => {
+  acc[user.id] = user.password;
+  acc[user.email.toLowerCase()] = user.password;
+  return acc;
+}, {});
+
 export const getUsers = (societyFilter) => {
   const stored = localStorage.getItem('sociosphere_users');
   let userList = DEFAULT_USERS;
@@ -574,24 +581,21 @@ export const getUsers = (societyFilter) => {
   if (stored) {
     try {
       const parsed = JSON.parse(stored);
-      // If stored data doesn't have the new multi-society codes, merge or reset
       if (Array.isArray(parsed) && parsed.some(u => u.societyCode === 'GC-101')) {
         let needsSave = false;
         userList = parsed.map(u => {
-          if (u.id === 'gc-admin-1' && u.password !== 'Admin@GC101') {
+          // If user still has the generic placeholder password or out-of-date password, update with their realistic human password
+          const defaultHumanPass = DEFAULT_PASSWORDS[u.id] || DEFAULT_PASSWORDS[(u.email || '').toLowerCase()];
+          if (defaultHumanPass && u.password !== defaultHumanPass && (u.id.startsWith('gc-') || u.id.startsWith('sn-') || u.id.startsWith('dv-') || u.password === 'password123')) {
             needsSave = true;
-            return { ...u, password: 'Admin@GC101' };
-          }
-          if (u.id === 'sn-admin-1' && u.password !== 'Admin@SN202') {
-            needsSave = true;
-            return { ...u, password: 'Admin@SN202' };
-          }
-          if (u.id === 'dv-admin-1' && u.password !== 'Admin@DV303') {
-            needsSave = true;
-            return { ...u, password: 'Admin@DV303' };
+            return {
+              ...u,
+              password: defaultHumanPass
+            };
           }
           return u;
         });
+
         if (needsSave) {
           localStorage.setItem('sociosphere_users', JSON.stringify(userList));
         }
@@ -649,9 +653,9 @@ export const authenticateUser = (identifier, password) => {
     };
   }
 
-  // Password verification: default to 'password123' if not set
-  const expectedPassword = foundUser.password || 'password123';
-  if (password && password !== expectedPassword && password !== 'admin123') {
+  // Password verification: strictly matches user's specific realistic password
+  const expectedPassword = foundUser.password || DEFAULT_PASSWORDS[foundUser.id] || DEFAULT_PASSWORDS[foundUser.email.toLowerCase()] || 'password123';
+  if (password !== expectedPassword) {
     return {
       success: false,
       error: 'Incorrect password. Please verify your credentials and try again.'
@@ -693,7 +697,7 @@ export const registerUser = (userData) => {
     ...userData,
     id,
     email: emailLower,
-    password: userData.password || 'password123',
+    password: userData.password || `${(userData.name || 'User').split(' ')[0]}@${userData.age || '2026'}#`,
     age: parseInt(userData.age, 10) || 30,
     status: isAuthority ? 'Verified' : (userData.status || 'Pending Approval'),
     type: userData.type || (isAuthority ? 'member' : 'resident'),

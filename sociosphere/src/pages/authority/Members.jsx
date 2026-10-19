@@ -18,6 +18,8 @@ import {
   X,
   ChevronRight,
   Eye,
+  EyeOff,
+  Key,
   Award,
   Building,
   Building2,
@@ -83,6 +85,7 @@ const Members = () => {
 
   // Modals
   const [selectedPerson, setSelectedPerson] = useState(null);
+  const [showPasswordInModal, setShowPasswordInModal] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Add person form state & validation
@@ -721,7 +724,10 @@ const Members = () => {
       ===================================================== */}
       <Modal
         isOpen={!!selectedPerson}
-        onClose={() => setSelectedPerson(null)}
+        onClose={() => {
+          setSelectedPerson(null);
+          setShowPasswordInModal(false);
+        }}
         title={selectedPerson?.type === 'member' ? "Committee Member Record" : "Resident Society Dossier"}
         size="md"
       >
@@ -820,6 +826,32 @@ const Members = () => {
               </div>
             )}
 
+            {/* PORTAL ACCESS PASSWORD (ADMIN CREDENTIAL INSPECTION) */}
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+                  <Key size={13} className="text-amber-500" />
+                  Resident Portal Password (Admin View)
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordInModal(!showPasswordInModal)}
+                  className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 font-semibold"
+                >
+                  {showPasswordInModal ? <EyeOff size={13} /> : <Eye size={13} />}
+                  <span>{showPasswordInModal ? 'Hide Password' : 'Show Password'}</span>
+                </button>
+              </div>
+              <div className="mt-1 flex items-center justify-between">
+                <p className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                  {showPasswordInModal ? (selectedPerson.password || 'password123') : '••••••••••••'}
+                </p>
+                <span className="text-[10px] text-slate-400 bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded font-medium">
+                  Realistic Human Password
+                </span>
+              </div>
+            </div>
+
             {/* MODAL ACTIONS */}
             <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
               <button
@@ -840,7 +872,7 @@ const Members = () => {
                     Approve Registration
                   </Button>
                 )}
-                <Button variant="secondary" onClick={() => setSelectedPerson(null)} className="text-xs">
+                <Button variant="secondary" onClick={() => { setSelectedPerson(null); setShowPasswordInModal(false); }} className="text-xs">
                   Close
                 </Button>
               </div>
