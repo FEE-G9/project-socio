@@ -12,7 +12,6 @@ function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [pendingNotice, setPendingNotice] = useState(null);
-  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
 
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -207,223 +206,29 @@ function Login() {
             </button>
           </form>
 
-          {/* QUICK DEMO CREDENTIALS SHORTCUTS */}
+          {/* QUICK DEMO SHORTCUTS */}
           <div className="mt-4 pt-3 border-t border-white/10 text-left">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-white/60">
-                Quick Multi-Society Demo Logins:
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowDemoAccounts(!showDemoAccounts)}
-                className="text-[10px] text-emerald-400 hover:text-emerald-300 font-semibold underline underline-offset-2 transition"
-              >
-                {showDemoAccounts ? "Hide All Passwords" : "View All 3 Societies"}
-              </button>
-            </div>
-
-            {/* Quick Admins */}
-            <div className="grid grid-cols-3 gap-1.5 text-[10px]">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-white/50 block mb-2">
+              Quick Demo Access (Gandhi Colony):
+            </span>
+            <div className="grid grid-cols-2 gap-2 text-xs">
               <button
                 type="button"
                 onClick={() => handleQuickLogin("goyalvansh63708@gmail.com", "vansh12345")}
-                className="rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 p-1.5 text-center text-emerald-300 font-bold transition truncate"
-                title="Gandhi Colony Admin: Vansh Goyal (Pass: vansh12345)"
+                className="rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 p-2 text-center text-emerald-300 font-bold transition truncate"
+                title="Admin: Vansh Goyal (Pass: vansh12345)"
               >
-                Gandhi Admin (Vansh)
+                Admin (Vansh)
               </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin("admin.shayam@sociosphere.io", "Admin@SN202")}
-                className="rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 p-1.5 text-center text-emerald-300 font-bold transition truncate"
-                title="Shayam Nagar Admin (Pass: Admin@SN202)"
-              >
-                Shayam Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin("admin.dalima@sociosphere.io", "Admin@DV303")}
-                className="rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 p-1.5 text-center text-emerald-300 font-bold transition truncate"
-                title="Dalima Vihar Admin (Pass: Admin@DV303)"
-              >
-                Dalima Admin
-              </button>
-            </div>
-
-            {/* Quick Residents (Human Passwords) */}
-            <div className="grid grid-cols-3 gap-1.5 text-[10px] mt-1.5">
               <button
                 type="button"
                 onClick={() => handleQuickLogin("aarav@sociosphere.io", "Aarav@402!")}
-                className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 p-1.5 text-center text-blue-300 font-medium transition truncate"
-                title="Aarav Sharma - Gandhi Colony (Pass: Aarav@402!)"
+                className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 p-2 text-center text-blue-300 font-medium transition truncate"
+                title="Resident: Aarav Sharma (Pass: Aarav@402!)"
               >
-                Aarav (Gandhi)
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin("kabir.v@techcorp.in", "KabirV@703#")}
-                className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 p-1.5 text-center text-blue-300 font-medium transition truncate"
-                title="Kabir Verma - Shayam Nagar (Pass: KabirV@703#)"
-              >
-                Kabir (Shayam)
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin("vikram.r@gmail.com", "Vikram#P1#")}
-                className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 p-1.5 text-center text-blue-300 font-medium transition truncate"
-                title="Vikramaditya - Dalima Vihar (Pass: Vikram#P1#)"
-              >
-                Vikram (Dalima)
+                Resident (Aarav)
               </button>
             </div>
-
-            {/* EXPANDABLE ALL ACCOUNTS & PASSWORDS CHEATSHEET */}
-            {showDemoAccounts && (
-              <div className="mt-2.5 p-2 rounded-xl bg-slate-900/90 border border-white/10 text-[10px] max-h-48 overflow-y-auto space-y-2">
-                <div>
-                  <div className="font-bold text-emerald-400 mb-1 border-b border-white/10 pb-0.5 flex items-center justify-between">
-                    <span>Gandhi Colony (GC-101)</span>
-                    <span className="text-[9px] text-emerald-300 font-normal">Admin: Vansh Goyal</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1">
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("goyalvansh63708@gmail.com", "vansh12345")}
-                      className="text-left p-1 rounded bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 truncate col-span-2"
-                      title="Vansh Goyal (RWA President & Society Admin) - vansh12345"
-                    >
-                      <span className="text-emerald-300 font-bold block truncate">★ Vansh Goyal (Society Admin)</span>
-                      <span className="text-amber-400 font-mono text-[9px]">goyalvansh63708@gmail.com • vansh12345</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("rajesh.k@sociosphere.io", "Rajesh#1982")}
-                      className="text-left p-1 rounded hover:bg-white/10 truncate"
-                      title="Rajesh Khanna (General Secretary) - Rajesh#1982"
-                    >
-                      <span className="text-slate-200 font-semibold block truncate">Rajesh (Secy)</span>
-                      <span className="text-amber-400 font-mono text-[9px]">Rajesh#1982</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("meenakshi.s@sociosphere.io", "Meena@302#")}
-                      className="text-left p-1 rounded hover:bg-white/10 truncate"
-                      title="Meenakshi (Treasurer) - Meena@302#"
-                    >
-                      <span className="text-slate-200 font-semibold block truncate">Meena (Treas)</span>
-                      <span className="text-amber-400 font-mono text-[9px]">Meena@302#</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("priya.p@gmail.com", "Priya#1993")}
-                      className="text-left p-1 rounded hover:bg-white/10 truncate"
-                      title="Priya Patel (Flat 304) - Priya#1993"
-                    >
-                      <span className="text-slate-200 font-semibold block truncate">Priya Patel</span>
-                      <span className="text-amber-400 font-mono text-[9px]">Priya#1993</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("arjun.n@gmail.com", "ArjunN#123")}
-                      className="text-left p-1 rounded hover:bg-amber-500/20 border border-amber-500/30 truncate"
-                      title="Arjun Nambiar (Pending Approval) - ArjunN#123"
-                    >
-                      <span className="text-amber-300 font-semibold block truncate">Arjun (Pending)</span>
-                      <span className="text-amber-400 font-mono text-[9px]">ArjunN#123</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="font-bold text-sky-400 mb-1 border-b border-white/10 pb-0.5">
-                    Shayam Nagar (SN-202)
-                  </div>
-                  <div className="grid grid-cols-2 gap-1">
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("harish.b@sociosphere.io", "Batra@1980")}
-                      className="text-left p-1 rounded hover:bg-white/10 truncate"
-                      title="Harish Batra (Infra) - Batra@1980"
-                    >
-                      <span className="text-slate-200 font-semibold block truncate">Harish Batra</span>
-                      <span className="text-amber-400 font-mono text-[9px]">Batra@1980</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("ananya.sen@sociosphere.io", "DrAnanya@504")}
-                      className="text-left p-1 rounded hover:bg-white/10 truncate"
-                      title="Dr. Ananya Sen (Health) - DrAnanya@504"
-                    >
-                      <span className="text-slate-200 font-semibold block truncate">Dr. Ananya</span>
-                      <span className="text-amber-400 font-mono text-[9px]">DrAnanya@504</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("fatima.s@gmail.com", "Fatima@1998!")}
-                      className="text-left p-1 rounded hover:bg-white/10 truncate"
-                      title="Fatima Sheikh (Flat 102) - Fatima@1998!"
-                    >
-                      <span className="text-slate-200 font-semibold block truncate">Fatima Sheikh</span>
-                      <span className="text-amber-400 font-mono text-[9px]">Fatima@1998!</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("deepak.c@gmail.com", "Chopra@202#")}
-                      className="text-left p-1 rounded hover:bg-amber-500/20 border border-amber-500/30 truncate"
-                      title="Deepak Chopra (Pending Approval) - Chopra@202#"
-                    >
-                      <span className="text-amber-300 font-semibold block truncate">Deepak (Pending)</span>
-                      <span className="text-amber-400 font-mono text-[9px]">Chopra@202#</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="font-bold text-purple-400 mb-1 border-b border-white/10 pb-0.5">
-                    Dalima Vihar (DV-303)
-                  </div>
-                  <div className="grid grid-cols-2 gap-1">
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("shalini.m@sociosphere.io", "Shalini@1983")}
-                      className="text-left p-1 rounded hover:bg-white/10 truncate"
-                      title="Shalini Murthy (Secy) - Shalini@1983"
-                    >
-                      <span className="text-slate-200 font-semibold block truncate">Shalini (Secy)</span>
-                      <span className="text-amber-400 font-mono text-[9px]">Shalini@1983</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("neha.k@designstudio.co", "NehaK@2000")}
-                      className="text-left p-1 rounded hover:bg-white/10 truncate"
-                      title="Neha Kapoor (Flat 204) - NehaK@2000"
-                    >
-                      <span className="text-slate-200 font-semibold block truncate">Neha Kapoor</span>
-                      <span className="text-amber-400 font-mono text-[9px]">NehaK@2000</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("tariq.m@yahoo.com", "Tariq@401#")}
-                      className="text-left p-1 rounded hover:bg-white/10 truncate"
-                      title="Tariq Mansoor (Flat 401) - Tariq@401#"
-                    >
-                      <span className="text-slate-200 font-semibold block truncate">Tariq Mansoor</span>
-                      <span className="text-amber-400 font-mono text-[9px]">Tariq@401#</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("deepa.c@yahoo.com", "DeepaC@1989")}
-                      className="text-left p-1 rounded hover:bg-amber-500/20 border border-amber-500/30 truncate"
-                      title="Deepa Chawla (Pending Approval) - DeepaC@1989"
-                    >
-                      <span className="text-amber-300 font-semibold block truncate">Deepa (Pending)</span>
-                      <span className="text-amber-400 font-mono text-[9px]">DeepaC@1989</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Divider */}

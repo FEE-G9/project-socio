@@ -8,12 +8,14 @@ import {
   Zap,
   Users,
   AlertOctagon,
-  CheckCircle2
+  CheckCircle2,
+  Building2
 } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import StatCard from '../../components/ui/StatCard';
 import Spinner from '../../components/ui/Spinner';
 import { getIssues } from '../../data/mockIssues';
+import { useAuth } from '../../context/AuthContext';
 
 // Placeholder AIInsight since it might not be exported from UI or have standard theme applied
 const AIInsight = ({ title, description, type }) => (
@@ -24,6 +26,13 @@ const AIInsight = ({ title, description, type }) => (
 );
 
 const Analytics = () => {
+  const { user } = useAuth();
+  const adminSociety = user?.society || user?.communityName || 'Gandhi Colony';
+  const adminSocietyCode = user?.societyCode || (
+    adminSociety === 'Gandhi Colony' ? 'GC-101' :
+    adminSociety === 'Shayam Nagar' ? 'SN-202' : 'DV-303'
+  );
+
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [pdfGenerated, setPdfGenerated] = useState(false);
   
@@ -40,9 +49,16 @@ const Analytics = () => {
     };
   }, []);
 
-  const totalIssues = issues.length;
-  const criticalIssues = issues.filter(i => (i.severity || '').toLowerCase() === 'high' || (i.severity || '').toLowerCase() === 'critical').length;
-  const resolvedIssues = issues.filter(i => i.status === 'Resolved').length;
+  // Filter issues strictly to admin's society
+  const societyIssues = issues.filter(i => 
+    (i.society && i.society.toLowerCase() === adminSociety.toLowerCase()) ||
+    (i.colonyName && i.colonyName.toLowerCase() === adminSociety.toLowerCase()) ||
+    (adminSociety === 'Gandhi Colony' && (!i.colonyName || i.colonyName === 'Green Meadows Heights'))
+  );
+
+  const totalIssues = societyIssues.length;
+  const criticalIssues = societyIssues.filter(i => (i.severity || '').toLowerCase() === 'high' || (i.severity || '').toLowerCase() === 'critical').length;
+  const resolvedIssues = societyIssues.filter(i => i.status === 'Resolved').length;
   
   // Dummy math to make the stats look alive based on actual numbers
   const avgResTime = totalIssues > 0 ? Math.max(2, Math.round(48 - (resolvedIssues * 1.5))) : 24;
@@ -79,8 +95,14 @@ const Analytics = () => {
       {/* Header Info */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Society Analytics</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">AI-powered insights and comprehensive statistics.</p>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{adminSociety} Analytics</h1>
+            <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              <Building2 size={13} />
+              <span>{adminSocietyCode}</span>
+            </span>
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">AI-powered insights and comprehensive statistics for {adminSociety}.</p>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">AI Analysis Mode</span>

@@ -3,11 +3,20 @@ import {
   Megaphone, 
   Calendar, 
   AlertCircle,
-  Bell
+  Bell,
+  Building2
 } from 'lucide-react';
 import { getAnnouncements } from '../../data/mockAnnouncements';
+import { useAuth } from '../../context/AuthContext';
 
 const Announcements = () => {
+  const { user } = useAuth();
+  const userSociety = user?.society || user?.communityName || 'Gandhi Colony';
+  const userSocietyCode = user?.societyCode || (
+    userSociety === 'Gandhi Colony' ? 'GC-101' :
+    userSociety === 'Shayam Nagar' ? 'SN-202' : 'DV-303'
+  );
+
   const [announcements, setAnnouncements] = useState([]);
 
   useEffect(() => {
@@ -35,6 +44,11 @@ const Announcements = () => {
     }
   };
 
+  const societyAnnouncements = announcements.filter(a => 
+    (a.society && a.society.toLowerCase() === userSociety.toLowerCase()) ||
+    (userSociety === 'Gandhi Colony' && (!a.society || a.colonyId === 'colony-1' || a.societyCode === 'GC-101'))
+  );
+
   return (
     <div className="space-y-8 pb-12">
       {/* Header Info */}
@@ -45,14 +59,21 @@ const Announcements = () => {
             <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
               Community Hub
             </p>
+            <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 ml-2">
+              <Building2 size={12} />
+              <span>{userSociety}</span>
+              <span className="font-mono text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-1 rounded border border-emerald-500/30">
+                {userSocietyCode}
+              </span>
+            </span>
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Announcements</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Official notices, updates, and events from the Society Authority.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Official notices, updates, and events from {userSociety} Authority.</p>
         </div>
       </div>
 
       <div className="space-y-4 max-w-4xl">
-        {announcements.map(ann => (
+        {societyAnnouncements.map(ann => (
           <div key={ann.id} className="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-[#0D1524] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
             <div className="p-5 sm:p-6">
               <div className="flex items-start justify-between gap-4 mb-3">

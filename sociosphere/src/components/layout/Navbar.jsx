@@ -256,9 +256,17 @@ const Navbar = ({
                     <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
                       {user?.name || "Citizen"}
                     </p>
-                    <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">
+                    <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
                       {user?.role || "Citizen"}
                     </p>
+                    <div className="flex items-center gap-1.5 mt-0.5 mb-1">
+                      <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 truncate">
+                        {user?.society || user?.communityName || "Gandhi Colony"}
+                      </span>
+                      <span className="font-mono text-[9px] px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/30 shrink-0">
+                        {user?.societyCode || "GC-101"}
+                      </span>
+                    </div>
                     
                     {(user?.email || user?.phone) && (
                       <div className="space-y-0.5 mt-1 border-t border-slate-200/60 dark:border-slate-700/60 pt-1">

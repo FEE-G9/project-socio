@@ -94,9 +94,9 @@ const Profile = () => {
       name: currentUser?.name || "",
       email: currentUser?.email || "",
       phone: currentUser?.phone || "",
-      society: currentUser?.communityName || "",
-      block: unitDetails.block,
-      apartment: unitDetails.apartment,
+      society: currentUser?.society || currentUser?.communityName || "",
+      block: currentUser?.blockNumber || unitDetails.block,
+      apartment: currentUser?.houseOrFlatNo || unitDetails.apartment,
       city: currentUser?.communityCity || currentUser?.city || "Rajpura",
     };
   };
@@ -117,10 +117,13 @@ const Profile = () => {
     user?.name,
     user?.email,
     user?.phone,
+    user?.society,
     user?.communityName,
     user?.communityCity,
     user?.city,
     user?.unitNumber,
+    user?.blockNumber,
+    user?.houseOrFlatNo,
   ]);
 
   const handleEdit = () => {
@@ -147,7 +150,10 @@ const Profile = () => {
         name: profile.name,
         email: profile.email,
         phone: editProfile.phone,
-        communityName: editProfile.society,
+        society: user?.society || profile.society,
+        communityName: user?.society || profile.society,
+        blockNumber: editProfile.block,
+        houseOrFlatNo: editProfile.apartment,
         unitNumber: updatedUnitNumber,
       };
 
@@ -448,11 +454,10 @@ const Profile = () => {
 
             <ProfileField
               icon={Building2}
-              label="Society"
-              value={isEditing ? editProfile.society : profile.society}
-              editing={isEditing}
-              onChange={(value) => handleChange("society", value)}
-              placeholder="Enter society name"
+              label="Assigned Society (Locked)"
+              value={profile.society}
+              editing={false}
+              placeholder="Assigned society"
             />
 
             <ProfileField

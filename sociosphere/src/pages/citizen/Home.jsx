@@ -218,9 +218,30 @@ export default function Home() {
         }
       });
 
-      const allReports = Array.from(combinedMap.values());
+      const userSociety = (user?.society || user?.communityName || 'Gandhi Colony').trim();
+      const userEmail = (user?.email || '').trim().toLowerCase();
+      const userId = user?.id;
 
-      const normalized = allReports.map((report) => {
+      // Filter reports strictly to this citizen's society (or items reported by this citizen)
+      const societyReports = Array.from(combinedMap.values()).filter((item) => {
+        if (!item) return false;
+        // Direct reporter match
+        if (userEmail && item.reportedByEmail && item.reportedByEmail.trim().toLowerCase() === userEmail) return true;
+        if (userId && item.reportedById && item.reportedById === userId) return true;
+
+        // Society match
+        const itemSoc = (item.society || item.communityName || item.colony || '').trim().toLowerCase();
+        if (itemSoc && itemSoc === userSociety.toLowerCase()) return true;
+
+        // Default seed backwards compatibility for Gandhi Colony
+        if (userSociety.toLowerCase() === 'gandhi colony' && (itemSoc === 'green meadows heights' || !itemSoc)) {
+          return true;
+        }
+
+        return false;
+      });
+
+      const normalized = societyReports.map((report) => {
         const isCrime = report?.reportType === "crime" || report?.id?.startsWith("CRM-");
         return {
           ...report,
@@ -517,6 +538,12 @@ export default function Home() {
             .includes("HIGH"))
     ).length;
 
+  const userSociety = user?.society || user?.communityName || 'Gandhi Colony';
+  const userSocietyCode = user?.societyCode || (
+    userSociety === 'Gandhi Colony' ? 'GC-101' :
+    userSociety === 'Shayam Nagar' ? 'SN-202' : 'DV-303'
+  );
+
   const displayName = user?.name && !user.name.includes("@")
     ? user.name.split(" ")[0]
     : "Resident";
@@ -561,9 +588,12 @@ export default function Home() {
           <div className="location-section">
             <MapPin size={16} />
 
-            <span>
-              {user?.communityName ||
-                "Your Community"}
+            <span className="font-bold">
+              {userSociety}
+            </span>
+
+            <span className="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30">
+              {userSocietyCode}
             </span>
 
             <span className="online-dot" />

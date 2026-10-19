@@ -5,14 +5,23 @@ import {
   Calendar, 
   AlertCircle,
   CheckCircle2,
-  Bell
+  Bell,
+  Building2
 } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import { getAnnouncements, addAnnouncement } from '../../data/mockAnnouncements';
+import { useAuth } from '../../context/AuthContext';
 
 const PostAnnouncement = () => {
+  const { user } = useAuth();
+  const adminSociety = user?.society || user?.communityName || 'Gandhi Colony';
+  const adminSocietyCode = user?.societyCode || (
+    adminSociety === 'Gandhi Colony' ? 'GC-101' :
+    adminSociety === 'Shayam Nagar' ? 'SN-202' : 'DV-303'
+  );
+
   const [announcements, setAnnouncements] = useState([]);
   const [formData, setFormData] = useState({
     title: '',
@@ -45,9 +54,11 @@ const PostAnnouncement = () => {
     setTimeout(() => {
       const newAnn = {
         ...formData,
-        author: 'Society Welfare Board',
+        author: `${adminSociety} Welfare Board`,
         authorRole: 'Society Authority',
-        colonyId: 'colony-1' // hardcoded for demo
+        society: adminSociety,
+        societyCode: adminSocietyCode,
+        colonyId: adminSocietyCode
       };
       
       const updatedList = addAnnouncement(newAnn);
@@ -81,8 +92,17 @@ const PostAnnouncement = () => {
       {/* Header Info */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Announcements</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Broadcast important notices and updates to the community.</p>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Announcements</h1>
+            <span className="flex items-center gap-1.5 rounded-full bg-blue-500/15 border border-blue-500/30 px-2.5 py-0.5 text-xs font-bold text-blue-600 dark:text-blue-400">
+              <Building2 size={13} />
+              <span>{adminSociety}</span>
+              <span className="font-mono text-[10px] bg-blue-500/20 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded border border-blue-500/30">
+                {adminSocietyCode}
+              </span>
+            </span>
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Broadcast important notices and updates to {adminSociety}.</p>
         </div>
       </div>
 
@@ -176,13 +196,21 @@ const PostAnnouncement = () => {
 
         {/* Right Column: Existing Announcements */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between mb-2">
-             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Broadcast History</h2>
-             <Badge variant="slate" className="font-normal">{announcements.length} Published</Badge>
-          </div>
+          {(() => {
+            const societyAnnouncements = announcements.filter(a => 
+              (a.society && a.society.toLowerCase() === adminSociety.toLowerCase()) ||
+              (adminSociety === 'Gandhi Colony' && (!a.society || a.colonyId === 'colony-1' || a.societyCode === 'GC-101'))
+            );
 
-          <div className="space-y-4">
-            {announcements.map(ann => (
+            return (
+              <>
+                <div className="flex items-center justify-between mb-2">
+                   <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Broadcast History</h2>
+                   <Badge variant="slate" className="font-normal">{societyAnnouncements.length} Published</Badge>
+                </div>
+
+                <div className="space-y-4">
+                  {societyAnnouncements.map(ann => (
               <Card key={ann.id} className="p-0 overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700/60">
                 <div className="p-5 sm:p-6">
                   <div className="flex items-start justify-between gap-4 mb-3">
@@ -221,14 +249,17 @@ const PostAnnouncement = () => {
               </Card>
             ))}
             
-            {announcements.length === 0 && (
+            {societyAnnouncements.length === 0 && (
               <div className="text-center py-12 border border-slate-200 dark:border-slate-800 border-dashed rounded-2xl bg-slate-50 dark:bg-[#0D1524]">
                 <Megaphone size={48} className="mx-auto text-slate-400 dark:text-slate-700 mb-4" />
                 <h3 className="text-lg font-medium text-slate-600 dark:text-slate-300">No Announcements</h3>
-                <p className="text-sm text-slate-400 dark:text-slate-500">You haven't broadcasted any announcements yet.</p>
+                <p className="text-sm text-slate-400 dark:text-slate-500">No broadcasts found for {adminSociety}.</p>
               </div>
             )}
-          </div>
+                </div>
+              </>
+            );
+          })()}
         </div>
 
       </div>

@@ -57,9 +57,9 @@ const AuthorityProfile = () => {
     name: user?.name || "",
     email: user?.email || "",
     phone: user?.phone || "",
-    society: user?.communityName || "",
-    block: user?.unitNumber ? user.unitNumber.split(' - ')[0] || "" : "",
-    apartment: user?.unitNumber ? user.unitNumber.split(' - ')[1] || "" : "",
+    society: user?.society || user?.communityName || "",
+    block: user?.blockNumber || (user?.unitNumber ? user.unitNumber.split(' - ')[0] || "" : ""),
+    apartment: user?.houseOrFlatNo || (user?.unitNumber ? user.unitNumber.split(' - ')[1] || "" : ""),
     city: user?.city || "",
   });
 
@@ -69,9 +69,9 @@ const AuthorityProfile = () => {
         name: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
-        society: user.communityName || "",
-        block: user.unitNumber ? user.unitNumber.split(' - ')[0] || "" : "",
-        apartment: user.unitNumber ? user.unitNumber.split(' - ')[1] || "" : "",
+        society: user.society || user.communityName || "",
+        block: user.blockNumber || (user.unitNumber ? user.unitNumber.split(' - ')[0] || "" : ""),
+        apartment: user.houseOrFlatNo || (user.unitNumber ? user.unitNumber.split(' - ')[1] || "" : ""),
         city: user.city || "",
       });
     }
@@ -102,7 +102,10 @@ const AuthorityProfile = () => {
           name: editProfile.name,
           email: editProfile.email,
           phone: editProfile.phone,
-          communityName: editProfile.society,
+          society: user?.society || editProfile.society,
+          communityName: user?.society || editProfile.society,
+          blockNumber: editProfile.block,
+          houseOrFlatNo: editProfile.apartment,
           unitNumber: editProfile.block && editProfile.apartment ? `${editProfile.block} - ${editProfile.apartment}` : editProfile.block || editProfile.apartment || "",
           city: editProfile.city
         });
@@ -360,11 +363,11 @@ const AuthorityProfile = () => {
 
             <ProfileField
               icon={Building2}
-              label="Society"
-              value={isEditing ? editProfile.society : profile.society}
-              editing={isEditing}
-              onChange={(value) => handleChange("society", value)}
-              placeholder="Enter society name"
+              label="Assigned Society (Locked)"
+              value={profile.society}
+              editing={false}
+              onChange={() => {}}
+              placeholder="Assigned Society"
             />
 
             <ProfileField

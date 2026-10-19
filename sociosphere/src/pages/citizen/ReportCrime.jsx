@@ -146,9 +146,12 @@ export default function ReportCrime({ onClose, isEmbedded = false, onSuccess }) 
 			reportedByEmail: isAnonymous ? "" : (user?.email?.trim().toLowerCase() || ""),
 			reportedById: isAnonymous ? "" : (user?.id || ""),
 			reporterPhone: isAnonymous ? "" : reporterPhone,
-			communityId: user?.communityId || "colony-1",
-			communityName: user?.communityName || "Green Meadows Heights",
-			colony: user?.communityName || user?.communityId || "Green Meadows Heights",
+			communityId: user?.communityId || "colony-gandhi",
+			society: user?.society || user?.communityName || "Gandhi Colony",
+			societyCode: user?.societyCode || "GC-101",
+			communityName: user?.society || user?.communityName || "Gandhi Colony",
+			colonyName: user?.society || user?.communityName || "Gandhi Colony",
+			colony: user?.society || user?.communityName || "Gandhi Colony",
 			reportType: "crime",
 			timeline: [
 				{

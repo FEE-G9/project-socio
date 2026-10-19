@@ -104,8 +104,20 @@ const AdminHome = () => {
   );
   const pendingRequestsCount = societyUsers.filter(u => u.status === 'Pending Approval').length;
 
-  const totalIssues = issues.length;
-  const resolvedIssues = issues.filter(i => i.status === 'Resolved').length;
+  const societyIssues = issues.filter(i => 
+    (i.society && i.society.toLowerCase() === adminSociety.toLowerCase()) ||
+    (i.colonyName && i.colonyName.toLowerCase() === adminSociety.toLowerCase()) ||
+    (adminSociety === 'Gandhi Colony' && (!i.colonyName || i.colonyName === 'Green Meadows Heights'))
+  );
+
+  const societyCrimes = crimes.filter(c =>
+    (c.society && c.society.toLowerCase() === adminSociety.toLowerCase()) ||
+    (c.colony && c.colony.toLowerCase() === adminSociety.toLowerCase()) ||
+    (adminSociety === 'Gandhi Colony' && (!c.colony || c.colony === 'Green Meadows Heights'))
+  );
+
+  const totalIssues = societyIssues.length;
+  const resolvedIssues = societyIssues.filter(i => i.status === 'Resolved').length;
   const resolutionRate = totalIssues > 0 ? Math.round((resolvedIssues / totalIssues) * 100) : 100;
 
   const handleAction = (modalName) => {
@@ -132,9 +144,9 @@ const AdminHome = () => {
     }, 1500);
   };
 
-  const recentActivities = [...issues.map(i => ({
+  const recentActivities = [...societyIssues.map(i => ({
     id: i.id, type: 'Issue', title: i.title, status: i.status, date: i.createdAt || new Date().toISOString()
-  })), ...crimes.map(c => ({
+  })), ...societyCrimes.map(c => ({
     id: c.id, type: 'Crime', title: c.title, status: c.status, date: c.timestamp || new Date().toISOString()
   }))].sort((a, b) => {
     const timeA = isNaN(new Date(a.date).getTime()) ? 0 : new Date(a.date).getTime();

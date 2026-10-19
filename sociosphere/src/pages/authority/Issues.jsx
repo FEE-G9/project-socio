@@ -10,17 +10,27 @@ import {
   Search,
   MoreVertical,
   Activity,
-  Trash2
+  Trash2,
+  Building2
 } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import { deleteIssue, getIssues, updateIssueStatus } from '../../data/mockIssues';
+import { useAuth } from '../../context/AuthContext';
 
 const Issues = () => {
+  const { user } = useAuth();
+  const adminSociety = user?.society || user?.communityName || 'Gandhi Colony';
+  const adminSocietyCode = user?.societyCode || (
+    adminSociety === 'Gandhi Colony' ? 'GC-101' :
+    adminSociety === 'Shayam Nagar' ? 'SN-202' : 'DV-303'
+  );
+
   const [issues, setIssues] = useState([]);
   const [activeTab, setActiveTab] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Modal states
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
@@ -60,11 +70,25 @@ const Issues = () => {
     }
   };
 
-  const categories = ['All', ...new Set(issues.map(i => i.category))];
+  // Strictly isolate to the current admin's society
+  const societyIssues = issues.filter(i => 
+    (i.society && i.society.toLowerCase() === adminSociety.toLowerCase()) ||
+    (i.colonyName && i.colonyName.toLowerCase() === adminSociety.toLowerCase()) ||
+    (adminSociety === 'Gandhi Colony' && (!i.colonyName || i.colonyName === 'Green Meadows Heights'))
+  );
 
-  const filteredIssues = activeTab === 'All' 
-    ? issues 
-    : issues.filter(issue => issue.category === activeTab);
+  const categories = ['All', ...new Set(societyIssues.map(i => i.category))];
+
+  const filteredIssues = societyIssues.filter(issue => {
+    const matchesTab = activeTab === 'All' || issue.category === activeTab;
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch = !q ||
+      (issue.title && issue.title.toLowerCase().includes(q)) ||
+      (issue.description && issue.description.toLowerCase().includes(q)) ||
+      (issue.location && issue.location.toLowerCase().includes(q)) ||
+      (issue.reportedBy && issue.reportedBy.toLowerCase().includes(q));
+    return matchesTab && matchesSearch;
+  });
 
   const openStatusModal = (issue) => {
     setSelectedIssueId(issue.id);
@@ -89,13 +113,24 @@ const Issues = () => {
       {/* Header Info */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Issue Management</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Track and resolve complaints raised by citizens.</p>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Issue Management</h1>
+            <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              <Building2 size={13} />
+              <span>{adminSociety}</span>
+              <span className="font-mono text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-500/30">
+                {adminSocietyCode}
+              </span>
+            </span>
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Track and resolve complaints raised by citizens in {adminSociety}.</p>
         </div>
         <div className="flex items-center gap-4 border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/90 rounded-xl px-3 py-1.5 focus-within:border-emerald-500 transition-colors">
           <Search size={16} className="text-slate-400 dark:text-slate-500" />
           <input 
             type="text" 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search issues..." 
             className="bg-transparent border-none outline-none text-sm w-48 text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />

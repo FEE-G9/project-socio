@@ -73,9 +73,12 @@ const Members = () => {
 
   const [users, setUsers] = useState([]);
 
-  // Default society: current admin's society if set, else 'Gandhi Colony'
-  const defaultSociety = currentAdmin?.society || currentAdmin?.communityName || 'Gandhi Colony';
-  const [selectedSociety, setSelectedSociety] = useState(defaultSociety);
+  // Admin is strictly locked to their own society
+  const adminSociety = currentAdmin?.society || currentAdmin?.communityName || 'Gandhi Colony';
+  const activeColonyObj = colonies.find(c => 
+    (c.name || '').toLowerCase() === adminSociety.toLowerCase() ||
+    (c.code || '').toLowerCase() === (currentAdmin?.societyCode || '').toLowerCase()
+  ) || colonies[0];
 
   // URL query check (?tab=pending)
   const initialTab = new URLSearchParams(location.search).get('tab') || 'all';
@@ -88,13 +91,13 @@ const Members = () => {
   const [showPasswordInModal, setShowPasswordInModal] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Add person form state & validation
+  // Add person form state & validation (locked to admin's society)
   const [addFormData, setAddFormData] = useState({
     name: '',
     email: '',
     phone: '',
     age: '',
-    society: defaultSociety,
+    society: adminSociety,
     occupation: '',
     blockNumber: 'Block A',
     houseOrFlatNo: '',
@@ -104,10 +107,10 @@ const Members = () => {
   });
   const [formErrors, setFormErrors] = useState({});
 
-  // Sync users from storage & listen for changes
+  // Sync users strictly for the current administrator's society
   useEffect(() => {
     const loadData = () => {
-      setUsers(getUsers());
+      setUsers(getUsers(adminSociety));
     };
     loadData();
 
@@ -117,25 +120,10 @@ const Members = () => {
       window.removeEventListener('sociosphere_users_updated', loadData);
       window.removeEventListener('storage', loadData);
     };
-  }, []);
+  }, [adminSociety]);
 
-  // Update society default if admin changes
-  useEffect(() => {
-    if (currentAdmin?.society || currentAdmin?.communityName) {
-      const adminSoc = currentAdmin.society || currentAdmin.communityName;
-      setSelectedSociety(adminSoc);
-      setAddFormData(prev => ({ ...prev, society: adminSoc }));
-    }
-  }, [currentAdmin?.society, currentAdmin?.communityName]);
-
-  // Filter users first by society
-  const societyUsers = useMemo(() => {
-    if (selectedSociety === 'all') return users;
-    return users.filter(u => 
-      (u.society || '').toLowerCase() === selectedSociety.toLowerCase() ||
-      (u.communityName || '').toLowerCase() === selectedSociety.toLowerCase()
-    );
-  }, [users, selectedSociety]);
+  // Scoped users strictly for this society
+  const societyUsers = users;
 
   // Compute counts for the selected society
   const totalCount = societyUsers.length;
@@ -260,10 +248,10 @@ const Members = () => {
       email: addFormData.email.trim().toLowerCase(),
       phone: `+91 ${addFormData.phone.trim().replace(/\D/g, "")}`,
       age: parseInt(addFormData.age, 10),
-      society: addFormData.society,
-      societyCode: socCode,
-      communityName: addFormData.society,
-      communityId: colonyObj.id,
+      society: adminSociety,
+      societyCode: activeColonyObj.code,
+      communityName: adminSociety,
+      communityId: activeColonyObj.id,
       occupation: addFormData.occupation.trim(),
       blockNumber: addFormData.blockNumber,
       houseOrFlatNo: addFormData.houseOrFlatNo.trim(),
@@ -284,7 +272,7 @@ const Members = () => {
       email: '',
       phone: '',
       age: '',
-      society: selectedSociety !== 'all' ? selectedSociety : 'Gandhi Colony',
+      society: adminSociety,
       occupation: '',
       blockNumber: 'Block A',
       houseOrFlatNo: '',
@@ -294,51 +282,37 @@ const Members = () => {
     });
   };
 
-  const activeColonyObj = colonies.find(c => c.name === selectedSociety);
-
   return (
     <div className="space-y-8 pb-14">
       {/* =====================================================
-          HEADER SECTION WITH SOCIETY SWITCHER
+          HEADER SECTION WITH LOCKED SOCIETY BRANDING
       ===================================================== */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5 flex-wrap">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-              Society Directory & Members
+              {adminSociety} Directory & Members
             </h1>
-            {activeColonyObj && (
-              <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-0.5 text-xs font-black tracking-wider text-emerald-700 dark:text-emerald-400">
-                Code: {activeColonyObj.code}
-              </span>
-            )}
+            <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-0.5 text-xs font-black tracking-wider text-emerald-700 dark:text-emerald-400">
+              Code: {activeColonyObj.code}
+            </span>
             <span className="rounded-full bg-blue-100 dark:bg-blue-950/60 px-2.5 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300">
-              Live Database
+              Secure Society Portal
             </span>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Registered residents, council members, and pending verification requests for {selectedSociety === 'all' ? 'all communities' : selectedSociety}.
+            Registered residents, council members, and pending verification requests for {adminSociety}.
           </p>
         </div>
 
-        {/* TOP CONTROLS: SOCIETY SELECTOR + ADD BUTTON */}
+        {/* TOP CONTROLS: LOCKED SOCIETY BADGE + ADD BUTTON */}
         <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
-          <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+          <div className="flex items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 px-3.5 py-2 text-sm font-bold text-emerald-800 dark:text-emerald-300 shadow-sm">
             <Building2 size={16} className="text-emerald-500" />
-            <select
-              value={selectedSociety}
-              onChange={(e) => {
-                setSelectedSociety(e.target.value);
-                setAddFormData(prev => ({ ...prev, society: e.target.value !== 'all' ? e.target.value : 'Gandhi Colony' }));
-              }}
-              aria-label="Switch active society database view"
-              className="bg-transparent outline-none cursor-pointer pr-2 font-bold"
-            >
-              <option value="Gandhi Colony" className="dark:bg-slate-800">Gandhi Colony (GC-101)</option>
-              <option value="Shayam Nagar" className="dark:bg-slate-800">Shayam Nagar (SN-202)</option>
-              <option value="Dalima Vihar" className="dark:bg-slate-800">Dalima Vihar (DV-303)</option>
-              <option value="all" className="dark:bg-slate-800">All Societies (Combined)</option>
-            </select>
+            <span>{adminSociety}</span>
+            <span className="font-mono text-xs bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">
+              {activeColonyObj.code}
+            </span>
           </div>
 
           <button
@@ -359,7 +333,7 @@ const Members = () => {
           {
             label: "Total Directory",
             value: totalCount.toString(),
-            trendLabel: `enrolled in ${selectedSociety === 'all' ? 'all societies' : selectedSociety}`,
+            trendLabel: `enrolled in ${adminSociety}`,
             trendDirection: "up",
             icon: Users,
             iconBg: "bg-blue-500/10",
@@ -1010,20 +984,20 @@ const Members = () => {
             </div>
           </div>
 
-          {/* SOCIETY SELECTION */}
+          {/* ASSIGNED SOCIETY (LOCKED TO ADMIN'S SOCIETY) */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-              Society / Colony *
+              Assigned Society (Locked to Your Community)
             </label>
-            <select
-              value={addFormData.society}
-              onChange={(e) => setAddFormData({ ...addFormData, society: e.target.value })}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 cursor-pointer"
-            >
-              <option value="Gandhi Colony">Gandhi Colony (Code: GC-101)</option>
-              <option value="Shayam Nagar">Shayam Nagar (Code: SN-202)</option>
-              <option value="Dalima Vihar">Dalima Vihar (Code: DV-303)</option>
-            </select>
+            <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 p-2.5 text-sm font-bold text-emerald-800 dark:text-emerald-300">
+              <div className="flex items-center gap-2">
+                <Building2 size={16} className="text-emerald-500" />
+                <span>{adminSociety}</span>
+              </div>
+              <span className="font-mono text-xs bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">
+                {activeColonyObj?.code || 'GC-101'}
+              </span>
+            </div>
           </div>
 
           {/* BLOCK & HOUSE / FLAT NUMBER */}
