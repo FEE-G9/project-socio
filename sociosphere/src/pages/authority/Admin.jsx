@@ -22,6 +22,7 @@ import { getIssues } from '../../data/mockIssues';
 import { getCrimes } from '../../data/mockCrimes';
 import { getUsers } from '../../data/mockUsers';
 import { useAlert } from '../../context/AlertContext';
+import { useAuth } from '../../context/AuthContext';
 
 const TrendArrow = ({ direction = "up" }) => {
   const isUp = direction === "up";
@@ -50,6 +51,7 @@ const TrendArrow = ({ direction = "up" }) => {
 
 const AdminHome = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { triggerAdminAlert } = useAlert();
   const [activeModal, setActiveModal] = useState(null); // 'reports', 'announcement', 'logs', 'members'
   const [isLoading, setIsLoading] = useState(false);
@@ -91,6 +93,16 @@ const AdminHome = () => {
       window.removeEventListener('storage', loadUsers);
     };
   }, []);
+
+  const adminSociety = user?.society || user?.communityName || 'Gandhi Colony';
+  const adminSocietyCode = user?.societyCode || (
+    adminSociety === 'Gandhi Colony' ? 'GC-101' :
+    adminSociety === 'Shayam Nagar' ? 'SN-202' : 'DV-303'
+  );
+  const societyUsers = usersList.filter(u => 
+    (u.society || u.communityName || '').toLowerCase() === adminSociety.toLowerCase()
+  );
+  const pendingRequestsCount = societyUsers.filter(u => u.status === 'Pending Approval').length;
 
   const totalIssues = issues.length;
   const resolvedIssues = issues.filter(i => i.status === 'Resolved').length;
@@ -135,8 +147,13 @@ const AdminHome = () => {
       {/* Header Info - Replaces the old fixed header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Admin Home</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Overview of your society's metrics and modules.</p>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{adminSociety} Admin</h1>
+            <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-black text-emerald-600 dark:text-emerald-400">
+              {adminSocietyCode}
+            </span>
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Overview of {adminSociety}'s metrics, resident directory, and civic modules.</p>
         </div>
           <div className="flex items-center gap-3">
             <button
@@ -160,7 +177,7 @@ const AdminHome = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Total Issues", value: totalIssues.toString(), trendLabel: "synced", trendDirection: "down", icon: AlertTriangle, iconBg: "bg-blue-500/10", iconColor: "text-blue-500 dark:text-blue-400", href: "/authority/issues" },
-          { label: "Active Members", value: (usersList.length || 16).toString(), trendLabel: "society directory", trendDirection: "up", icon: Users, iconBg: "bg-purple-500/10", iconColor: "text-purple-500 dark:text-purple-400", href: "/authority/members" },
+          { label: "Active Members", value: (societyUsers.length || 8).toString(), trendLabel: `${adminSociety} directory`, trendDirection: "up", icon: Users, iconBg: "bg-purple-500/10", iconColor: "text-purple-500 dark:text-purple-400", href: "/authority/members" },
           { label: "Total Collected", value: `₹${(mockFinance.totalCollected / 1000).toFixed(1)}k`, trendLabel: "vs last month", trendDirection: "up", icon: Wallet, iconBg: "bg-amber-500/10", iconColor: "text-amber-500 dark:text-amber-400" },
           { label: "Resolution Rate", value: `${resolutionRate}%`, trendLabel: "tracked", trendDirection: "up", icon: Activity, iconBg: "bg-emerald-500/10", iconColor: "text-emerald-500 dark:text-emerald-400" }
         ].map((stat) => {
@@ -300,10 +317,24 @@ const AdminHome = () => {
                   className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-lg group-hover:bg-emerald-100 dark:group-hover:bg-emerald-500/20 transition-colors">
+                    <div className="relative p-2 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-lg group-hover:bg-emerald-100 dark:group-hover:bg-emerald-500/20 transition-colors">
                       <Users size={18} />
+                      {pendingRequestsCount > 0 && (
+                        <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-amber-500 animate-pulse border-2 border-white dark:border-slate-800" />
+                      )}
                     </div>
-                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Approve Members</span>
+                    <div>
+                      <span className="text-sm font-medium text-slate-900 dark:text-slate-100 block">Approve Members</span>
+                      {pendingRequestsCount > 0 ? (
+                        <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                          {pendingRequestsCount} Pending Approval {pendingRequestsCount === 1 ? 'Request' : 'Requests'}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400 dark:text-slate-500">
+                          All requests reviewed
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <ChevronRight size={16} className="text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300" />
                 </button>

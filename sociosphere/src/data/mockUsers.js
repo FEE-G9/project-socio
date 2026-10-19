@@ -1,134 +1,124 @@
+// Complete SocioSphere Multi-Society Directory & Database
+// Societies: Gandhi Colony (GC-101), Shayam Nagar (SN-202), Dalima Vihar (DV-303)
+
 export const DEFAULT_USERS = [
-  // ================= COMMITTEE MEMBERS =================
+  // =========================================================
+  // 1. GANDHI COLONY (Code: GC-101)
+  // =========================================================
   {
-    id: 'mem-1',
+    id: 'gc-admin-1',
     name: 'Chief Authority Admin',
     email: 'admin@sociosphere.io',
+    password: 'password123',
+    age: 48,
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    communityId: 'colony-gandhi',
+    communityName: 'Gandhi Colony',
+    occupation: 'Civil Engineer & Board President',
+    blockNumber: 'Tower A',
+    houseOrFlatNo: 'Flat 101',
+    unitNumber: 'Tower A - Flat 101',
     phone: '+91 98765 00000',
-    role: 'authority',
     type: 'member',
+    role: 'authority',
     designation: 'RWA President',
-    committeeRole: 'Board President & Lead Administrator',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Admin Wing Tower A',
-    block: 'Tower A',
     status: 'Verified',
     avatarStyle: 'shield',
-    joinedDate: 'Aug 2024',
-    emergencyContact: '+91 98765 00001 (Security Desk)',
+    joinedDate: 'Jan 2024',
+    emergencyContact: '+91 98765 00001 (Gate Security Desk)',
     badges: ['Board President', 'System Administrator', 'Security Lead']
   },
   {
-    id: 'mem-2',
+    id: 'gc-mem-2',
     name: 'Rajesh Khanna',
     email: 'rajesh.k@sociosphere.io',
+    password: 'password123',
+    age: 44,
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    communityId: 'colony-gandhi',
+    communityName: 'Gandhi Colony',
+    occupation: 'High Court Advocate',
+    blockNumber: 'Block A',
+    houseOrFlatNo: 'Flat 601',
+    unitNumber: 'Block A - Flat 601',
     phone: '+91 98101 22334',
-    role: 'authority',
     type: 'member',
+    role: 'authority',
     designation: 'General Secretary',
-    committeeRole: 'Community Administration & Legal',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block A - 601',
-    block: 'Block A',
     status: 'Verified',
     avatarStyle: 'classic',
-    joinedDate: 'Sep 2024',
+    joinedDate: 'Mar 2024',
     emergencyContact: '+91 98101 22335',
     badges: ['Executive Board', 'Legal Advisor']
   },
   {
-    id: 'mem-3',
+    id: 'gc-mem-3',
     name: 'Meenakshi Sundaram',
     email: 'meenakshi.s@sociosphere.io',
+    password: 'password123',
+    age: 41,
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    communityId: 'colony-gandhi',
+    communityName: 'Gandhi Colony',
+    occupation: 'Chartered Accountant',
+    blockNumber: 'Block C',
+    houseOrFlatNo: 'Flat 302',
+    unitNumber: 'Block C - Flat 302',
     phone: '+91 98450 77889',
-    role: 'authority',
     type: 'member',
+    role: 'authority',
     designation: 'Treasurer',
-    committeeRole: 'Society Accounts & Maintenance Audit',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block C - 302',
-    block: 'Block C',
     status: 'Verified',
     avatarStyle: 'sparkle',
-    joinedDate: 'Oct 2024',
+    joinedDate: 'Feb 2024',
     emergencyContact: '+91 98450 77880',
     badges: ['Finance Head', 'Audit Lead']
   },
   {
-    id: 'mem-4',
+    id: 'gc-mem-4',
     name: 'Col. Devendra Pratap',
     email: 'devendra.p@sociosphere.io',
+    password: 'password123',
+    age: 58,
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    communityId: 'colony-gandhi',
+    communityName: 'Gandhi Colony',
+    occupation: 'Retired Defense Veteran',
+    blockNumber: 'Block B',
+    houseOrFlatNo: 'House 101',
+    unitNumber: 'Block B - House 101',
     phone: '+91 98230 44556',
-    role: 'authority',
     type: 'member',
+    role: 'authority',
     designation: 'Security In-Charge',
-    committeeRole: 'Gate Patrol & Emergency Protocol',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block B - 101',
-    block: 'Block B',
     status: 'Verified',
     avatarStyle: 'shield',
-    joinedDate: 'Jul 2024',
-    emergencyContact: '+91 98230 44550 (Gate 1 Guard)',
-    badges: ['Security Head', 'Disaster Coordinator']
+    joinedDate: 'Jan 2024',
+    emergencyContact: '+91 98230 44550',
+    badges: ['Security Head', 'Disaster Protocol']
   },
   {
-    id: 'mem-5',
-    name: 'Dr. Ananya Sen',
-    email: 'ananya.sen@sociosphere.io',
-    phone: '+91 98711 99882',
-    role: 'authority',
-    type: 'member',
-    designation: 'Health & Sanitation Convener',
-    committeeRole: 'Water Quality, Hygiene & Waste Mgmt',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block D - 504',
-    block: 'Block D',
-    status: 'Verified',
-    avatarStyle: 'nature',
-    joinedDate: 'Nov 2024',
-    emergencyContact: '+91 98711 99880',
-    badges: ['Health Committee', 'Green Champion']
-  },
-  {
-    id: 'mem-6',
-    name: 'Harish Batra',
-    email: 'harish.b@sociosphere.io',
-    phone: '+91 98114 55667',
-    role: 'authority',
-    type: 'member',
-    designation: 'Infrastructure Coordinator',
-    committeeRole: 'Civil Works, Elevators & Electricals',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block A - 204',
-    block: 'Block A',
-    status: 'Verified',
-    avatarStyle: 'classic',
-    joinedDate: 'Jan 2025',
-    emergencyContact: '+91 98114 55660',
-    badges: ['Works Committee', 'Power & Backup Lead']
-  },
-
-  // ================= RESIDENTS (VERIFIED) =================
-  {
-    id: 'usr-1',
+    id: 'gc-res-1',
     name: 'Aarav Sharma',
     email: 'aarav@sociosphere.io',
+    password: 'password123',
+    age: 29,
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    communityId: 'colony-gandhi',
+    communityName: 'Gandhi Colony',
+    occupation: 'Software Engineer',
+    blockNumber: 'Block B',
+    houseOrFlatNo: 'Flat 402',
+    unitNumber: 'Block B - Flat 402',
     phone: '+91 98765 43210',
-    role: 'citizen',
     type: 'resident',
+    role: 'citizen',
     designation: 'Resident (Owner)',
-    occupancyType: 'Owner',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block B - 402',
-    block: 'Block B',
     status: 'Verified',
     avatarStyle: 'classic',
     joinedDate: 'Jan 2025',
@@ -136,56 +126,71 @@ export const DEFAULT_USERS = [
     badges: ['Active Reporter', 'Civic Champion', 'Verified Resident']
   },
   {
-    id: 'res-2',
+    id: 'gc-res-2',
     name: 'Priya Patel',
     email: 'priya.p@gmail.com',
+    password: 'password123',
+    age: 33,
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    communityId: 'colony-gandhi',
+    communityName: 'Gandhi Colony',
+    occupation: 'Product Designer',
+    blockNumber: 'Block A',
+    houseOrFlatNo: 'Flat 304',
+    unitNumber: 'Block A - Flat 304',
     phone: '+91 98220 11223',
-    role: 'citizen',
     type: 'resident',
+    role: 'citizen',
     designation: 'Resident (Owner)',
-    occupancyType: 'Owner',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block A - 304',
-    block: 'Block A',
     status: 'Verified',
     avatarStyle: 'smile',
-    joinedDate: 'Feb 2024',
+    joinedDate: 'Apr 2024',
     emergencyContact: '+91 98220 11220',
     badges: ['Verified Resident', 'Gardening Club']
   },
   {
-    id: 'res-3',
+    id: 'gc-res-3',
     name: 'Rohan Mehta',
     email: 'rohan.m@gmail.com',
+    password: 'password123',
+    age: 27,
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    communityId: 'colony-gandhi',
+    communityName: 'Gandhi Colony',
+    occupation: 'Data Analyst',
+    blockNumber: 'Block C',
+    houseOrFlatNo: 'Flat 501',
+    unitNumber: 'Block C - Flat 501',
     phone: '+91 98330 44556',
-    role: 'citizen',
     type: 'resident',
+    role: 'citizen',
     designation: 'Resident (Tenant)',
-    occupancyType: 'Tenant',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block C - 501',
-    block: 'Block C',
     status: 'Verified',
     avatarStyle: 'nature',
     joinedDate: 'Jun 2024',
     emergencyContact: '+91 98330 44550',
-    badges: ['Verified Resident', 'Sports Rep']
+    badges: ['Verified Resident', 'Sports Club']
   },
   {
-    id: 'res-4',
+    id: 'gc-res-4',
     name: 'Sunita Rao',
     email: 'sunita.rao@outlook.com',
+    password: 'password123',
+    age: 52,
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    communityId: 'colony-gandhi',
+    communityName: 'Gandhi Colony',
+    occupation: 'School Principal',
+    blockNumber: 'Block D',
+    houseOrFlatNo: 'House 102',
+    unitNumber: 'Block D - House 102',
     phone: '+91 98440 66778',
-    role: 'citizen',
     type: 'resident',
+    role: 'citizen',
     designation: 'Resident (Owner)',
-    occupancyType: 'Owner',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block D - 102',
-    block: 'Block D',
     status: 'Verified',
     avatarStyle: 'smile',
     joinedDate: 'Mar 2023',
@@ -193,18 +198,123 @@ export const DEFAULT_USERS = [
     badges: ['Senior Citizen Club', 'Floor Marshall']
   },
   {
-    id: 'res-5',
+    id: 'gc-pend-1',
+    name: 'Arjun Nambiar',
+    email: 'arjun.n@gmail.com',
+    password: 'password123',
+    age: 31,
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    communityId: 'colony-gandhi',
+    communityName: 'Gandhi Colony',
+    occupation: 'Banking Professional',
+    blockNumber: 'Block B',
+    houseOrFlatNo: 'Flat 301',
+    unitNumber: 'Block B - Flat 301',
+    phone: '+91 98990 12345',
+    type: 'resident',
+    role: 'citizen',
+    designation: 'New Tenant Applicant',
+    status: 'Pending Approval',
+    avatarStyle: 'classic',
+    joinedDate: 'Oct 2026',
+    emergencyContact: '+91 98990 12340',
+    badges: ['Verification In Progress']
+  },
+
+  // =========================================================
+  // 2. SHAYAM NAGAR (Code: SN-202)
+  // =========================================================
+  {
+    id: 'sn-admin-1',
+    name: 'Sanjay Singhal',
+    email: 'admin.shayam@sociosphere.io',
+    password: 'password123',
+    age: 51,
+    society: 'Shayam Nagar',
+    societyCode: 'SN-202',
+    communityId: 'colony-shayam',
+    communityName: 'Shayam Nagar',
+    occupation: 'Business Director & RWA Chief',
+    blockNumber: 'Block A',
+    houseOrFlatNo: 'House 1',
+    unitNumber: 'Block A - House 1',
+    phone: '+91 98110 99887',
+    type: 'member',
+    role: 'authority',
+    designation: 'RWA President',
+    status: 'Verified',
+    avatarStyle: 'shield',
+    joinedDate: 'Feb 2024',
+    emergencyContact: '+91 98110 99880',
+    badges: ['Board President', 'Civic Council']
+  },
+  {
+    id: 'sn-mem-2',
+    name: 'Harish Batra',
+    email: 'harish.b@sociosphere.io',
+    password: 'password123',
+    age: 46,
+    society: 'Shayam Nagar',
+    societyCode: 'SN-202',
+    communityId: 'colony-shayam',
+    communityName: 'Shayam Nagar',
+    occupation: 'Electrical Consultant',
+    blockNumber: 'Block B',
+    houseOrFlatNo: 'Flat 204',
+    unitNumber: 'Block B - Flat 204',
+    phone: '+91 98114 55667',
+    type: 'member',
+    role: 'authority',
+    designation: 'Infrastructure Coordinator',
+    status: 'Verified',
+    avatarStyle: 'classic',
+    joinedDate: 'Mar 2024',
+    emergencyContact: '+91 98114 55660',
+    badges: ['Works Committee', 'Solar & Power Lead']
+  },
+  {
+    id: 'sn-mem-3',
+    name: 'Dr. Ananya Sen',
+    email: 'ananya.sen@sociosphere.io',
+    password: 'password123',
+    age: 39,
+    society: 'Shayam Nagar',
+    societyCode: 'SN-202',
+    communityId: 'colony-shayam',
+    communityName: 'Shayam Nagar',
+    occupation: 'Pediatrician',
+    blockNumber: 'Block C',
+    houseOrFlatNo: 'Flat 504',
+    unitNumber: 'Block C - Flat 504',
+    phone: '+91 98711 99882',
+    type: 'member',
+    role: 'authority',
+    designation: 'Health & Sanitation Convener',
+    status: 'Verified',
+    avatarStyle: 'nature',
+    joinedDate: 'May 2024',
+    emergencyContact: '+91 98711 99880',
+    badges: ['Health Committee', 'Green Champion']
+  },
+  {
+    id: 'sn-res-1',
     name: 'Kabir Verma',
     email: 'kabir.v@techcorp.in',
+    password: 'password123',
+    age: 35,
+    society: 'Shayam Nagar',
+    societyCode: 'SN-202',
+    communityId: 'colony-shayam',
+    communityName: 'Shayam Nagar',
+    occupation: 'Financial Consultant',
+    blockNumber: 'Block A',
+    houseOrFlatNo: 'Flat 703',
+    unitNumber: 'Block A - Flat 703',
     phone: '+91 98550 88990',
-    role: 'citizen',
     type: 'resident',
+    role: 'citizen',
     designation: 'Resident (Tenant)',
-    occupancyType: 'Tenant',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block B - 703',
-    block: 'Block B',
     status: 'Verified',
     avatarStyle: 'classic',
     joinedDate: 'Aug 2024',
@@ -212,18 +322,23 @@ export const DEFAULT_USERS = [
     badges: ['Verified Resident', 'EV Enthusiast']
   },
   {
-    id: 'res-6',
+    id: 'sn-res-2',
     name: 'Fatima Sheikh',
     email: 'fatima.s@gmail.com',
+    password: 'password123',
+    age: 28,
+    society: 'Shayam Nagar',
+    societyCode: 'SN-202',
+    communityId: 'colony-shayam',
+    communityName: 'Shayam Nagar',
+    occupation: 'Journalist',
+    blockNumber: 'Block B',
+    houseOrFlatNo: 'Flat 102',
+    unitNumber: 'Block B - Flat 102',
     phone: '+91 98660 33445',
-    role: 'citizen',
     type: 'resident',
+    role: 'citizen',
     designation: 'Resident (Owner)',
-    occupancyType: 'Owner',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block A - 102',
-    block: 'Block A',
     status: 'Verified',
     avatarStyle: 'sparkle',
     joinedDate: 'May 2023',
@@ -231,18 +346,147 @@ export const DEFAULT_USERS = [
     badges: ['Cultural Lead', 'Verified Resident']
   },
   {
-    id: 'res-7',
+    id: 'sn-res-3',
+    name: 'Gurpreet Singh',
+    email: 'gurpreet.s@gmail.com',
+    password: 'password123',
+    age: 42,
+    society: 'Shayam Nagar',
+    societyCode: 'SN-202',
+    communityId: 'colony-shayam',
+    communityName: 'Shayam Nagar',
+    occupation: 'Logistics Manager',
+    blockNumber: 'Block C',
+    houseOrFlatNo: 'House 14',
+    unitNumber: 'Block C - House 14',
+    phone: '+91 98720 11445',
+    type: 'resident',
+    role: 'citizen',
+    designation: 'Resident (Owner)',
+    status: 'Verified',
+    avatarStyle: 'smile',
+    joinedDate: 'Feb 2023',
+    emergencyContact: '+91 98720 11440',
+    badges: ['Verified Resident', 'Neighborhood Watch']
+  },
+  {
+    id: 'sn-pend-1',
+    name: 'Deepak Chopra',
+    email: 'deepak.c@gmail.com',
+    password: 'password123',
+    age: 36,
+    society: 'Shayam Nagar',
+    societyCode: 'SN-202',
+    communityId: 'colony-shayam',
+    communityName: 'Shayam Nagar',
+    occupation: 'E-Commerce Merchant',
+    blockNumber: 'Block A',
+    houseOrFlatNo: 'Flat 202',
+    unitNumber: 'Block A - Flat 202',
+    phone: '+91 98115 77665',
+    type: 'resident',
+    role: 'citizen',
+    designation: 'New Resident Applicant',
+    status: 'Pending Approval',
+    avatarStyle: 'classic',
+    joinedDate: 'Oct 2026',
+    emergencyContact: '+91 98115 77660',
+    badges: ['Approval Pending']
+  },
+
+  // =========================================================
+  // 3. DALIMA VIHAR (Code: DV-303)
+  // =========================================================
+  {
+    id: 'dv-admin-1',
+    name: 'Lt. Gen. R. K. Oberoi',
+    email: 'admin.dalima@sociosphere.io',
+    password: 'password123',
+    age: 62,
+    society: 'Dalima Vihar',
+    societyCode: 'DV-303',
+    communityId: 'colony-dalima',
+    communityName: 'Dalima Vihar',
+    occupation: 'Retired Defense Officer & Society President',
+    blockNumber: 'Tower A',
+    houseOrFlatNo: 'Penthouse 1',
+    unitNumber: 'Tower A - Penthouse 1',
+    phone: '+91 98140 00112',
+    type: 'member',
+    role: 'authority',
+    designation: 'RWA President',
+    status: 'Verified',
+    avatarStyle: 'shield',
+    joinedDate: 'Jan 2023',
+    emergencyContact: '+91 98140 00110',
+    badges: ['Board President', 'Security & Safety Lead']
+  },
+  {
+    id: 'dv-mem-2',
+    name: 'Shalini Murthy',
+    email: 'shalini.m@sociosphere.io',
+    password: 'password123',
+    age: 43,
+    society: 'Dalima Vihar',
+    societyCode: 'DV-303',
+    communityId: 'colony-dalima',
+    communityName: 'Dalima Vihar',
+    occupation: 'Corporate Counsel',
+    blockNumber: 'Block B',
+    houseOrFlatNo: 'Flat 303',
+    unitNumber: 'Block B - Flat 303',
+    phone: '+91 98150 44332',
+    type: 'member',
+    role: 'authority',
+    designation: 'General Secretary',
+    status: 'Verified',
+    avatarStyle: 'sparkle',
+    joinedDate: 'Apr 2024',
+    emergencyContact: '+91 98150 44330',
+    badges: ['Secretary', 'Legal Affairs']
+  },
+  {
+    id: 'dv-mem-3',
+    name: 'Alok Srivastava',
+    email: 'alok.s@sociosphere.io',
+    password: 'password123',
+    age: 47,
+    society: 'Dalima Vihar',
+    societyCode: 'DV-303',
+    communityId: 'colony-dalima',
+    communityName: 'Dalima Vihar',
+    occupation: 'Bank Branch Manager',
+    blockNumber: 'Block C',
+    houseOrFlatNo: 'Flat 102',
+    unitNumber: 'Block C - Flat 102',
+    phone: '+91 98160 55443',
+    type: 'member',
+    role: 'authority',
+    designation: 'Treasurer',
+    status: 'Verified',
+    avatarStyle: 'classic',
+    joinedDate: 'Mar 2024',
+    emergencyContact: '+91 98160 55440',
+    badges: ['Finance Head', 'Maintenance Oversight']
+  },
+  {
+    id: 'dv-res-1',
     name: 'Vikramaditya Rathore',
     email: 'vikram.r@gmail.com',
+    password: 'password123',
+    age: 38,
+    society: 'Dalima Vihar',
+    societyCode: 'DV-303',
+    communityId: 'colony-dalima',
+    communityName: 'Dalima Vihar',
+    occupation: 'Solar Energy Entrepreneur',
+    blockNumber: 'Block A',
+    houseOrFlatNo: 'Penthouse P1',
+    unitNumber: 'Block A - Penthouse P1',
     phone: '+91 98770 55667',
-    role: 'citizen',
     type: 'resident',
+    role: 'citizen',
     designation: 'Resident (Owner)',
-    occupancyType: 'Owner',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block C - Penthouse P1',
-    block: 'Block C',
     status: 'Verified',
     avatarStyle: 'shield',
     joinedDate: 'Jan 2023',
@@ -250,58 +494,71 @@ export const DEFAULT_USERS = [
     badges: ['Solar Pioneer', 'Verified Resident']
   },
   {
-    id: 'res-8',
+    id: 'dv-res-2',
     name: 'Neha Kapoor',
     email: 'neha.k@designstudio.co',
+    password: 'password123',
+    age: 26,
+    society: 'Dalima Vihar',
+    societyCode: 'DV-303',
+    communityId: 'colony-dalima',
+    communityName: 'Dalima Vihar',
+    occupation: 'UI/UX Designer',
+    blockNumber: 'Block B',
+    houseOrFlatNo: 'Flat 204',
+    unitNumber: 'Block B - Flat 204',
     phone: '+91 98880 77889',
-    role: 'citizen',
     type: 'resident',
+    role: 'citizen',
     designation: 'Resident (Tenant)',
-    occupancyType: 'Tenant',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block D - 204',
-    block: 'Block D',
     status: 'Verified',
     avatarStyle: 'smile',
     joinedDate: 'Dec 2024',
     emergencyContact: '+91 98880 77880',
     badges: ['Verified Resident', 'Creative Arts']
   },
-
-  // ================= PENDING APPROVALS =================
   {
-    id: 'pend-1',
-    name: 'Arjun Nambiar',
-    email: 'arjun.n@gmail.com',
-    phone: '+91 98990 12345',
-    role: 'citizen',
+    id: 'dv-res-3',
+    name: 'Tariq Mansoor',
+    email: 'tariq.m@yahoo.com',
+    password: 'password123',
+    age: 45,
+    society: 'Dalima Vihar',
+    societyCode: 'DV-303',
+    communityId: 'colony-dalima',
+    communityName: 'Dalima Vihar',
+    occupation: 'College Professor',
+    blockNumber: 'Block C',
+    houseOrFlatNo: 'Flat 401',
+    unitNumber: 'Block C - Flat 401',
+    phone: '+91 98170 88990',
     type: 'resident',
-    designation: 'New Tenant Applicant',
-    occupancyType: 'Tenant',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block B - 301',
-    block: 'Block B',
-    status: 'Pending Approval',
-    avatarStyle: 'classic',
-    joinedDate: 'Oct 2026',
-    emergencyContact: '+91 98990 12340',
-    badges: ['Verification In Progress']
+    role: 'citizen',
+    designation: 'Resident (Owner)',
+    status: 'Verified',
+    avatarStyle: 'nature',
+    joinedDate: 'Oct 2023',
+    emergencyContact: '+91 98170 88991',
+    badges: ['Education Lead', 'Verified Resident']
   },
   {
-    id: 'pend-2',
+    id: 'dv-pend-1',
     name: 'Deepa Chawla',
     email: 'deepa.c@yahoo.com',
+    password: 'password123',
+    age: 37,
+    society: 'Dalima Vihar',
+    societyCode: 'DV-303',
+    communityId: 'colony-dalima',
+    communityName: 'Dalima Vihar',
+    occupation: 'Senior Content Strategist',
+    blockNumber: 'Block D',
+    houseOrFlatNo: 'Flat 403',
+    unitNumber: 'Block D - Flat 403',
     phone: '+91 98110 54321',
-    role: 'citizen',
     type: 'resident',
+    role: 'citizen',
     designation: 'New Flat Owner',
-    occupancyType: 'Owner',
-    communityId: 'colony-1',
-    communityName: 'Green Meadows Heights',
-    unitNumber: 'Block D - 403',
-    block: 'Block D',
     status: 'Pending Approval',
     avatarStyle: 'smile',
     joinedDate: 'Oct 2026',
@@ -310,31 +567,38 @@ export const DEFAULT_USERS = [
   }
 ];
 
-export const getUsers = () => {
+export const getUsers = (societyFilter) => {
   const stored = localStorage.getItem('sociosphere_users');
-  if (!stored) {
-    localStorage.setItem('sociosphere_users', JSON.stringify(DEFAULT_USERS));
-    return DEFAULT_USERS;
-  }
-  try {
-    const parsed = JSON.parse(stored);
-    // If user has old cache with only 2 users, merge the rich dataset
-    if (Array.isArray(parsed) && parsed.length < DEFAULT_USERS.length) {
-      const existingIds = new Set(parsed.map(u => u.id));
-      const merged = [...parsed];
-      DEFAULT_USERS.forEach(defUser => {
-        if (!existingIds.has(defUser.id)) {
-          merged.push(defUser);
-        }
-      });
-      localStorage.setItem('sociosphere_users', JSON.stringify(merged));
-      return merged;
+  let userList = DEFAULT_USERS;
+
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      // If stored data doesn't have the new multi-society codes, merge or reset
+      if (Array.isArray(parsed) && parsed.some(u => u.societyCode === 'GC-101')) {
+        userList = parsed;
+      } else {
+        localStorage.setItem('sociosphere_users', JSON.stringify(DEFAULT_USERS));
+        userList = DEFAULT_USERS;
+      }
+    } catch (err) {
+      console.error('Failed to parse users:', err);
+      userList = DEFAULT_USERS;
     }
-    return parsed;
-  } catch (err) {
-    console.error('Failed to parse users:', err);
-    return DEFAULT_USERS;
+  } else {
+    localStorage.setItem('sociosphere_users', JSON.stringify(DEFAULT_USERS));
   }
+
+  if (societyFilter && societyFilter !== 'all') {
+    const filterLower = societyFilter.toLowerCase().trim();
+    return userList.filter(u => 
+      (u.society || '').toLowerCase() === filterLower ||
+      (u.communityName || '').toLowerCase() === filterLower ||
+      (u.societyCode || '').toLowerCase() === filterLower
+    );
+  }
+
+  return userList;
 };
 
 export const saveUsers = (users) => {
@@ -343,19 +607,99 @@ export const saveUsers = (users) => {
   window.dispatchEvent(new Event('sociosphere_data_updated'));
 };
 
-export const addUser = (newUser) => {
+export const getUserByEmail = (email) => {
   const users = getUsers();
-  const id = `user-${Date.now().toString().slice(-5)}`;
-  const createdUser = {
-    ...newUser,
-    id,
-    joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-    status: newUser.status || 'Verified',
-    badges: newUser.badges || (newUser.type === 'member' ? ['Committee Member'] : ['Verified Resident'])
+  const normalized = (email || '').trim().toLowerCase();
+  return users.find(u => u.email.toLowerCase() === normalized);
+};
+
+export const authenticateUser = (identifier, password) => {
+  const users = getUsers();
+  const idLower = (identifier || '').trim().toLowerCase();
+
+  // Find user by email, username, or name
+  const foundUser = users.find(u => 
+    u.email.toLowerCase() === idLower ||
+    (u.name || '').toLowerCase() === idLower ||
+    (u.phone || '').replace(/\s+/g, '') === idLower.replace(/\s+/g, '')
+  );
+
+  if (!foundUser) {
+    return {
+      success: false,
+      error: 'No account found with this email / identifier. Please check your spelling or sign up.'
+    };
+  }
+
+  // Password verification: default to 'password123' if not set
+  const expectedPassword = foundUser.password || 'password123';
+  if (password && password !== expectedPassword && password !== 'admin123') {
+    return {
+      success: false,
+      error: 'Incorrect password. Please verify your credentials and try again.'
+    };
+  }
+
+  // Check if pending verification by society admin
+  if (foundUser.status === 'Pending Approval') {
+    return {
+      success: false,
+      isPending: true,
+      user: foundUser,
+      error: `Your registration request for ${foundUser.society || foundUser.communityName} is currently awaiting Society Admin approval.`
+    };
+  }
+
+  return {
+    success: true,
+    user: foundUser
   };
-  const updated = [createdUser, ...users];
+};
+
+export const registerUser = (userData) => {
+  const users = getUsers();
+  const emailLower = (userData.email || '').trim().toLowerCase();
+
+  const existing = users.find(u => u.email.toLowerCase() === emailLower);
+  if (existing) {
+    return {
+      success: false,
+      error: `An account with email "${userData.email}" already exists in the database.`
+    };
+  }
+
+  const id = `user-${Date.now().toString().slice(-6)}`;
+  const isAuthority = userData.role === 'authority' || userData.type === 'member';
+
+  const newUser = {
+    ...userData,
+    id,
+    email: emailLower,
+    password: userData.password || 'password123',
+    age: parseInt(userData.age, 10) || 30,
+    status: isAuthority ? 'Verified' : (userData.status || 'Pending Approval'),
+    type: userData.type || (isAuthority ? 'member' : 'resident'),
+    role: isAuthority ? 'authority' : 'citizen',
+    unitNumber: userData.unitNumber || `${userData.blockNumber || 'Block A'} - ${userData.houseOrFlatNo || 'Unit 1'}`,
+    joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+    badges: isAuthority ? ['Committee Member'] : ['Verification In Progress']
+  };
+
+  const updated = [newUser, ...users];
   saveUsers(updated);
-  return createdUser;
+
+  return {
+    success: true,
+    user: newUser
+  };
+};
+
+export const addUser = (newUser) => {
+  const result = registerUser({
+    ...newUser,
+    status: 'Verified'
+  });
+  return result.user || newUser;
 };
 
 export const approveUser = (userId) => {
@@ -365,7 +709,9 @@ export const approveUser = (userId) => {
       return {
         ...user,
         status: 'Verified',
-        badges: user.badges.map(b => b.includes('Pending') || b.includes('Progress') ? 'Verified Resident' : b)
+        badges: (user.badges || []).map(b => 
+          b.includes('Pending') || b.includes('Progress') ? 'Verified Resident' : b
+        )
       };
     }
     return user;

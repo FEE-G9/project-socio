@@ -81,18 +81,32 @@ export const AuthProvider = ({ children }) => {
       email,
       communityId,
       communityName,
+      society,
+      societyCode,
       role,
       unitNumber,
+      blockNumber,
+      houseOrFlatNo,
       phone,
       city,
       department,
       username,
       age,
       occupation,
+      type,
+      status,
+      badges,
+      designation,
+      avatarStyle,
     } = userData;
 
     const colonies = getColonies();
-    const foundColony = colonies.find(c => c.id === communityId || c.name === communityName) || colonies[0];
+    const effectiveSociety = society || communityName;
+    const foundColony = colonies.find(c => 
+      c.id === communityId || 
+      c.name.toLowerCase() === (effectiveSociety || '').toLowerCase() ||
+      c.code === societyCode
+    ) || colonies[0];
 
     const normalizedEmail = (email || 'user@sociosphere.io').trim().toLowerCase();
     const suppliedName = (name || username || '').trim();
@@ -119,35 +133,57 @@ export const AuthProvider = ({ children }) => {
       : suppliedName && !suppliedNameIsEmail
         ? suppliedName
         : fallbackName;
+
     const newUser = existingUser
       ? {
           ...normalizeUser(existingUser),
           name: resolvedName,
           email: existingUser.email?.trim().toLowerCase() || normalizedEmail,
+          society: existingUser.society || effectiveSociety || foundColony?.name || 'Gandhi Colony',
+          societyCode: existingUser.societyCode || societyCode || foundColony?.code || 'GC-101',
+          communityName: existingUser.communityName || effectiveSociety || foundColony?.name || 'Gandhi Colony',
+          communityId: existingUser.communityId || foundColony?.id || 'colony-gandhi',
+          blockNumber: existingUser.blockNumber || blockNumber || 'Block A',
+          houseOrFlatNo: existingUser.houseOrFlatNo || houseOrFlatNo || '',
+          unitNumber: existingUser.unitNumber || unitNumber || '',
+          age: existingUser.age || age || '',
+          occupation: existingUser.occupation || occupation || '',
+          type: existingUser.type || type || (role === 'authority' ? 'member' : 'resident'),
+          status: existingUser.status || status || 'Verified',
+          designation: existingUser.designation || designation || '',
+          badges: existingUser.badges || badges || [],
           city: existingUser.city === 'Chandigarh' || !existingUser.city ? 'Rajpura' : existingUser.city,
           communityCity: existingUser.communityCity === 'Chandigarh' || !existingUser.communityCity
             ? 'Rajpura'
             : existingUser.communityCity,
-          avatarStyle: existingUser.avatarStyle || 'classic',
+          avatarStyle: existingUser.avatarStyle || avatarStyle || 'classic',
         }
       : {
-          id: `usr-${Date.now()}`,
+          id: userData.id || `usr-${Date.now()}`,
           name: resolvedName,
           email: normalizedEmail,
           role: role || 'citizen',
-          communityId: foundColony ? foundColony.id : 'colony-1',
-          communityName: communityName || (foundColony ? foundColony.name : 'Green Meadows Heights'),
-          unitNumber: unitNumber || '',
+          type: type || (role === 'authority' ? 'member' : 'resident'),
+          status: status || 'Verified',
+          society: effectiveSociety || (foundColony ? foundColony.name : 'Gandhi Colony'),
+          societyCode: societyCode || (foundColony ? foundColony.code : 'GC-101'),
+          communityId: foundColony ? foundColony.id : 'colony-gandhi',
+          communityName: effectiveSociety || (foundColony ? foundColony.name : 'Gandhi Colony'),
+          blockNumber: blockNumber || 'Block A',
+          houseOrFlatNo: houseOrFlatNo || '',
+          unitNumber: unitNumber || (blockNumber && houseOrFlatNo ? `${blockNumber} - ${houseOrFlatNo}` : 'Unit 1'),
           phone: phone || '',
           city: city || 'Rajpura',
           communityCity: city || 'Rajpura',
           department: department || '',
+          designation: designation || (role === 'authority' ? 'RWA President' : 'Resident (Owner)'),
+          badges: badges || (role === 'authority' ? ['Board President'] : ['Verified Resident']),
           age: age || '',
           occupation: occupation || '',
           avatar: role === 'authority'
             ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80'
             : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-          avatarStyle: 'classic',
+          avatarStyle: avatarStyle || 'classic',
           joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
         };
 
