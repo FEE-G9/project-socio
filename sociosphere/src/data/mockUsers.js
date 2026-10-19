@@ -9,7 +9,7 @@ export const DEFAULT_USERS = [
     id: 'gc-admin-1',
     name: 'Chief Authority Admin',
     email: 'admin@sociosphere.io',
-    password: 'password123',
+    password: 'Admin@GC101',
     age: 48,
     society: 'Gandhi Colony',
     societyCode: 'GC-101',
@@ -229,7 +229,7 @@ export const DEFAULT_USERS = [
     id: 'sn-admin-1',
     name: 'Sanjay Singhal',
     email: 'admin.shayam@sociosphere.io',
-    password: 'password123',
+    password: 'Admin@SN202',
     age: 51,
     society: 'Shayam Nagar',
     societyCode: 'SN-202',
@@ -401,7 +401,7 @@ export const DEFAULT_USERS = [
     id: 'dv-admin-1',
     name: 'Lt. Gen. R. K. Oberoi',
     email: 'admin.dalima@sociosphere.io',
-    password: 'password123',
+    password: 'Admin@DV303',
     age: 62,
     society: 'Dalima Vihar',
     societyCode: 'DV-303',
@@ -576,7 +576,25 @@ export const getUsers = (societyFilter) => {
       const parsed = JSON.parse(stored);
       // If stored data doesn't have the new multi-society codes, merge or reset
       if (Array.isArray(parsed) && parsed.some(u => u.societyCode === 'GC-101')) {
-        userList = parsed;
+        let needsSave = false;
+        userList = parsed.map(u => {
+          if (u.id === 'gc-admin-1' && u.password !== 'Admin@GC101') {
+            needsSave = true;
+            return { ...u, password: 'Admin@GC101' };
+          }
+          if (u.id === 'sn-admin-1' && u.password !== 'Admin@SN202') {
+            needsSave = true;
+            return { ...u, password: 'Admin@SN202' };
+          }
+          if (u.id === 'dv-admin-1' && u.password !== 'Admin@DV303') {
+            needsSave = true;
+            return { ...u, password: 'Admin@DV303' };
+          }
+          return u;
+        });
+        if (needsSave) {
+          localStorage.setItem('sociosphere_users', JSON.stringify(userList));
+        }
       } else {
         localStorage.setItem('sociosphere_users', JSON.stringify(DEFAULT_USERS));
         userList = DEFAULT_USERS;

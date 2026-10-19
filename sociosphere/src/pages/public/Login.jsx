@@ -209,30 +209,30 @@ function Login() {
           {/* QUICK DEMO CREDENTIALS SHORTCUTS */}
           <div className="mt-4 pt-3 border-t border-white/10 text-left">
             <span className="text-[11px] font-bold uppercase tracking-wider text-white/50 block mb-2">
-              Quick Society Login Demo (Password: password123):
+              Quick Society Login Demo (Admin: Admin@&lt;Code&gt;, Resident: password123):
             </span>
             <div className="grid grid-cols-3 gap-1.5 text-[10px]">
               <button
                 type="button"
-                onClick={() => handleQuickLogin("admin@sociosphere.io")}
+                onClick={() => handleQuickLogin("admin@sociosphere.io", "Admin@GC101")}
                 className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 p-1.5 text-center text-emerald-400 font-bold transition truncate"
-                title="Gandhi Colony Admin"
+                title="Gandhi Colony Admin (Pass: Admin@GC101)"
               >
                 Gandhi Admin
               </button>
               <button
                 type="button"
-                onClick={() => handleQuickLogin("admin.shayam@sociosphere.io")}
+                onClick={() => handleQuickLogin("admin.shayam@sociosphere.io", "Admin@SN202")}
                 className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 p-1.5 text-center text-emerald-400 font-bold transition truncate"
-                title="Shayam Nagar Admin"
+                title="Shayam Nagar Admin (Pass: Admin@SN202)"
               >
                 Shayam Admin
               </button>
               <button
                 type="button"
-                onClick={() => handleQuickLogin("admin.dalima@sociosphere.io")}
+                onClick={() => handleQuickLogin("admin.dalima@sociosphere.io", "Admin@DV303")}
                 className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 p-1.5 text-center text-emerald-400 font-bold transition truncate"
-                title="Dalima Vihar Admin"
+                title="Dalima Vihar Admin (Pass: Admin@DV303)"
               >
                 Dalima Admin
               </button>
