@@ -7,27 +7,27 @@ export const DEFAULT_USERS = [
   // =========================================================
   {
     id: 'gc-admin-1',
-    name: 'Chief Authority Admin',
-    email: 'admin@sociosphere.io',
-    password: 'Admin@GC101',
-    age: 48,
+    name: 'Vansh Goyal',
+    email: 'goyalvansh63708@gmail.com',
+    password: 'vansh12345',
+    age: 20,
     society: 'Gandhi Colony',
     societyCode: 'GC-101',
     communityId: 'colony-gandhi',
     communityName: 'Gandhi Colony',
-    occupation: 'Civil Engineer & Board President',
-    blockNumber: 'Tower A',
-    houseOrFlatNo: 'Flat 101',
-    unitNumber: 'Tower A - Flat 101',
-    phone: '+91 98765 00000',
+    occupation: 'Software Engineer',
+    blockNumber: 'Block A',
+    houseOrFlatNo: 'Flat 707',
+    unitNumber: 'Block A - Flat 707',
+    phone: '+91 90412 08572',
     type: 'member',
     role: 'authority',
-    designation: 'RWA President',
+    designation: 'RWA President (Flat Owner)',
     status: 'Verified',
     avatarStyle: 'shield',
     joinedDate: 'Jan 2024',
-    emergencyContact: '+91 98765 00001 (Gate Security Desk)',
-    badges: ['Board President', 'System Administrator', 'Security Lead']
+    emergencyContact: '+91 90412 08572',
+    badges: ['Board President', 'System Administrator', 'Flat Owner', 'Tech Lead']
   },
   {
     id: 'gc-mem-2',
@@ -572,7 +572,9 @@ const DEFAULT_PASSWORDS = DEFAULT_USERS.reduce((acc, user) => {
   acc[user.id] = user.password;
   acc[user.email.toLowerCase()] = user.password;
   return acc;
-}, {});
+}, {
+  'admin@sociosphere.io': 'vansh12345'
+});
 
 export const getUsers = (societyFilter) => {
   const stored = localStorage.getItem('sociosphere_users');
@@ -584,6 +586,28 @@ export const getUsers = (societyFilter) => {
       if (Array.isArray(parsed) && parsed.some(u => u.societyCode === 'GC-101')) {
         let needsSave = false;
         userList = parsed.map(u => {
+          // If admin profile needs upgrade to Vansh Goyal
+          if (u.id === 'gc-admin-1') {
+            if (u.name !== 'Vansh Goyal' || u.email !== 'goyalvansh63708@gmail.com' || u.password !== 'vansh12345') {
+              needsSave = true;
+              return {
+                ...u,
+                name: 'Vansh Goyal',
+                email: 'goyalvansh63708@gmail.com',
+                password: 'vansh12345',
+                age: 20,
+                occupation: 'Software Engineer',
+                blockNumber: 'Block A',
+                houseOrFlatNo: 'Flat 707',
+                unitNumber: 'Block A - Flat 707',
+                phone: '+91 90412 08572',
+                designation: 'RWA President (Flat Owner)',
+                emergencyContact: '+91 90412 08572',
+                badges: ['Board President', 'System Administrator', 'Flat Owner', 'Tech Lead']
+              };
+            }
+          }
+
           // If user still has the generic placeholder password or out-of-date password, update with their realistic human password
           const defaultHumanPass = DEFAULT_PASSWORDS[u.id] || DEFAULT_PASSWORDS[(u.email || '').toLowerCase()];
           if (defaultHumanPass && u.password !== defaultHumanPass && (u.id.startsWith('gc-') || u.id.startsWith('sn-') || u.id.startsWith('dv-') || u.password === 'password123')) {
@@ -638,13 +662,21 @@ export const getUserByEmail = (email) => {
 export const authenticateUser = (identifier, password) => {
   const users = getUsers();
   const idLower = (identifier || '').trim().toLowerCase();
+  const cleanIdPhone = idLower.replace(/\D/g, '');
 
-  // Find user by email, username, or name
-  const foundUser = users.find(u => 
-    u.email.toLowerCase() === idLower ||
-    (u.name || '').toLowerCase() === idLower ||
-    (u.phone || '').replace(/\s+/g, '') === idLower.replace(/\s+/g, '')
-  );
+  // Find user by email, username, phone, or name
+  const foundUser = users.find(u => {
+    const userEmail = (u.email || '').toLowerCase();
+    const userName = (u.name || '').toLowerCase();
+    const userPhoneClean = (u.phone || '').replace(/\D/g, '');
+
+    return (
+      userEmail === idLower ||
+      (idLower === 'admin@sociosphere.io' && u.id === 'gc-admin-1') ||
+      userName === idLower ||
+      (cleanIdPhone.length >= 10 && userPhoneClean.includes(cleanIdPhone))
+    );
+  });
 
   if (!foundUser) {
     return {

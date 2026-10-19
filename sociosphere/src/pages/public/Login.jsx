@@ -226,11 +226,11 @@ function Login() {
             <div className="grid grid-cols-3 gap-1.5 text-[10px]">
               <button
                 type="button"
-                onClick={() => handleQuickLogin("admin@sociosphere.io", "Admin@GC101")}
+                onClick={() => handleQuickLogin("goyalvansh63708@gmail.com", "vansh12345")}
                 className="rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 p-1.5 text-center text-emerald-300 font-bold transition truncate"
-                title="Gandhi Colony Admin (Pass: Admin@GC101)"
+                title="Gandhi Colony Admin: Vansh Goyal (Pass: vansh12345)"
               >
-                Gandhi Admin
+                Gandhi Admin (Vansh)
               </button>
               <button
                 type="button"
@@ -282,10 +282,20 @@ function Login() {
             {showDemoAccounts && (
               <div className="mt-2.5 p-2 rounded-xl bg-slate-900/90 border border-white/10 text-[10px] max-h-48 overflow-y-auto space-y-2">
                 <div>
-                  <div className="font-bold text-emerald-400 mb-1 border-b border-white/10 pb-0.5">
-                    Gandhi Colony (GC-101)
+                  <div className="font-bold text-emerald-400 mb-1 border-b border-white/10 pb-0.5 flex items-center justify-between">
+                    <span>Gandhi Colony (GC-101)</span>
+                    <span className="text-[9px] text-emerald-300 font-normal">Admin: Vansh Goyal</span>
                   </div>
                   <div className="grid grid-cols-2 gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleQuickLogin("goyalvansh63708@gmail.com", "vansh12345")}
+                      className="text-left p-1 rounded bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 truncate col-span-2"
+                      title="Vansh Goyal (RWA President & Society Admin) - vansh12345"
+                    >
+                      <span className="text-emerald-300 font-bold block truncate">★ Vansh Goyal (Society Admin)</span>
+                      <span className="text-amber-400 font-mono text-[9px]">goyalvansh63708@gmail.com • vansh12345</span>
+                    </button>
                     <button
                       type="button"
                       onClick={() => handleQuickLogin("rajesh.k@sociosphere.io", "Rajesh#1982")}
