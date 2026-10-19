@@ -20,6 +20,7 @@ import Spinner from '../../components/ui/Spinner';
 import { mockFinance } from '../../data/mockFinance';
 import { getIssues } from '../../data/mockIssues';
 import { getCrimes } from '../../data/mockCrimes';
+import { getUsers } from '../../data/mockUsers';
 import { useAlert } from '../../context/AlertContext';
 
 const TrendArrow = ({ direction = "up" }) => {
@@ -79,6 +80,18 @@ const AdminHome = () => {
     };
   }, []);
 
+  const [usersList, setUsersList] = useState([]);
+  useEffect(() => {
+    const loadUsers = () => setUsersList(getUsers());
+    loadUsers();
+    window.addEventListener('sociosphere_users_updated', loadUsers);
+    window.addEventListener('storage', loadUsers);
+    return () => {
+      window.removeEventListener('sociosphere_users_updated', loadUsers);
+      window.removeEventListener('storage', loadUsers);
+    };
+  }, []);
+
   const totalIssues = issues.length;
   const resolvedIssues = issues.filter(i => i.status === 'Resolved').length;
   const resolutionRate = totalIssues > 0 ? Math.round((resolvedIssues / totalIssues) * 100) : 100;
@@ -86,6 +99,10 @@ const AdminHome = () => {
   const handleAction = (modalName) => {
     if (modalName === 'announcement') {
       navigate('/authority/announcements');
+      return;
+    }
+    if (modalName === 'members') {
+      navigate('/authority/members?tab=pending');
       return;
     }
     setActiveModal(modalName);
@@ -142,8 +159,8 @@ const AdminHome = () => {
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Issues", value: totalIssues.toString(), trendLabel: "synced", trendDirection: "down", icon: AlertTriangle, iconBg: "bg-blue-500/10", iconColor: "text-blue-500 dark:text-blue-400" },
-          { label: "Active Members", value: "892", trendLabel: "new this week", trendDirection: "up", icon: Users, iconBg: "bg-purple-500/10", iconColor: "text-purple-500 dark:text-purple-400" },
+          { label: "Total Issues", value: totalIssues.toString(), trendLabel: "synced", trendDirection: "down", icon: AlertTriangle, iconBg: "bg-blue-500/10", iconColor: "text-blue-500 dark:text-blue-400", href: "/authority/issues" },
+          { label: "Active Members", value: (usersList.length || 16).toString(), trendLabel: "society directory", trendDirection: "up", icon: Users, iconBg: "bg-purple-500/10", iconColor: "text-purple-500 dark:text-purple-400", href: "/authority/members" },
           { label: "Total Collected", value: `₹${(mockFinance.totalCollected / 1000).toFixed(1)}k`, trendLabel: "vs last month", trendDirection: "up", icon: Wallet, iconBg: "bg-amber-500/10", iconColor: "text-amber-500 dark:text-amber-400" },
           { label: "Resolution Rate", value: `${resolutionRate}%`, trendLabel: "tracked", trendDirection: "up", icon: Activity, iconBg: "bg-emerald-500/10", iconColor: "text-emerald-500 dark:text-emerald-400" }
         ].map((stat) => {
@@ -151,7 +168,8 @@ const AdminHome = () => {
           return (
             <div
               key={stat.label}
-              className="group rounded-2xl border border-slate-200 bg-white p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:bg-[#0D1524] dark:hover:border-slate-700"
+              onClick={() => stat.href && navigate(stat.href)}
+              className={`group rounded-2xl border border-slate-200 bg-white p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:bg-[#0D1524] dark:hover:border-slate-700 ${stat.href ? 'cursor-pointer' : ''}`}
             >
               <div className="flex items-start justify-between">
                 <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.iconBg}`}>
