@@ -795,6 +795,28 @@ export const approveUser = (userId) => {
   return { success: true, user: approvedUser, users: updated };
 };
 
+export const updateUser = (userId, updatedFields) => {
+  const users = getUsers();
+  let updatedRecord = null;
+  const updated = users.map(user => {
+    if (
+      user.id === userId || 
+      (user.email && updatedFields.email && user.email.toLowerCase() === updatedFields.email.toLowerCase())
+    ) {
+      updatedRecord = {
+        ...user,
+        ...updatedFields
+      };
+      return updatedRecord;
+    }
+    return user;
+  });
+  if (updatedRecord) {
+    saveUsers(updated);
+  }
+  return updatedRecord;
+};
+
 export const deleteUser = (userId) => {
   const users = getUsers();
   const updated = users.filter(u => u.id !== userId);

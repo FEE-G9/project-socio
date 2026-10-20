@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getColonies } from "../data/mockColonies";const AuthContext = createContext();
+import { useDispatch } from 'react-redux';
+import { setProfile, updateProfile as updateReduxProfile, clearProfile } from '../store/slices/profileSlice';
+import { getColonies } from "../data/mockColonies";
+
+const AuthContext = createContext();
 const ACCOUNTS_STORAGE_KEY = 'sociosphere_accounts';
 
 const getAccounts = () => {
@@ -61,6 +65,8 @@ export const AuthProvider = ({ children }) => {
     return null;
   });
 
+  const dispatch = useDispatch();
+
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('sociosphere_is_auth') !== 'false';
   });
@@ -71,9 +77,10 @@ export const AuthProvider = ({ children }) => {
       const accounts = getAccounts();
       accounts[user.email.trim().toLowerCase()] = user;
       localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts));
+      dispatch(setProfile(user));
     }
     localStorage.setItem('sociosphere_is_auth', isAuthenticated ? 'true' : 'false');
-  }, [user, isAuthenticated]);
+  }, [user, isAuthenticated, dispatch]);
 
   const login = (userData) => {
     const {
@@ -189,6 +196,7 @@ export const AuthProvider = ({ children }) => {
 
     setUser(newUser);
     setIsAuthenticated(true);
+    dispatch(setProfile(newUser));
     return newUser;
   };
 
@@ -198,6 +206,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('sociosphere_auth_user', JSON.stringify(next));
       return next;
     });
+    dispatch(updateReduxProfile(updatedFields));
   };
 
   const switchRole = (newRole) => {
@@ -206,12 +215,14 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('sociosphere_auth_user', JSON.stringify(next));
       return next;
     });
+    dispatch(updateReduxProfile({ role: newRole }));
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem('sociosphere_auth_user');
     localStorage.setItem('sociosphere_is_auth', 'false');
+    dispatch(clearProfile());
   };
 
   return (
