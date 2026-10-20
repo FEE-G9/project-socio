@@ -89,6 +89,7 @@ const Members = () => {
   const [activeTab, setActiveTab] = useState(initialTab); // 'all', 'members', 'residents', 'pending'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBlock, setSelectedBlock] = useState('all');
+  const [toastMessage, setToastMessage] = useState(null);
 
   // Modals
   const [selectedPerson, setSelectedPerson] = useState(null);
@@ -176,7 +177,11 @@ const Members = () => {
   // Actions
   const handleApprove = (userId, e) => {
     if (e) e.stopPropagation();
+    const targetUser = societyUsers.find(u => u.id === userId);
+    const targetName = targetUser?.name || 'Resident';
     approveUser(userId);
+    setToastMessage(`✓ ${targetName} approved & admitted into ${adminSociety}!`);
+    setTimeout(() => setToastMessage(null), 4000);
     if (selectedPerson && selectedPerson.id === userId) {
       setSelectedPerson(prev => prev ? { ...prev, status: 'Verified' } : null);
     }
@@ -186,6 +191,8 @@ const Members = () => {
     if (e) e.stopPropagation();
     if (window.confirm(`Are you sure you want to remove ${name} from the society database?`)) {
       deleteUser(userId);
+      setToastMessage(`Application / Record for ${name} has been removed.`);
+      setTimeout(() => setToastMessage(null), 4000);
       if (selectedPerson && selectedPerson.id === userId) {
         setSelectedPerson(null);
       }
@@ -328,6 +335,16 @@ const Members = () => {
           </button>
         </div>
       </div>
+
+      {/* TOAST MESSAGE */}
+      {toastMessage && (
+        <div className="p-4 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 flex items-center justify-between shadow-sm animate-in fade-in">
+          <span className="text-sm font-semibold">{toastMessage}</span>
+          <button onClick={() => setToastMessage(null)} className="text-emerald-700 dark:text-emerald-300 hover:opacity-80">
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
       {/* =====================================================
           KPI SUMMARY CARDS

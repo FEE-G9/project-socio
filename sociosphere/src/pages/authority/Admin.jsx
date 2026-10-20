@@ -10,17 +10,25 @@ import {
   ChevronRight,
   FileText,
   ShieldAlert,
-  ArrowUpRight
+  ArrowUpRight,
+  Clock,
+  MapPin,
+  X,
+  Building2,
+  Briefcase,
+  Phone,
+  Mail
 } from 'lucide-react';
 import StatCard from '../../components/ui/StatCard';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Spinner from '../../components/ui/Spinner';
+import UserAvatar from '../../components/ui/UserAvatar';
 import { mockFinance } from '../../data/mockFinance';
 import { getIssues } from '../../data/mockIssues';
 import { getCrimes } from '../../data/mockCrimes';
-import { getUsers } from '../../data/mockUsers';
+import { getUsers, approveUser, deleteUser } from '../../data/mockUsers';
 import { useAlert } from '../../context/AlertContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -55,6 +63,7 @@ const AdminHome = () => {
   const { triggerAdminAlert } = useAlert();
   const [activeModal, setActiveModal] = useState(null); // 'reports', 'announcement', 'logs', 'members'
   const [isLoading, setIsLoading] = useState(false);
+  const [approvalToast, setApprovalToast] = useState(null);
   
   // Dynamic Stats
   const [issues, setIssues] = useState([]);
@@ -102,7 +111,30 @@ const AdminHome = () => {
   const societyUsers = usersList.filter(u => 
     (u.society || u.communityName || '').toLowerCase() === adminSociety.toLowerCase()
   );
-  const pendingRequestsCount = societyUsers.filter(u => u.status === 'Pending Approval').length;
+  const pendingRequests = societyUsers.filter(u => u.status === 'Pending Approval');
+  const pendingRequestsCount = pendingRequests.length;
+
+  const handleApproveApplicant = (applicantId, applicantName, e) => {
+    if (e) e.stopPropagation();
+    approveUser(applicantId);
+    setApprovalToast({
+      type: 'success',
+      message: `✓ ${applicantName} has been approved and admitted to ${adminSociety}! Their resident account is now active.`
+    });
+    setTimeout(() => setApprovalToast(null), 5000);
+  };
+
+  const handleDeclineApplicant = (applicantId, applicantName, e) => {
+    if (e) e.stopPropagation();
+    if (window.confirm(`Decline and remove join request from ${applicantName}?`)) {
+      deleteUser(applicantId);
+      setApprovalToast({
+        type: 'info',
+        message: `Application from ${applicantName} was declined.`
+      });
+      setTimeout(() => setApprovalToast(null), 4000);
+    }
+  };
 
   const societyIssues = issues.filter(i => 
     (i.society && i.society.toLowerCase() === adminSociety.toLowerCase()) ||
@@ -222,6 +254,115 @@ const AdminHome = () => {
         {/* Main Column */}
         <div className="lg:col-span-2 space-y-8">
           
+          {/* Toast Notification */}
+          {approvalToast && (
+            <div className={`p-4 rounded-xl border flex items-center justify-between shadow-sm animate-in fade-in duration-200 ${
+              approvalToast.type === 'success' 
+                ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200'
+                : 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200'
+            }`}>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-sm">{approvalToast.message}</span>
+              </div>
+              <button 
+                onClick={() => setApprovalToast(null)}
+                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )}
+
+          {/* Incoming Resident Applications (Pending Approvals) */}
+          {pendingRequests.length > 0 && (
+            <section className="rounded-2xl border-2 border-amber-400/60 dark:border-amber-500/40 bg-gradient-to-br from-amber-50/50 via-white to-amber-50/20 dark:from-amber-950/20 dark:via-[#0D1524] dark:to-amber-950/10 p-6 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-amber-200/60 dark:border-amber-700/40">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-white shadow-md shadow-amber-500/30">
+                    <Clock size={20} />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                      Incoming Resident Applications
+                      <span className="px-2 py-0.5 text-xs font-bold bg-amber-500 text-white rounded-full">
+                        {pendingRequests.length} Pending
+                      </span>
+                    </h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      New signups awaiting verification to join {adminSociety}.
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  to="/authority/members?tab=pending"
+                  className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 self-start sm:self-auto"
+                >
+                  View in Directory <ChevronRight size={14} />
+                </Link>
+              </div>
+
+              <div className="space-y-3">
+                {pendingRequests.map(applicant => (
+                  <div
+                    key={applicant.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm gap-4 hover:border-amber-400 transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      <UserAvatar user={applicant} size="md" />
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{applicant.name}</h4>
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700/50">
+                            Awaiting Approval
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1 flex-wrap">
+                          <span className="flex items-center gap-1">
+                            <Building2 size={13} className="text-slate-400" />
+                            {applicant.blockNumber || 'Block A'} • Flat {applicant.houseOrFlatNo || applicant.unitNumber || 'N/A'}
+                          </span>
+                          {applicant.occupation && (
+                            <span className="flex items-center gap-1">
+                              <Briefcase size={13} className="text-slate-400" />
+                              {applicant.occupation}
+                            </span>
+                          )}
+                          {applicant.phone && (
+                            <span className="flex items-center gap-1">
+                              <Phone size={13} className="text-slate-400" />
+                              {applicant.phone}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+                          <Mail size={13} className="text-slate-400" />
+                          {applicant.email}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeclineApplicant(applicant.id, applicant.name, e)}
+                        className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 transition-colors"
+                      >
+                        Decline
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => handleApproveApplicant(applicant.id, applicant.name, e)}
+                        className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                      >
+                        Approve & Admit
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Authority Modules */}
           <section>
             <div className="flex items-center justify-between mb-4">

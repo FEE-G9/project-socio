@@ -758,20 +758,41 @@ export const addUser = (newUser) => {
 
 export const approveUser = (userId) => {
   const users = getUsers();
+  let approvedUser = null;
   const updated = users.map(user => {
     if (user.id === userId) {
-      return {
+      approvedUser = {
         ...user,
         status: 'Verified',
         badges: (user.badges || []).map(b => 
           b.includes('Pending') || b.includes('Progress') ? 'Verified Resident' : b
         )
       };
+      return approvedUser;
     }
     return user;
   });
   saveUsers(updated);
-  return updated;
+
+  // Sync with cached accounts if present
+  if (approvedUser && approvedUser.email) {
+    try {
+      const accounts = JSON.parse(localStorage.getItem('sociosphere_accounts') || '{}');
+      const emailKey = approvedUser.email.trim().toLowerCase();
+      if (accounts[emailKey]) {
+        accounts[emailKey] = {
+          ...accounts[emailKey],
+          status: 'Verified',
+          badges: approvedUser.badges
+        };
+        localStorage.setItem('sociosphere_accounts', JSON.stringify(accounts));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  return { success: true, user: approvedUser, users: updated };
 };
 
 export const deleteUser = (userId) => {
