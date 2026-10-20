@@ -79,6 +79,7 @@ export default function Home() {
   const [toast, setToast] = useState("");
   const [userReports, setUserReports] = useState([]);
   const [comingSoonFeature, setComingSoonFeature] = useState(null);
+  const [expandedTimeline, setExpandedTimeline] = useState({});
 
   const { theme } = useTheme();
   const { user } = useAuth();
@@ -536,6 +537,13 @@ export default function Home() {
     return 1;
   };
 
+  const toggleTimeline = (reportId) => {
+    setExpandedTimeline((previous) => ({
+      ...previous,
+      [reportId]: !previous[reportId],
+    }));
+  };
+
   return (
     <div
       className={`home-page ${
@@ -818,14 +826,16 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <div className="issue-progress" aria-label={`Report progress: step ${getProgressStep(issue)} of 4`}>
-                      {["Reported", "Reviewed", "Assigned", "Resolved"].map((step, index) => (
-                        <span key={step} className={index < getProgressStep(issue) ? "complete" : ""}>
-                          <i />
-                          <em>{step}</em>
-                        </span>
-                      ))}
-                    </div>
+                    {expandedTimeline[issue.id] && (
+                      <div className="issue-progress" aria-label={`Report progress: step ${getProgressStep(issue)} of 4`}>
+                        {["Reported", "Reviewed", "Assigned", "Resolved"].map((step, index) => (
+                          <span key={step} className={index < getProgressStep(issue) ? "complete" : ""}>
+                            <i />
+                            <em>{step}</em>
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
                     <div className="issue-footer">
                       <div className="issue-time">
@@ -841,13 +851,10 @@ export default function Home() {
                       <div className="flex items-center gap-2">
                         <button
                           className="timeline-button"
-                          onClick={() =>
-                            showToast(
-                              `Tracking timeline for ${issue.id}`
-                            )
-                          }
+                          onClick={() => toggleTimeline(issue.id)}
+                          aria-expanded={Boolean(expandedTimeline[issue.id])}
                         >
-                          View Timeline
+                          {expandedTimeline[issue.id] ? "Hide Timeline" : "View Timeline"}
 
                           <ChevronRight size={16} />
                         </button>
@@ -1022,14 +1029,16 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <div className="issue-progress" aria-label={`Report progress: step ${getProgressStep(crime)} of 4`}>
-                      {["Reported", "Reviewed", "Assigned", "Resolved"].map((step, index) => (
-                        <span key={step} className={index < getProgressStep(crime) ? "complete" : ""}>
-                          <i />
-                          <em>{step}</em>
-                        </span>
-                      ))}
-                    </div>
+                    {expandedTimeline[crime.id] && (
+                      <div className="issue-progress" aria-label={`Report progress: step ${getProgressStep(crime)} of 4`}>
+                        {["Reported", "Reviewed", "Assigned", "Resolved"].map((step, index) => (
+                          <span key={step} className={index < getProgressStep(crime) ? "complete" : ""}>
+                            <i />
+                            <em>{step}</em>
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
                     <div className="issue-footer">
                       <div className="issue-time">
@@ -1047,13 +1056,10 @@ export default function Home() {
                       <div className="flex items-center gap-2">
                         <button
                           className="timeline-button text-rose-400 hover:text-rose-300"
-                          onClick={() =>
-                            showToast(
-                              `Tracking security dispatch for ${crime.id}`
-                            )
-                          }
+                          onClick={() => toggleTimeline(crime.id)}
+                          aria-expanded={Boolean(expandedTimeline[crime.id])}
                         >
-                          View Timeline
+                          {expandedTimeline[crime.id] ? "Hide Timeline" : "View Timeline"}
 
                           <ChevronRight size={16} />
                         </button>
@@ -1536,4 +1542,3 @@ export default function Home() {
     </div>
   );
 }
-
