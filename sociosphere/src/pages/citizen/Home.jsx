@@ -35,6 +35,7 @@ import {
   FileText,
   ShieldAlert,
   PhoneCall,
+  PackageSearch,
 } from "lucide-react";
 
 const quickActions = [
@@ -50,12 +51,12 @@ const quickActions = [
     icon: Shield,
     className: "action-red",
   },
-  // {
-  //   title: "View Map",
-  //   description: "Live community problem heatmap",
-  //   icon: MapPin,
-  //   className: "action-blue",
-  // },
+  {
+    title: "Lost & Found",
+    description: "Report & recover misplaced items",
+    icon: PackageSearch,
+    className: "action-blue",
+  },
   {
     title: "Community Hub",
     description: "Resident polls, clubs, rides",
@@ -308,10 +309,10 @@ export default function Home() {
       return;
     }
 
-    // if (title === "View Map") {
-    //   setActiveModal("map");
-    //   return;
-    // }
+    if (title === "Lost & Found") {
+      navigate("/citizen/lost-found");
+      return;
+    }
 
     if (title === "Maintenance") {
       setComingSoonFeature(title);

@@ -19,6 +19,7 @@ import Settings from "./pages/citizen/Settings";
 // import Dashboard from "./pages/citizen/Dashboard";
 import Announcements from "./pages/citizen/Announcements";
 import Maintenance from "./pages/citizen/Maintenance";
+import LostFound from "./pages/citizen/LostFound";
 
 import AdminHome from "./pages/authority/Admin";
 import Analytics from "./pages/authority/Analytics";
@@ -55,6 +56,7 @@ function App() {
           {/* <Route path="dashboard" element={<Dashboard />} /> */}
           <Route path="report" element={<Report />} />
           <Route path="report-crime" element={<ReportCrime />} />
+          <Route path="lost-found" element={<LostFound />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
           <Route path="fees" element={<Maintenance />} />

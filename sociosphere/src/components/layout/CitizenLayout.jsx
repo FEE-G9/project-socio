@@ -6,6 +6,7 @@ import {
   ShieldAlert,
   User,
   Sparkles,
+  PackageSearch,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -41,11 +42,6 @@ const CitizenLayout = () => {
       href: "/citizen/home",
       icon: Home,
     },
-    // {
-    //   label: "Dashboard",
-    //   href: "/citizen/dashboard",
-    //   icon: LayoutDashboard,
-    // },
     {
       label: "Report Issue",
       href: "/citizen/report",
@@ -55,6 +51,11 @@ const CitizenLayout = () => {
       label: "Report Crime",
       href: "/citizen/report-crime",
       icon: ShieldAlert,
+    },
+    {
+      label: "Lost & Found",
+      href: "/citizen/lost-found",
+      icon: PackageSearch,
     },
     {
       label: "Profile",
