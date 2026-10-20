@@ -74,7 +74,7 @@ const Issues = () => {
   const societyIssues = issues.filter(i => 
     (i.society && i.society.toLowerCase() === adminSociety.toLowerCase()) ||
     (i.colonyName && i.colonyName.toLowerCase() === adminSociety.toLowerCase()) ||
-    (adminSociety === 'Gandhi Colony' && (!i.colonyName || i.colonyName === 'Green Meadows Heights'))
+    (i.colony && i.colony.toLowerCase() === adminSociety.toLowerCase())
   );
 
   const categories = ['All', ...new Set(societyIssues.map(i => i.category))];

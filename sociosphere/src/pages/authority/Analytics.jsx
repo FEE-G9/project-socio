@@ -53,7 +53,7 @@ const Analytics = () => {
   const societyIssues = issues.filter(i => 
     (i.society && i.society.toLowerCase() === adminSociety.toLowerCase()) ||
     (i.colonyName && i.colonyName.toLowerCase() === adminSociety.toLowerCase()) ||
-    (adminSociety === 'Gandhi Colony' && (!i.colonyName || i.colonyName === 'Green Meadows Heights'))
+    (i.colony && i.colony.toLowerCase() === adminSociety.toLowerCase())
   );
 
   const totalIssues = societyIssues.length;

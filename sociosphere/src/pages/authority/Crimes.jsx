@@ -72,7 +72,7 @@ const Crimes = () => {
   const societyCrimes = crimes.filter(c =>
     (c.society && c.society.toLowerCase() === adminSociety.toLowerCase()) ||
     (c.colony && c.colony.toLowerCase() === adminSociety.toLowerCase()) ||
-    (adminSociety === 'Gandhi Colony' && (!c.colony || c.colony === 'Green Meadows Heights'))
+    (c.colonyName && c.colonyName.toLowerCase() === adminSociety.toLowerCase())
   );
 
   const categories = ['All', ...new Set(societyCrimes.map(i => i.category))];

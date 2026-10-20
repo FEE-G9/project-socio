@@ -139,13 +139,13 @@ const AdminHome = () => {
   const societyIssues = issues.filter(i => 
     (i.society && i.society.toLowerCase() === adminSociety.toLowerCase()) ||
     (i.colonyName && i.colonyName.toLowerCase() === adminSociety.toLowerCase()) ||
-    (adminSociety === 'Gandhi Colony' && (!i.colonyName || i.colonyName === 'Green Meadows Heights'))
+    (i.colony && i.colony.toLowerCase() === adminSociety.toLowerCase())
   );
 
   const societyCrimes = crimes.filter(c =>
     (c.society && c.society.toLowerCase() === adminSociety.toLowerCase()) ||
     (c.colony && c.colony.toLowerCase() === adminSociety.toLowerCase()) ||
-    (adminSociety === 'Gandhi Colony' && (!c.colony || c.colony === 'Green Meadows Heights'))
+    (c.colonyName && c.colonyName.toLowerCase() === adminSociety.toLowerCase())
   );
 
   const totalIssues = societyIssues.length;
