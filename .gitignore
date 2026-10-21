@@ -1,0 +1,14 @@
+# Dependencies & Build
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor & Temp
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+
+# Scratch / Workspace Artifacts
+sociosphere1/
