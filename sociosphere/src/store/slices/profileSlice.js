@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { updateUser as updateMockUser } from '../../data/mockUsers';
+import { updateUser as updateMockUser } from '../../data/mockUsers.js';
 
 // Helper to safely load auth user from localStorage
 const getSavedAuthUser = () => {
