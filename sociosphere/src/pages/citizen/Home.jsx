@@ -2,23 +2,22 @@ import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
+import { useWeather } from "../../hooks/useWeather";
 
 import Report from "./Report";
 import ReportCrime from "./ReportCrime";
-// import Map from "./Map";
-import CitizenSOSModal from "../../components/ui/CitizenSOSModal";
 
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
-import { getIssues, saveIssues, deleteIssue } from "../../data/mockIssues";
-import { getCrimes, saveCrimes, deleteCrime } from "../../data/mockCrimes";
+import { getIssues, saveIssues } from "../../data/mockIssues";
+import { getAnnouncements } from "../../data/mockAnnouncements";
+// import Map from "./Map";
 
 import {
   Shield,
   MapPin,
   Bell,
   Users,
-  User,
   Trash2,
   CreditCard,
   Plus,
@@ -35,7 +34,22 @@ import {
   FileText,
   ShieldAlert,
   PhoneCall,
+  Cloud,
+  Gauge,
+  Megaphone,
 } from "lucide-react";
+
+function getWeatherEmoji(condition) {
+  const c = (condition || "").toLowerCase();
+  if (c.includes("thunder")) return "⛈️";
+  if (c.includes("drizzle") || c.includes("rain")) return "🌧️";
+  if (c.includes("snow")) return "❄️";
+  if (c.includes("mist") || c.includes("fog") || c.includes("haze")) return "🌫️";
+  if (c.includes("few") || c.includes("partly") || c.includes("scatter")) return "🌤️";
+  if (c.includes("cloud") || c.includes("overcast")) return "⛅";
+  if (c.includes("clear") || c.includes("sun")) return "☀️";
+  return "☀️";
+}
 
 const quickActions = [
   {
@@ -56,6 +70,12 @@ const quickActions = [
   //   icon: MapPin,
   //   className: "action-blue",
   // },
+  {
+    title: "Emergency",
+    description: "Police, ambulance, fire helplines",
+    icon: PhoneCall,
+    className: "action-red",
+  },
   {
     title: "Community Hub",
     description: "Resident polls, clubs, rides",
@@ -79,10 +99,45 @@ export default function Home() {
   const [toast, setToast] = useState("");
   const [userReports, setUserReports] = useState([]);
   const [comingSoonFeature, setComingSoonFeature] = useState(null);
-  const [expandedTimeline, setExpandedTimeline] = useState({});
-
+  const [showAllIssues, setShowAllIssues] = useState(false);
+  const [selectedIssue, setSelectedIssue] = useState(null);
+  const [showIssueTimeline, setShowIssueTimeline] = useState(false);
   const { theme } = useTheme();
   const { user } = useAuth();
+  const weather = useWeather();
+  const [colonyAnnouncements, setColonyAnnouncements] = useState([]);
+
+  useEffect(() => {
+    const loadAnnouncements = () => {
+      try {
+        const all = getAnnouncements() || [];
+        const userColonyId = user?.communityId || user?.colonyId;
+        const userColonyName = (user?.communityName || "").trim().toLowerCase();
+
+        const matching = all.filter((item) => {
+          if (!item) return false;
+          const itemColonyId = item.colonyId;
+          const itemColonyName = (item.communityName || item.colonyName || "").trim().toLowerCase();
+          if (userColonyId && itemColonyId && itemColonyId === userColonyId) return true;
+          if (userColonyName && itemColonyName && itemColonyName === userColonyName) return true;
+          if (!itemColonyId && !itemColonyName) return true;
+          return false;
+        });
+
+        setColonyAnnouncements(matching.length > 0 ? matching : all);
+      } catch {
+        setColonyAnnouncements([]);
+      }
+    };
+
+    loadAnnouncements();
+    window.addEventListener("sociosphere_data_updated", loadAnnouncements);
+    window.addEventListener("storage", loadAnnouncements);
+    return () => {
+      window.removeEventListener("sociosphere_data_updated", loadAnnouncements);
+      window.removeEventListener("storage", loadAnnouncements);
+    };
+  }, [user?.communityId, user?.communityName, user?.colonyId]);
 
   /* =========================================================
      TOAST
@@ -100,147 +155,143 @@ export default function Home() {
      LOAD REPORTS FROM THE CURRENT USER'S SOCIETY
   ========================================================= */
 
-  const INITIAL_COLONY_REPORTS = [
-    {
-      id: "ISSUE-101",
-      title: "Main Avenue Water Pipeline Leakage near Block B Park",
-      category: "Water Supply & Plumbing",
-      priority: "HIGH PRIORITY",
-      priorityClass: "high",
-      status: "In Progress",
-      statusClass: "progress",
-      location: "Block B, Near Central Fountain",
-      description: "Clean drinking water is leaking profusely from the main pipeline connection. Water pressure in Block B apartments has dropped by 40%.",
-      date: "Sep 5, 2026",
-      eta: "24 Hours",
-      reportedBy: "Aarav Sharma",
-      personName: "Aarav Sharma",
-      reportedByEmail: "aarav@sociosphere.io",
-      communityId: "colony-1",
-      communityName: "Green Meadows Heights",
-      colony: "Green Meadows Heights",
-      reportType: "civic",
-      image: "https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "ISSUE-102",
-      title: "Broken Solar Streetlights along Perimeter Road",
-      category: "Electrical & Lighting",
-      priority: "MEDIUM PRIORITY",
-      priorityClass: "medium",
-      status: "In Progress",
-      statusClass: "progress",
-      location: "Perimeter Wall Gate 3 to Gate 4",
-      description: "Three consecutive solar streetlights have gone dark since yesterday evening. The stretch is dark during night hours.",
-      date: "Sep 6, 2026",
-      eta: "48 Hours",
-      reportedBy: "Priya Patel",
-      personName: "Priya Patel",
-      reportedByEmail: "priya@sociosphere.io",
-      communityId: "colony-1",
-      communityName: "Green Meadows Heights",
-      colony: "Green Meadows Heights",
-      reportType: "civic",
-      image: "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "ISSUE-103",
-      title: "Uncollected Green Waste after Garden Pruning",
-      category: "Sanitation & Waste",
-      priority: "LOW PRIORITY",
-      priorityClass: "low",
-      status: "Resolved",
-      statusClass: "resolved",
-      location: "Community Center Lawn",
-      description: "Tree branches and garden clippings were left piled near the recycling bin area following seasonal tree trimming.",
-      date: "Sep 2, 2026",
-      eta: "Cleared",
-      reportedBy: "Rohan Verma",
-      personName: "Rohan Verma",
-      reportedByEmail: "rohan@sociosphere.io",
-      communityId: "colony-1",
-      communityName: "Green Meadows Heights",
-      colony: "Green Meadows Heights",
-      reportType: "civic",
-      image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: "CRM-2026-104",
-      title: "Bicycle Theft Attempt near Underground Parking B2",
-      category: "Theft & Burglary Incident",
-      priority: "CRITICAL PRIORITY",
-      priorityClass: "critical",
-      status: "In Progress",
-      statusClass: "progress",
-      location: "Basement B2, Pillar #14",
-      description: "Lock on gear cycle was tampered with between 10 PM and 11 PM. CCTV footage request submitted to security desk.",
-      date: "Sep 6, 2026",
-      eta: "Security Dispatched",
-      reportedBy: "Vikram Malhotra",
-      personName: "Vikram Malhotra",
-      reportedByEmail: "vikram@sociosphere.io",
-      communityId: "colony-1",
-      communityName: "Green Meadows Heights",
-      colony: "Green Meadows Heights",
-      reportType: "crime",
-      image: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=800&q=80"
+ const loadUserReports = () => {
+  try {
+    const currentEmail =
+      user?.email?.trim().toLowerCase();
+
+    const currentUserId = user?.id;
+    const currentCommunityId = user?.communityId;
+    const currentCommunityName = user?.communityName?.trim().toLowerCase();
+
+    if (!currentEmail && !currentUserId && !currentCommunityId && !currentCommunityName) {
+      setUserReports([]);
+      return;
     }
-  ];
 
-  const loadUserReports = () => {
-    try {
-      const storedReports = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
-      const authorityIssues = getIssues();
-      const authorityCrimes = getCrimes();
+    // =====================================================
+    // ALL USER REPORTS
+    // Civic + Crime
+    // =====================================================
 
-      // Merge all items from localStorage: authority issues, authority crimes, and user reports
-      const combinedMap = new Map();
+    const legacyReports = JSON.parse(
+      localStorage.getItem("sociosphere_user_reports") || "[]"
+    );
+    const authorityIssues = getIssues();
+    const storedReports = [
+      ...authorityIssues,
+      ...legacyReports.filter((report) =>
+        !authorityIssues.some((issue) => issue.id === report.id)
+      ),
+    ];
 
-      // 1. Add authority issues
-      (authorityIssues || []).forEach((item) => {
-        if (item && item.id) {
-          combinedMap.set(item.id, { ...item, reportType: item.reportType || "civic" });
-        }
-      });
+    const filteredReports = storedReports
+      .filter((report) => {
+        const reportEmail =
+          report?.reportedByEmail
+            ?.trim()
+            .toLowerCase();
 
-      // 2. Add authority crimes
-      (authorityCrimes || []).forEach((item) => {
-        if (item && item.id) {
-          combinedMap.set(item.id, { ...item, reportType: "crime" });
-        }
-      });
+        const emailMatches =
+          currentEmail &&
+          reportEmail === currentEmail;
 
-      // 3. Add stored user reports
-      (storedReports || []).forEach((item) => {
-        if (item && item.id) {
-          const isCrime = item.reportType === "crime" || item.id.startsWith("CRM-");
-          combinedMap.set(item.id, { ...item, reportType: isCrime ? "crime" : "civic" });
-        }
-      });
+        const idMatches =
+          currentUserId &&
+          report?.reportedById === currentUserId;
 
-      const allReports = Array.from(combinedMap.values());
+        const reportCommunityId = report?.communityId;
+        const reportCommunityName = (
+          report?.communityName ||
+          report?.colonyName ||
+          report?.society ||
+          report?.community
+        )?.trim().toLowerCase();
 
-      const normalized = allReports.map((report) => {
-        const isCrime = report?.reportType === "crime" || report?.id?.startsWith("CRM-");
+        const communityMatches =
+          (currentCommunityId && reportCommunityId === currentCommunityId) ||
+          (currentCommunityName && reportCommunityName === currentCommunityName);
+
+        // Legacy records without society metadata remain visible only to their author.
+        return communityMatches || (
+          !reportCommunityId &&
+          !reportCommunityName &&
+          (emailMatches || idMatches)
+        );
+      })
+      .map((report) => {
+        const isCrime =
+          report?.reportType === "crime" ||
+          report?.id?.startsWith("CRM-");
+
         return {
           ...report,
-          priority: report.priority || (report.severity ? `${report.severity} Priority` : isCrime ? "High Priority" : "Medium Priority"),
-          priorityClass: report.priorityClass || (report.severity || (isCrime ? "critical" : "medium")).toLowerCase(),
-          status: report.status || "In Progress",
-          statusClass: report.statusClass || (report.status === "Resolved" ? "resolved" : "progress"),
-          date: report.date || (report.createdAt || report.timestamp ? new Date(report.createdAt || report.timestamp).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "Recently"),
-          eta: report.eta || report.aiAnalysis?.estimatedResolutionTime || (isCrime ? "Security Dispatched" : "Pending Dispatch"),
-          image: report.image || null,
-          reportType: isCrime ? "crime" : "civic",
+
+          priority:
+            report.priority ||
+            (report.severity
+              ? `${report.severity} Priority`
+              : isCrime
+                ? "High Priority"
+                : "Medium Priority"),
+
+          priorityClass:
+            report.priorityClass ||
+            (
+              report.severity ||
+              (isCrime ? "critical" : "medium")
+            ).toLowerCase(),
+
+          status:
+            report.status ||
+            "In Progress",
+
+          statusClass:
+            report.statusClass ||
+            (
+              report.status === "Resolved"
+                ? "resolved"
+                : "progress"
+            ),
+
+          date:
+            report.date ||
+            (
+              report.createdAt ||
+              report.timestamp
+            )
+              ? new Date(
+                  report.createdAt ||
+                  report.timestamp
+                ).toLocaleDateString()
+              : "Recently",
+
+          eta:
+            report.eta ||
+            report.aiAnalysis
+              ?.estimatedResolutionTime ||
+            (isCrime
+              ? "Security Dispatched"
+              : "Pending Dispatch"),
+
+          image:
+            report.image || null,
+
+          reportType:
+            isCrime ? "crime" : "civic",
         };
       });
 
-      setUserReports(normalized);
-    } catch (error) {
-      console.error("Failed to load user reports:", error);
-      setUserReports([]);
-    }
-  };
+    setUserReports(filteredReports);
+  } catch (error) {
+    console.error(
+      "Failed to load user reports:",
+      error
+    );
+
+    setUserReports([]);
+  }
+};
 
   /* =========================================================
      LOAD ON USER CHANGE + DATA UPDATE
@@ -249,16 +300,18 @@ export default function Home() {
   useEffect(() => {
     loadUserReports();
 
-    window.addEventListener("sociosphere_data_updated", loadUserReports);
-    window.addEventListener("sociosphere_crimes_updated", loadUserReports);
-    window.addEventListener("storage", loadUserReports);
+    window.addEventListener(
+      "sociosphere_data_updated",
+      loadUserReports
+    );
 
     return () => {
-      window.removeEventListener("sociosphere_data_updated", loadUserReports);
-      window.removeEventListener("sociosphere_crimes_updated", loadUserReports);
-      window.removeEventListener("storage", loadUserReports);
+      window.removeEventListener(
+        "sociosphere_data_updated",
+        loadUserReports
+      );
     };
-  }, [user?.email, user?.id, user?.communityName]);
+  }, [user?.email, user?.id]);
 
   /* =========================================================
      QUICK ACTIONS
@@ -281,12 +334,18 @@ export default function Home() {
     // }
 
     if (title === "Maintenance") {
-      setComingSoonFeature(title);
+      navigate("/citizen/fees");
+      return;
+    }
+
+    if (title === "Emergency") {
+      navigate("/citizen/emergency");
       return;
     }
 
     if (title === "Community Hub") {
-      setComingSoonFeature(title);
+      navigate("/citizen/community");
+      return;
     }
   };
 
@@ -309,11 +368,17 @@ export default function Home() {
       return;
     }
 
-    if (report.id?.startsWith("CRM-") || report.reportType === "crime") {
-      deleteCrime(report.id);
-    } else {
-      deleteIssue(report.id);
-    }
+    const remainingIssues = getIssues().filter((issue) => issue.id !== report.id);
+    saveIssues(remainingIssues);
+
+    const storedReports = JSON.parse(
+      localStorage.getItem("sociosphere_user_reports") || "[]"
+    );
+    localStorage.setItem(
+      "sociosphere_user_reports",
+      JSON.stringify(storedReports.filter((issue) => issue.id !== report.id))
+    );
+    window.dispatchEvent(new Event("sociosphere_data_updated"));
     showToast("Report deleted.");
   };
 
@@ -332,6 +397,8 @@ export default function Home() {
       item?.id &&
       item.id.startsWith("CRM-")
   );
+
+  const atGlanceIssues = showAllIssues ? userReports : userReports.slice(0, 2);
 
   const displayedCivicIssues = userCivicReports;
   const displayedCrimeIssues = userCrimeReports;
@@ -537,13 +604,6 @@ export default function Home() {
     return 1;
   };
 
-  const toggleTimeline = (reportId) => {
-    setExpandedTimeline((previous) => ({
-      ...previous,
-      [reportId]: !previous[reportId],
-    }));
-  };
-
   return (
     <div
       className={`home-page ${
@@ -558,40 +618,89 @@ export default function Home() {
 
       <header className="home-navbar">
         <div className="navbar-inner">
-          <div className="location-section">
-            <MapPin size={16} />
-
-            <span>
-              {user?.communityName ||
-                "Your Community"}
-            </span>
-
-            <span className="online-dot" />
-          </div>
-
-          {/* <div className="navbar-actions">
-            <button
-              className="emergency-button"
-              onClick={() => {
-                setActiveModal("emergency");
-              }}
-              aria-haspopup="dialog"
-              aria-label="Open emergency call options"
-            >
-              <span className="emergency-icon">
-                !
+          <div
+            className="location-section"
+            title={`Current weather in ${user?.communityName || "your colony"}: ${weather.description || weather.condition || "Clear sky"}, ${weather.temp ?? 26}°C`}
+          >
+            <span className="weather-inline-chip">
+              <span className="weather-inline-icon" role="img" aria-label={weather.condition || "weather"}>
+                {getWeatherEmoji(weather.condition)}
               </span>
-
-              SOS
-
-              <strong>Emergency</strong>
-            </button>
-          </div> */}
+              <span className="weather-inline-temp">
+                {weather.temp != null ? `${weather.temp}°C` : "26°C"}
+              </span>
+            </span>
+            <span className="location-divider" aria-hidden="true">|</span>
+            <MapPin size={16} className="location-pin-icon" />
+            <span className="community-name-text">{user?.communityName || "Your Community"}</span>
+            <span className="online-dot" title="Colony live" />
+          </div>
         </div>
       </header>
 
+      {/* =====================================================
+          COLONY IMPORTANT ANNOUNCEMENT (MARQUEE)
+      ===================================================== */}
+      <section className="colony-ticker-section" aria-label="Colony Announcements">
+        <div className="ticker-badge">
+          <Megaphone size={14} className="ticker-badge-icon" />
+          <span>Notice</span>
+        </div>
+
+        <div
+          className="ticker-track"
+          onClick={() => navigate("/citizen/announcements")}
+          title="Click to view all announcements"
+        >
+          <marquee
+            behavior="scroll"
+            direction="left"
+            scrollamount="5"
+            className="ticker-marquee"
+            onMouseEnter={(e) => e.target.stop()}
+            onMouseLeave={(e) => e.target.start()}
+          >
+            {(colonyAnnouncements.length > 0
+              ? colonyAnnouncements
+              : [
+                  {
+                    id: "default-colony-notice",
+                    title: `Welcome to ${user?.communityName || "Your Colony"} Portal`,
+                    content: "Stay updated with recent notices, report local civic concerns, and connect with your neighbours.",
+                    important: true,
+                    category: "Notice",
+                  },
+                ]
+            ).map((ann, idx) => (
+              <span key={ann.id || idx} className="ticker-item">
+                {ann.important && (
+                  <span className="ticker-pill-urgent">IMPORTANT</span>
+                )}
+                <span className="ticker-category">[{ann.category || "Notice"}]</span>
+                <strong className="ticker-title">{ann.title}</strong>
+                {ann.content && (
+                  <span className="ticker-desc">— {ann.content}</span>
+                )}
+                <span className="ticker-sep">✦</span>
+              </span>
+            ))}
+          </marquee>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate("/citizen/announcements")}
+          className="ticker-action-btn"
+          title="View all colony announcements"
+        >
+          <span>View all</span>
+          <ChevronRight size={14} />
+        </button>
+      </section>
+
       <section className="home-welcome">
         <h1>{timeGreeting}, {displayName}</h1>
+        <p>A better neighbourhood starts with you</p>
       </section>
 
       {/* =====================================================
@@ -645,7 +754,7 @@ export default function Home() {
 
       <section className="section-header quick-header">
           <h2>Quick Civic Actions</h2>
-          <span>One-tap resident utilities</span>
+           
         </section>
 
         <section className="quick-actions">
@@ -673,6 +782,50 @@ export default function Home() {
           })}
         </section>
 
+        <section className="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-[#0D1524]">
+          <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-4 dark:border-slate-800 sm:px-6">
+            <div>
+              <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">Issues at a glance</h2>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Your latest civic and safety reports</p>
+            </div>
+            {userReports.length > 2 && (
+              <button
+                type="button"
+                onClick={() => setShowAllIssues((show) => !show)}
+                className="inline-flex shrink-0 items-center gap-1 text-sm font-bold text-emerald-600 transition hover:text-emerald-500 dark:text-emerald-400"
+              >
+                {showAllIssues ? "Show less" : "View more"}
+                <ChevronRight size={16} className={showAllIssues ? "rotate-90" : ""} />
+              </button>
+            )}
+          </div>
+
+          <div className="divide-y divide-slate-200 dark:divide-slate-800">
+            {atGlanceIssues.length ? atGlanceIssues.map((issue) => {
+              const Icon = getIssueIcon(issue);
+              return (
+                <article key={issue.id} className="flex items-center gap-3 px-5 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/60 sm:px-6">
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${issue.reportType === "crime" ? "bg-rose-500/10 text-rose-600 dark:text-rose-400" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"}`}>
+                    <Icon size={19} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">{issue.title}</h3>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{issue.category} Â· {issue.status}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedIssue(issue); setShowIssueTimeline(false); }}
+                    className="shrink-0 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400"
+                  >
+                    View details
+                  </button>
+                </article>
+              );
+            }) : <div className="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">No reports to show yet.</div>}
+          </div>
+        </section>
+
+        <div className="hidden">
         {/* ===================================================
             CIVIC ISSUES
         =================================================== */}
@@ -682,7 +835,6 @@ export default function Home() {
             <div>
               <h2>
                 Society Civic Issues
-                Community Civic Issues
 
                 <span className="count-badge">
                   {displayedCivicIssues.length}
@@ -803,6 +955,14 @@ export default function Home() {
                     </div>
 
                     <div className="issue-body">
+                      {issue.image ? (
+                        <img
+                          className="issue-image"
+                          src={issue.image}
+                          alt={issue.title}
+                        />
+                      ) : null}
+
                       <div className="issue-details">
                         <span className="issue-id">
                           {issue.id}
@@ -818,24 +978,17 @@ export default function Home() {
                           <MapPin size={15} />
                           {issue.location}
                         </div>
-
-                        <div className="issue-reporter flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium mt-2">
-                          <User size={14} className="text-emerald-500 dark:text-emerald-400 shrink-0" />
-                          <span>Reported by: <strong className="text-slate-800 dark:text-slate-100 font-semibold">{issue.reportedBy || issue.personName || "Resident"}</strong></span>
-                        </div>
                       </div>
                     </div>
 
-                    {expandedTimeline[issue.id] && (
-                      <div className="issue-progress" aria-label={`Report progress: step ${getProgressStep(issue)} of 4`}>
-                        {["Reported", "Reviewed", "Assigned", "Resolved"].map((step, index) => (
-                          <span key={step} className={index < getProgressStep(issue) ? "complete" : ""}>
-                            <i />
-                            <em>{step}</em>
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    <div className="issue-progress" aria-label={`Report progress: step ${getProgressStep(issue)} of 4`}>
+                      {["Reported", "Reviewed", "Assigned", "Resolved"].map((step, index) => (
+                        <span key={step} className={index < getProgressStep(issue) ? "complete" : ""}>
+                          <i />
+                          <em>{step}</em>
+                        </span>
+                      ))}
+                    </div>
 
                     <div className="issue-footer">
                       <div className="issue-time">
@@ -851,10 +1004,13 @@ export default function Home() {
                       <div className="flex items-center gap-2">
                         <button
                           className="timeline-button"
-                          onClick={() => toggleTimeline(issue.id)}
-                          aria-expanded={Boolean(expandedTimeline[issue.id])}
+                          onClick={() =>
+                            showToast(
+                              `Tracking timeline for ${issue.id}`
+                            )
+                          }
                         >
-                          {expandedTimeline[issue.id] ? "Hide Timeline" : "View Timeline"}
+                          View Timeline
 
                           <ChevronRight size={16} />
                         </button>
@@ -878,6 +1034,9 @@ export default function Home() {
           </div>
         </section>
 
+        </div>
+
+        <div className="hidden">
         {/* ===================================================
             CRIME & SAFETY
         =================================================== */}
@@ -891,7 +1050,7 @@ export default function Home() {
                   className="text-rose-400"
                 />
 
-                Community Crime & Safety Incidents
+                Reported Crime & Safety Incidents
 
                 <span className="count-badge crime-badge">
                   {displayedCrimeIssues.length}
@@ -1006,6 +1165,14 @@ export default function Home() {
                     </div>
 
                     <div className="issue-body">
+                      {crime.image ? (
+                        <img
+                          className="issue-image border border-rose-500/20"
+                          src={crime.image}
+                          alt={crime.title}
+                        />
+                      ) : null}
+
                       <div className="issue-details">
                         <span className="issue-id text-rose-400">
                           {crime.id}
@@ -1021,24 +1188,17 @@ export default function Home() {
                           <MapPin size={15} />
                           {crime.location}
                         </div>
-
-                        <div className="issue-reporter flex items-center gap-1.5 text-xs text-rose-400 dark:text-rose-300 font-medium mt-2">
-                          <User size={14} className="text-rose-400 dark:text-rose-400 shrink-0" />
-                          <span>Reported by: <strong className="text-rose-200 dark:text-rose-100 font-semibold">{crime.reportedBy || crime.personName || "Resident"}</strong></span>
-                        </div>
                       </div>
                     </div>
 
-                    {expandedTimeline[crime.id] && (
-                      <div className="issue-progress" aria-label={`Report progress: step ${getProgressStep(crime)} of 4`}>
-                        {["Reported", "Reviewed", "Assigned", "Resolved"].map((step, index) => (
-                          <span key={step} className={index < getProgressStep(crime) ? "complete" : ""}>
-                            <i />
-                            <em>{step}</em>
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    <div className="issue-progress" aria-label={`Report progress: step ${getProgressStep(crime)} of 4`}>
+                      {["Reported", "Reviewed", "Assigned", "Resolved"].map((step, index) => (
+                        <span key={step} className={index < getProgressStep(crime) ? "complete" : ""}>
+                          <i />
+                          <em>{step}</em>
+                        </span>
+                      ))}
+                    </div>
 
                     <div className="issue-footer">
                       <div className="issue-time">
@@ -1056,10 +1216,13 @@ export default function Home() {
                       <div className="flex items-center gap-2">
                         <button
                           className="timeline-button text-rose-400 hover:text-rose-300"
-                          onClick={() => toggleTimeline(crime.id)}
-                          aria-expanded={Boolean(expandedTimeline[crime.id])}
+                          onClick={() =>
+                            showToast(
+                              `Tracking security dispatch for ${crime.id}`
+                            )
+                          }
                         >
-                          {expandedTimeline[crime.id] ? "Hide Timeline" : "View Timeline"}
+                          View Timeline
 
                           <ChevronRight size={16} />
                         </button>
@@ -1082,6 +1245,8 @@ export default function Home() {
             )}
           </div>
         </section>
+
+        </div>
 
         {/* ===================================================
             COMMUNITY OVERVIEW
@@ -1142,121 +1307,45 @@ export default function Home() {
           </div>
         </section>
 
-      {/* =====================================================
-          FOOTER
-      ===================================================== */}
-
-      <footer className="home-footer">
-        <div>
-          <Shield size={16} />
-
-          <strong>
-            SocioSphere Citizen Dashboard
-          </strong>
-
-          <span>
-            â€¢ {user?.communityName || "Your Community"}
-          </span>
-        </div>
-
-        <div>
-          <span>
-            Powered by SocioAI Civic Engine
-          </span>
-
-          <span>â€¢</span>
-
-          <button
-            onClick={() =>
-              showToast("Privacy Policy")
-            }
-          >
-            Privacy
-          </button>
-
-          <button
-            onClick={() =>
-              showToast("Terms of Civic Service")
-            }
-          >
-            Terms
-          </button>
-
-          <button
-            onClick={() =>
-              showToast("RWA Constitution")
-            }
-          >
-            Bylaws
-          </button>
-        </div>
-      </footer>
-
-      {/* FOOTER */}
-
-      {/* =====================================================
-          EMERGENCY CALL MODAL
-      ===================================================== */}
-
-      {activeModal === "emergency" && createPortal(
+      {selectedIssue && createPortal(
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/10 p-4 backdrop-blur-sm dark:bg-slate-950/15"
-          onClick={() => setActiveModal(null)}
+          className="fixed inset-0 z-[210] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm"
+          onClick={() => setSelectedIssue(null)}
           role="dialog"
           aria-modal="true"
-          aria-labelledby="emergency-title"
+          aria-labelledby="issue-details-title"
         >
-          <div
-            className="relative w-full max-w-md rounded-2xl border border-rose-500/40 bg-white p-6 shadow-2xl dark:bg-[#0D1524]"
+          <section
+            className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-[#0D1524]"
             onClick={(event) => event.stopPropagation()}
           >
-            <button
-              type="button"
-              onClick={() => setActiveModal(null)}
-              className="absolute right-4 top-4 rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
-              aria-label="Close emergency options"
-            >
-              <X size={20} />
-            </button>
-
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400">
-              <PhoneCall size={27} />
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">{showIssueTimeline ? "Issue timeline" : "Issue details"}</p>
+                <h2 id="issue-details-title" className="mt-1 text-xl font-extrabold text-slate-900 dark:text-white">{selectedIssue.title}</h2>
+              </div>
+              <button type="button" onClick={() => setSelectedIssue(null)} className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Close issue details"><X size={20} /></button>
             </div>
 
-            <h2 id="emergency-title" className="mt-4 text-2xl font-extrabold text-slate-900 dark:text-white">
-              Emergency assistance
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-              If there is immediate danger, call emergency services now. Your device will open its calling app.
-            </p>
-
-            <div className="mt-6 space-y-3">
-              <a
-                href="tel:112"
-                onClick={() => setActiveModal(null)}
-                className="flex items-center justify-between rounded-xl bg-rose-500 px-5 py-4 font-bold text-white transition hover:bg-rose-400"
-              >
-                <span className="flex items-center gap-3"><PhoneCall size={20} /> Call 112</span>
-                <span className="text-sm">National Emergency</span>
-              </a>
-              <a
-                href="tel:108"
-                onClick={() => setActiveModal(null)}
-                className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 font-bold text-slate-900 transition hover:border-rose-400 hover:bg-rose-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-              >
-                <span className="flex items-center gap-3"><PhoneCall size={20} /> Call 108</span>
-                <span className="text-sm text-slate-500 dark:text-slate-400">Ambulance</span>
-              </a>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setActiveModal("reportCrime")}
-              className="mt-5 w-full text-sm font-semibold text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
-            >
-              It is not immediate â€” report a crime or safety issue
-            </button>
-          </div>
+            {showIssueTimeline ? (
+              <div className="mt-6 space-y-4">
+                {(selectedIssue.timeline?.length ? selectedIssue.timeline : [{ step: "Reported", date: selectedIssue.date || "Recently", note: "Your report has been received." }]).map((entry, index) => (
+                  <div key={`${entry.step}-${index}`} className="flex gap-3">
+                    <span className="mt-1.5 h-3 w-3 shrink-0 rounded-full bg-emerald-500 ring-4 ring-emerald-500/15" />
+                    <div><p className="text-sm font-bold text-slate-800 dark:text-slate-100">{entry.step}</p><p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{entry.date}</p><p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{entry.note}</p></div>
+                  </div>
+                ))}
+                <button type="button" onClick={() => setShowIssueTimeline(false)} className="mt-2 text-sm font-bold text-emerald-600 hover:text-emerald-500 dark:text-emerald-400">Back to details</button>
+              </div>
+            ) : (
+              <div className="mt-6">
+                <div className="flex flex-wrap gap-2 text-xs font-semibold"><span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700 dark:bg-slate-800 dark:text-slate-300">{selectedIssue.category}</span><span className="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-700 dark:text-emerald-400">{selectedIssue.status}</span></div>
+                <p className="mt-5 text-sm leading-6 text-slate-600 dark:text-slate-300">{selectedIssue.description || "No additional description was provided."}</p>
+                <p className="mt-4 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400"><MapPin size={16} />{selectedIssue.location || "Location not provided"}</p>
+                <button type="button" onClick={() => setShowIssueTimeline(true)} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-500"><Clock size={16} />View timeline</button>
+              </div>
+            )}
+          </section>
         </div>,
         document.body
       )}
@@ -1410,10 +1499,10 @@ export default function Home() {
       )}
 
       {/* =====================================================
-          MAP MODAL (COMMENTED OUT - NOT NEEDED CURRENTLY)
+          MAP MODAL
       ===================================================== */}
 
-      {/* activeModal === "map" && (
+      {/* {activeModal === "map" && (
         <div
           className="modal-overlay"
           onClick={() => setActiveModal(null)}
@@ -1474,7 +1563,7 @@ export default function Home() {
             />
           </div>
         </div>
-      ) */}
+      )}
 
       {/* =====================================================
           COMING SOON MODAL
@@ -1523,14 +1612,6 @@ export default function Home() {
       )}
 
       {/* =====================================================
-          EMERGENCY SOS MODAL
-      ===================================================== */}
-      <CitizenSOSModal
-        isOpen={activeModal === "emergency"}
-        onClose={() => setActiveModal(null)}
-      />
-
-      {/* =====================================================
           TOAST
       ===================================================== */}
 
@@ -1540,5 +1621,63 @@ export default function Home() {
         </div>
       )}
     </div>
+  );
+}
+
+function WeatherBox({ weather }) {
+  const [now, setNow] = useState(() => new Date());
+  const icon = getWeatherEmoji(weather.condition);
+  const description = weather.description
+    ? weather.description.charAt(0).toUpperCase() + weather.description.slice(1)
+    : weather.loading
+      ? "Getting latest conditions"
+      : "Weather unavailable";
+  const time = now.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(new Date()), 60000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const metrics = [
+    { label: "Humidity", value: weather.humidity == null ? "--" : weather.humidity + "%", icon: Droplets },
+    { label: "Wind", value: weather.windSpeed == null ? "--" : weather.windSpeed + " km/h", icon: Zap },
+    { label: "Pressure", value: weather.pressure == null ? "--" : weather.pressure + " hPa", icon: Gauge },
+    { label: "Clouds", value: weather.cloudCoverage == null ? "--" : weather.cloudCoverage + "%", icon: Cloud },
+  ];
+
+  return (
+    <section className="weather-card" aria-label="Current weather">
+      <div className="weather-card-heading">
+        <h2>Current Weather</h2>
+        <span>{time}</span>
+      </div>
+
+      <div className="weather-card-current">
+        <span className="weather-card-icon" aria-hidden="true">
+          {weather.loading ? "..." : icon}
+        </span>
+        <div className="weather-card-reading">
+          <div className="weather-card-temperature">
+            {weather.temp == null ? "26" : weather.temp}
+            <span>&deg;C</span>
+          </div>
+          <p>{description}</p>
+        </div>
+      </div>
+
+      <div className="weather-card-metrics">
+        {metrics.map(({ label, value, icon: Icon }) => (
+          <div className="weather-metric" key={label}>
+            <Icon size={17} aria-hidden="true" />
+            <span>{value}</span>
+            <small>{label}</small>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

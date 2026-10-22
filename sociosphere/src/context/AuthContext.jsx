@@ -39,25 +39,22 @@ export const AuthProvider = ({ children }) => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        const storedAccount = parsed.email
-          ? getAccounts()[parsed.email.trim().toLowerCase()]
-          : null;
+        const storedAccount = parsed.email ? getAccounts()[parsed.email.trim().toLowerCase()] : null;
         const accountName = storedAccount?.name?.trim();
         const parsedName = parsed.name?.trim();
-        const nameIsEmail = !parsedName || parsedName.toLowerCase() === parsed.email?.trim().toLowerCase();
+        const nameIsEmail =
+          !parsedName || parsedName.toLowerCase() === parsed.email?.trim().toLowerCase();
 
         return normalizeUser({
           ...storedAccount,
           ...parsed,
-          name: nameIsEmail && accountName && !accountName.includes('@')
-            ? accountName
-            : parsed.name,
+          name: nameIsEmail && accountName && !accountName.includes('@') ? accountName : parsed.name,
         });
-      } catch (e) {
+      } catch {
         // Fallback
       }
     }
-    // Return a completely blank shell to force dynamic loading
+
     return null;
   });
 
@@ -69,8 +66,10 @@ export const AuthProvider = ({ children }) => {
     if (user) {
       localStorage.setItem('sociosphere_auth_user', JSON.stringify(user));
       const accounts = getAccounts();
-      accounts[user.email.trim().toLowerCase()] = user;
-      localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts));
+      if (user.email) {
+        accounts[user.email.trim().toLowerCase()] = user;
+        localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts));
+      }
     }
     localStorage.setItem('sociosphere_is_auth', isAuthenticated ? 'true' : 'false');
   }, [user, isAuthenticated]);

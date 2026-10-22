@@ -33,7 +33,6 @@
 .main-nav,
 .nav-item,
 .notification-button,
-.emergency-button,
 .profile-info strong,
 .profile-info small,
 .section-header h2,
@@ -212,24 +211,6 @@
 .home-page.light-mode .notification-button:hover {
   background: #f1f5f9;
   color: #0f172a;
-}
-
-.home-page.light-mode .emergency-button {
-  background: #fff1f2;
-  border-color: #fda4af;
-  color: #be123c;
-}
-
-.home-page.light-mode .emergency-button:hover,
-.home-page.light-mode .emergency-button:focus-visible {
-  background: #ffe4e6;
-  border-color: #e11d48;
-  color: #9f1239;
-  outline: none;
-}
-
-.home-page.light-mode .emergency-icon {
-  border-color: currentColor;
 }
 
 .home-page.light-mode .profile-avatar {
@@ -519,9 +500,11 @@
 
 .home-welcome {
   width: 100%;
-  padding: 30px 0 26px;
+  min-height: 0;
+  padding: 14px 0 22px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: flex-start;
 }
 
@@ -542,6 +525,13 @@
   letter-spacing: -0.5px;
 }
 
+.home-welcome p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
 .issue-progress {
   padding: 10px 17px 0;
   display: flex;
@@ -554,7 +544,7 @@
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 2px;
   color: var(--muted);
   font-size: 9px;
 }
@@ -596,7 +586,13 @@
   .home-welcome {
     align-items: flex-start;
     flex-direction: column;
-    padding-top: 24px;
+    padding-top: 0;
+  }
+
+  .weather-card {
+    width: 288px;
+    max-width: 100%;
+    align-self: flex-end;
   }
 
   .issue-progress {
@@ -610,6 +606,8 @@
 }
 
 .home-navbar {
+  position: relative;
+  z-index: 2;
   width: 100%;
   height: 64px;
   background: transparent;
@@ -618,6 +616,7 @@
 }
 
 .navbar-inner {
+  position: relative;
   width: 100%;
   max-width: 1440px;
   height: 100%;
@@ -696,6 +695,124 @@
   box-shadow: 0 0 10px rgba(16, 215, 160, 0.7);
 }
 
+.weather-card {
+  position: absolute;
+  top: 0;
+  right: 24px;
+  width: 210px;
+  min-height: 165px;
+  flex: 0 0 210px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(191, 219, 254, 0.25);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 85% 8%, rgba(96, 165, 250, 0.38), transparent 38%),
+    linear-gradient(145deg, #245b98 0%, #3979b8 58%, #326ba5 100%);
+  box-shadow: 0 18px 38px rgba(30, 64, 112, 0.22);
+  color: #ffffff;
+}
+
+.weather-card-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.weather-card-heading h2 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+}
+
+.weather-card-heading > span {
+  color: rgba(239, 246, 255, 0.78);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.weather-card-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 5px 0 8px;
+}
+
+.weather-card-icon {
+  font-size: 46px;
+  line-height: 1;
+  filter: drop-shadow(0 5px 8px rgba(15, 23, 42, 0.15));
+}
+
+.weather-card-reading {
+  min-width: 0;
+}
+
+.weather-card-temperature {
+  font-size: 42px;
+  line-height: 0.95;
+  font-weight: 800;
+  letter-spacing: -4px;
+  white-space: nowrap;
+}
+
+.weather-card-temperature span {
+  margin-left: 3px;
+  font-size: 15px;
+  vertical-align: top;
+  letter-spacing: 0;
+}
+
+.weather-card-reading p {
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.weather-card-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3px;
+  padding-top: 7px;
+  border-top: 1px solid rgba(219, 234, 254, 0.22);
+  line-height: 1;
+}
+
+.weather-metric {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: rgba(239, 246, 255, 0.92);
+  line-height: 1;
+  text-align: center;
+}
+
+.weather-metric svg {
+  opacity: 0.9;
+}
+
+.weather-metric span {
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.weather-metric small {
+  color: rgba(239, 246, 255, 0.72);
+  font-size: 8px;
+}
+
 .main-nav {
   flex: 1;
   min-width: 0;
@@ -736,14 +853,6 @@
   border-color: rgba(16, 215, 160, 0.25);
 }
 
-.navbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
 .notification-button {
   position: relative;
   width: 43px;
@@ -772,35 +881,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.emergency-button {
-  min-height: 43px;
-  padding: 0 15px;
-  border: 1px solid rgba(251, 92, 114, 0.45);
-  border-radius: 12px;
-  background: rgba(251, 92, 114, 0.07);
-  color: #ff8ea0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.emergency-button strong {
-  font-size: 13px;
-}
-
-.emergency-icon {
-  width: 15px;
-  height: 15px;
-  border: 1px solid #fb5c72;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
 }
 
 .profile {
@@ -883,13 +963,13 @@
   width: 100%;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 16px;
+  gap: 12px;
 }
 
 .quick-action-card {
   min-width: 0;
-  min-height: 146px;
-  padding: 19px;
+  min-height: 160px;
+  padding: 16px;
   border: 1px solid var(--border);
   border-radius: 15px;
   text-align: left;
@@ -955,6 +1035,7 @@
 .action-icon {
   width: 44px;
   height: 44px;
+  flex: 0 0 44px;
   border-radius: 13px;
   display: flex;
   align-items: center;
@@ -988,7 +1069,7 @@
 }
 
 .action-content h3 {
-  margin: 0 0 4px;
+  margin: 0 0 3px;
   font-size: 17px;
   font-weight: 800;
 }
@@ -1544,6 +1625,32 @@
     display: none;
   }
 
+  .home-welcome {
+    min-height: auto;
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 14px 0 22px;
+  }
+
+  .weather-card {
+    position: static;
+    width: min(210px, 100%);
+    flex-basis: auto;
+    margin-left: auto;
+    align-self: flex-end;
+  }
+
+  .home-navbar {
+    height: auto;
+    min-height: 64px;
+  }
+
+  .navbar-inner {
+    height: auto;
+    min-height: 64px;
+    align-items: flex-start;
+  }
+
   .issues-grid {
     grid-template-columns: 1fr;
   }
@@ -1575,25 +1682,12 @@
     display: none;
   }
 
-  .emergency-button {
-    padding: 0 10px;
-  }
-
-  .emergency-button strong {
-    display: none;
-  }
-
   .home-main {
     padding: 16px 14px 28px;
   }
 
   .quick-actions {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .quick-action-card {
-    min-height: 130px;
-    padding: 14px;
   }
 
   .community-overview {
@@ -1627,19 +1721,8 @@
     height: 38px;
   }
 
-  .emergency-button {
-    display: none;
-  }
-
   .quick-actions {
     grid-template-columns: 1fr;
-  }
-
-  .quick-action-card {
-    min-height: 105px;
-    flex-direction: row;
-    align-items: center;
-    gap: 13px;
   }
 
   .action-content {
@@ -1712,4 +1795,176 @@
   border: 1px solid rgba(244, 63, 94, 0.3);
   color: #fb7185;
   padding:50px;
+}
+
+
+/* =====================================================
+   COLONY ANNOUNCEMENT TICKER (MARQUEE)
+===================================================== */
+.colony-ticker-section {
+  width: 100%;
+  max-width: 1440px;
+  margin: 10px auto 16px auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.09) 0%, rgba(14, 165, 233, 0.06) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.home-page.dark-mode .colony-ticker-section {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.12) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.ticker-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+}
+
+.ticker-track {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.ticker-marquee {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.home-page.dark-mode .ticker-marquee {
+  color: #cbd5e1;
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.ticker-item:hover {
+  opacity: 0.85;
+}
+
+.ticker-pill-urgent {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  animation: pulse-urgent 2s infinite;
+}
+
+@keyframes pulse-urgent {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.04); }
+}
+
+.ticker-category {
+  color: #059669;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.home-page.dark-mode .ticker-category {
+  color: #34d399;
+}
+
+.ticker-title {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.home-page.dark-mode .ticker-title {
+  color: #f8fafc;
+}
+
+.ticker-desc {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.home-page.dark-mode .ticker-desc {
+  color: #94a3b8;
+}
+
+.ticker-sep {
+  color: #10b981;
+  font-size: 12px;
+  margin-left: 12px;
+  opacity: 0.7;
+}
+
+.ticker-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  font-size: 11px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.ticker-action-btn:hover {
+  background: #10b981;
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+.home-page.dark-mode .ticker-action-btn {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+}
+
+.home-page.dark-mode .ticker-action-btn:hover {
+  background: #10b981;
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .colony-ticker-section {
+    padding: 6px 10px;
+    gap: 8px;
+    border-radius: 12px;
+  }
+  .ticker-badge span {
+    display: none;
+  }
+  .ticker-action-btn span {
+    display: none;
+  }
 }
