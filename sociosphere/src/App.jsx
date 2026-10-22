@@ -21,6 +21,7 @@ import Settings from "./pages/citizen/Settings";
 import Announcements from "./pages/citizen/Announcements";
 import Events from "./pages/citizen/Events";
 import Maintenance from "./pages/citizen/Maintenance";
+import Expenses from "./pages/citizen/Expenses";
 import Community from "./pages/citizen/Community";
 import Emergency from "./pages/citizen/Emergency";
 
@@ -169,6 +170,7 @@ function App() {
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
           <Route path="fees" element={<Maintenance />} />
+          <Route path="expenses" element={<Expenses />} />
           <Route path="announcements" element={<Announcements />} />
           <Route path="events" element={<Events />} />
           <Route path="community" element={<Community />} />
