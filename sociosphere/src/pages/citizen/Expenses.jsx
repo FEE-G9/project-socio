@@ -11,7 +11,7 @@ import {
   HeartHandshake,
 } from "lucide-react";
 
-// All figures below are DEMO DATA, not actual society accounts.
+// DEMO DATA ONLY — not actual society accounts.
 
 const incomeRecords = [
   { name: "Monthly maintenance charges", amount: 100000 },
@@ -87,13 +87,14 @@ const expenseRecords = [
   },
 ];
 
+// Illustrative monthly figures. These are not verified historical records.
 const monthlyData = [
-  { name: "May", amount: 62000 },
-  { name: "Jun", amount: 74000 },
-  { name: "Jul", amount: 58000 },
-  { name: "Aug", amount: 81000 },
-  { name: "Sep", amount: 69000 },
-  { name: "Oct", amount: 89000 },
+  { name: "May", income: 100000, expenses: 62000 },
+  { name: "June", income: 115000, expenses: 74000 },
+  { name: "July", income: 105000, expenses: 58000 },
+  { name: "August", income: 125000, expenses: 81000 },
+  { name: "September", income: 110000, expenses: 69000 },
+  { name: "October", income: 150000, expenses: 89000 },
 ];
 
 const contributionGoals = [
@@ -126,11 +127,34 @@ const contributionGoals = [
 const formatMoney = (amount) =>
   "₹" + amount.toLocaleString("en-IN");
 
+// Reusable bar for the monthly graph.
+function FinancialBar({ amount, maxAmount, color, label }) {
+  const height =
+    maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
+
+  return (
+    <div className="min-w-0 flex-1">
+      <div className="mb-2 text-center text-xs text-slate-300">
+        {formatMoney(amount)}
+      </div>
+
+      <div className="flex h-36 items-end rounded-t-md bg-slate-800/70 p-1 sm:h-44">
+        <div
+          title={`${label}: ${formatMoney(amount)}`}
+          style={{ height: `${height}%` }}
+          className={`w-full rounded-t-md ${color}`}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Expenses() {
   const [expandedCard, setExpandedCard] = useState(null);
-  const [chartView, setChartView] = useState("monthly");
   const [selectedGoal, setSelectedGoal] = useState("reserve");
-  const [selectedAmount, setSelectedAmount] = useState(500);
+  const [selectedAmount, setSelectedAmount] = useState("500");
+  const [requestMessage, setRequestMessage] = useState("");
+  const [requestSubmitted, setRequestSubmitted] = useState(false);
 
   const totalReceived = incomeRecords.reduce(
     (total, item) => total + item.amount,
@@ -142,7 +166,7 @@ export default function Expenses() {
     0
   );
 
-  // Demo balance calculation only.
+  // Simple demo calculation, not a verified bank balance.
   const availableBalance = totalReceived - totalExpenses;
 
   const stats = [
@@ -162,17 +186,17 @@ export default function Expenses() {
     },
     {
       id: "balance",
-      title: "Available Balance",
+      title: "Calculated Balance",
       value: formatMoney(availableBalance),
       icon: TrendingUp,
-      description: "Received minus expenses",
+      description: "Demo income minus expenses",
     },
     {
       id: "reserve",
       title: "Reserve Fund",
       value: formatMoney(500000),
       icon: PiggyBank,
-      description: "Funds set aside for future needs",
+      description: "Illustrative reserve figure",
     },
   ];
 
@@ -180,38 +204,65 @@ export default function Expenses() {
     setExpandedCard(expandedCard === id ? null : id);
   }
 
-  const chartData =
-    chartView === "monthly"
-      ? [
-          { name: "Security", amount: 25000 },
-          { name: "Electricity", amount: 18000 },
-          { name: "Cleaning", amount: 8000 },
-          { name: "Painting", amount: 12000 },
-          { name: "Lift", amount: 10000 },
-          { name: "Repairs", amount: 14000 },
-          { name: "Admin", amount: 2000 },
-        ]
-      : monthlyData;
-
-  const highestAmount = Math.max(
-    ...chartData.map((item) => item.amount)
-  );
-
   const goal = contributionGoals.find(
     (item) => item.id === selectedGoal
   );
 
+  function handleContributionRequest(event) {
+    event.preventDefault();
+
+    const amount = Number(selectedAmount);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setRequestSubmitted(false);
+      setRequestMessage("Please enter an amount greater than zero.");
+      return;
+    }
+
+    if (amount > 1000000000) {
+      setRequestSubmitted(false);
+      setRequestMessage("Please enter a smaller amount.");
+      return;
+    }
+
+    // Demo only: this does not save or send a request to an admin.
+    console.log("Demo contribution request:", {
+      goal: goal.name,
+      amount,
+    });
+
+    setRequestSubmitted(true);
+    setRequestMessage(
+      `Demo request prepared for ${formatMoney(amount)} towards ${goal.name}. No admin has been notified.`
+    );
+  }
+
+  // One shared scale makes monthly bars comparable.
+  const highestMonthlyAmount = Math.max(
+    ...monthlyData.map((item) =>
+      Math.max(item.income, item.expenses)
+    ),
+    1
+  );
+
+  // Scale for the expense category graph.
+  const highestExpenseAmount = Math.max(
+    ...expenseRecords.map((item) => item.amount),
+    1
+  );
+
   return (
     <div className="min-h-screen space-y-8 bg-slate-950 p-4 text-white sm:p-6 lg:p-8">
-
       {/* PAGE HEADING */}
       <header className="border-b-4 border-emerald-600 pb-5">
         <h1 className="text-2xl font-bold sm:text-3xl">
           Financial Transparency
         </h1>
+
         <p className="mt-2 text-sm text-slate-400">
           Understand how society funds are collected, spent and saved.
         </p>
+
         <p className="mt-3 text-xs text-amber-400">
           Demo dashboard — all amounts and records are illustrative.
         </p>
@@ -223,6 +274,7 @@ export default function Expenses() {
           {stats.map(({ id, title, value, icon: Icon, description }) => (
             <button
               key={id}
+              type="button"
               onClick={() => toggleCard(id)}
               aria-expanded={expandedCard === id}
               className={`rounded-xl border bg-slate-900 p-5 text-left transition hover:border-emerald-500 ${
@@ -242,6 +294,7 @@ export default function Expenses() {
                 <span className="text-xs text-slate-500">
                   {description}
                 </span>
+
                 {expandedCard === id ? (
                   <ChevronUp size={18} />
                 ) : (
@@ -260,7 +313,9 @@ export default function Expenses() {
             <h2 className="text-xl font-bold">
               {stats.find((item) => item.id === expandedCard)?.title}
             </h2>
+
             <button
+              type="button"
               onClick={() => setExpandedCard(null)}
               className="text-sm text-slate-400 hover:text-white"
             >
@@ -268,13 +323,12 @@ export default function Expenses() {
             </button>
           </div>
 
-          {/* INCOME BREAKDOWN */}
+          {/* INCOME DETAILS */}
           {expandedCard === "received" && (
             <div className="space-y-3">
               <p className="mb-4 text-sm text-slate-400">
-                Collection sources are shown separately. Individual
-                residents' names, flat numbers and payment histories
-                are not displayed.
+                Income sources are shown separately. Individual residents'
+                names, flat numbers and payment histories are not displayed.
               </p>
 
               {incomeRecords.map((item) => (
@@ -295,20 +349,17 @@ export default function Expenses() {
               </div>
 
               <p className="text-xs text-slate-500">
-                These sample categories must be replaced with verified
-                collection records. Refundable deposits and other liabilities
-                should be accounted for separately from income.
+                Sample data only. Actual collection records must be verified.
               </p>
             </div>
           )}
 
-          {/* EXPENSE BREAKDOWN */}
+          {/* EXPENSE DETAILS */}
           {expandedCard === "expenses" && (
             <div className="space-y-3">
               <p className="mb-4 text-sm text-slate-400">
                 Each expense includes its purpose, date, payee and payment
-                status. A receipt link appears only when a document URL
-                has been provided.
+                status. A receipt link appears only when provided.
               </p>
 
               {expenseRecords.map((item) => (
@@ -319,14 +370,17 @@ export default function Expenses() {
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <h3 className="font-semibold">{item.category}</h3>
+
                       <p className="mt-1 text-sm text-slate-300">
                         {item.description}
                       </p>
+
                       <p className="mt-1 text-xs text-slate-400">
                         {item.date} · {item.vendor}
                       </p>
+
                       <p className="mt-2 text-xs text-emerald-400">
-                        Status: {item.status}
+                        Payment status: {item.status}
                       </p>
                     </div>
 
@@ -346,7 +400,7 @@ export default function Expenses() {
                           View receipt
                         </a>
                       ) : (
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-amber-400">
                           Receipt not uploaded
                         </span>
                       )}
@@ -362,7 +416,7 @@ export default function Expenses() {
             </div>
           )}
 
-          {/* AVAILABLE BALANCE */}
+          {/* CALCULATED BALANCE */}
           {expandedCard === "balance" && (
             <div className="space-y-3">
               <div className="flex justify-between rounded-lg bg-slate-800 p-4">
@@ -380,13 +434,14 @@ export default function Expenses() {
               </div>
 
               <div className="flex justify-between border-t border-slate-700 pt-4 font-bold">
-                <span>Calculated balance</span>
+                <span>Calculated difference</span>
                 <span>{formatMoney(availableBalance)}</span>
               </div>
 
               <p className="text-xs text-slate-500">
-                A real balance must include opening balances, pending
-                payments, liabilities, refunds and reserve restrictions.
+                This is not a verified bank balance. A real balance must
+                include opening funds, pending payments, liabilities,
+                refunds and restrictions on reserve funds.
               </p>
             </div>
           )}
@@ -395,7 +450,7 @@ export default function Expenses() {
           {expandedCard === "reserve" && (
             <div className="space-y-3">
               <p className="text-sm text-slate-400">
-                Reserve funds are set aside for major repairs and
+                Reserve funds may be set aside for major repairs and
                 unexpected future costs.
               </p>
 
@@ -403,6 +458,7 @@ export default function Expenses() {
                 <p className="text-sm text-slate-400">
                   Illustrative reserve balance
                 </p>
+
                 <p className="mt-2 text-2xl font-bold text-emerald-400">
                   ₹5,00,000
                 </p>
@@ -414,79 +470,193 @@ export default function Expenses() {
               </p>
 
               <p className="text-xs text-slate-500">
-                This is a separate demo figure. Do not add it to the
-                available balance unless the accounting records support it.
+                This is a separate demo figure. It is not included in the
+                calculated balance above.
               </p>
             </div>
           )}
         </section>
       )}
 
-      {/* CHART */}
+      {/* NEW SIMPLIFIED GRAPH */}
       <section className="rounded-xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold">Expense Overview</h2>
-            <p className="mt-1 text-sm text-slate-400">
-              {chartView === "monthly"
-                ? "October spending by category"
-                : "Spending by month"}
+        <div>
+          <h2 className="text-xl font-bold">
+            Monthly Financial Overview
+          </h2>
+
+          <p className="mt-1 text-sm text-slate-400">
+            Compare how much money came in and went out each month.
+          </p>
+        </div>
+
+        {/* LEGEND */}
+        <div className="mt-5 flex flex-wrap gap-5 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="h-3 w-3 rounded-sm bg-emerald-500" />
+            <span className="text-slate-300">Income</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="h-3 w-3 rounded-sm bg-rose-500" />
+            <span className="text-slate-300">Expenses</span>
+          </div>
+        </div>
+
+        {/* MONTHLY ROWS */}
+        <div className="mt-6 space-y-6">
+          {monthlyData.map((item) => {
+            const difference = item.income - item.expenses;
+
+            return (
+              <div key={item.name} className="space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-semibold">{item.name}</h3>
+
+                  <p className="text-xs text-slate-400 sm:text-sm">
+                    Difference:{" "}
+                    <span className="font-semibold text-white">
+                      {formatMoney(difference)}
+                    </span>
+                  </p>
+                </div>
+
+                {/* INCOME ROW */}
+                <div className="grid grid-cols-[68px_minmax(0,1fr)] items-center gap-3 sm:grid-cols-[90px_minmax(0,1fr)]">
+                  <span className="text-xs text-slate-400 sm:text-sm">
+                    Income
+                  </span>
+
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="h-4 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-800">
+                      <div
+                        style={{
+                          width: `${
+                            (item.income / highestMonthlyAmount) * 100
+                          }%`,
+                        }}
+                        className="h-full rounded-full bg-emerald-500"
+                      />
+                    </div>
+
+                    <span className="w-24 shrink-0 text-right text-xs font-medium text-slate-200 sm:w-28 sm:text-sm">
+                      {formatMoney(item.income)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* EXPENSE ROW */}
+                <div className="grid grid-cols-[68px_minmax(0,1fr)] items-center gap-3 sm:grid-cols-[90px_minmax(0,1fr)]">
+                  <span className="text-xs text-slate-400 sm:text-sm">
+                    Expenses
+                  </span>
+
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="h-4 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-800">
+                      <div
+                        style={{
+                          width: `${
+                            (item.expenses / highestMonthlyAmount) * 100
+                          }%`,
+                        }}
+                        className="h-full rounded-full bg-rose-500"
+                      />
+                    </div>
+
+                    <span className="w-24 shrink-0 text-right text-xs font-medium text-slate-200 sm:w-28 sm:text-sm">
+                      {formatMoney(item.expenses)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* OCTOBER SUMMARY */}
+        <div className="mt-7 grid grid-cols-1 gap-3 border-t border-slate-800 pt-5 sm:grid-cols-3">
+          <div className="rounded-lg bg-slate-800/70 p-4">
+            <p className="text-xs text-slate-400">October income</p>
+            <p className="mt-2 text-lg font-bold text-emerald-400">
+              {formatMoney(monthlyData[5].income)}
             </p>
           </div>
 
-          <div className="flex gap-2 rounded-lg bg-slate-800 p-1">
-            <button
-              onClick={() => setChartView("monthly")}
-              className={`rounded-md px-3 py-2 text-sm ${
-                chartView === "monthly"
-                  ? "bg-emerald-600"
-                  : "text-slate-400"
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setChartView("yearly")}
-              className={`rounded-md px-3 py-2 text-sm ${
-                chartView === "yearly"
-                  ? "bg-emerald-600"
-                  : "text-slate-400"
-              }`}
-            >
-              Yearly
-            </button>
+          <div className="rounded-lg bg-slate-800/70 p-4">
+            <p className="text-xs text-slate-400">October expenses</p>
+            <p className="mt-2 text-lg font-bold text-rose-400">
+              {formatMoney(monthlyData[5].expenses)}
+            </p>
+          </div>
+
+          <div className="rounded-lg bg-slate-800/70 p-4">
+            <p className="text-xs text-slate-400">
+              Difference for October
+            </p>
+            <p className="mt-2 text-lg font-bold text-white">
+              {formatMoney(
+                monthlyData[5].income - monthlyData[5].expenses
+              )}
+            </p>
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-3 gap-4 sm:grid-cols-6">
-          {chartData.map((item) => (
-            <div key={item.name} className="flex min-w-0 flex-col items-center">
-              <span className="mb-2 text-center text-xs text-slate-300">
-                {formatMoney(item.amount)}
-              </span>
+        <p className="mt-5 rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs leading-5 text-slate-400">
+          How to read this graph: green represents income and red represents
+          expenses. Longer bars represent larger amounts. The difference is
+          income minus expenses; it is not necessarily the actual bank
+          balance. Monthly figures are illustrative and are not connected
+          to the expense records below.
+        </p>
+      </section>
 
-              <div className="flex h-48 w-full items-end justify-center rounded-t-md bg-slate-800/60 px-2">
-                <div
-                  style={{
-                    height: `${Math.max(
-                      (item.amount / highestAmount) * 100,
-                      5
-                    )}%`,
-                  }}
-                  className="w-full max-w-12 rounded-t-md bg-emerald-500"
-                />
+      {/* EXPENSE CATEGORY GRAPH */}
+      <section className="rounded-xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
+        <h2 className="text-xl font-bold">
+          Where Is the Money Being Spent?
+        </h2>
+
+        <p className="mt-1 text-sm text-slate-400">
+          October demo expenses grouped by category.
+        </p>
+
+        <div className="mt-6 space-y-5">
+          {expenseRecords.map((item) => {
+            const percentage =
+              (item.amount / highestExpenseAmount) * 100;
+
+            return (
+              <div key={item.category}>
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+                  <span className="text-slate-200">
+                    {item.category}
+                  </span>
+
+                  <span className="font-semibold text-rose-400">
+                    {formatMoney(item.amount)}
+                  </span>
+                </div>
+
+                <div className="h-3 overflow-hidden rounded-full bg-slate-800">
+                  <div
+                    style={{ width: `${percentage}%` }}
+                    className="h-full rounded-full bg-rose-500"
+                  />
+                </div>
               </div>
-
-              <span className="mt-3 text-center text-xs text-slate-400">
-                {item.name}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        <p className="mt-5 text-xs text-slate-500">
-          Demo figures only. The monthly view shows categories; the yearly
-          view compares months. Replace both with actual records.
+        <div className="mt-6 flex justify-between border-t border-slate-800 pt-4 text-sm font-semibold">
+          <span>Total expenses shown</span>
+          <span>{formatMoney(totalExpenses)}</span>
+        </div>
+
+        <p className="mt-3 text-xs leading-5 text-slate-500">
+          Longer bars represent larger expenses. Missing receipts should
+          be clearly identified; payment status alone does not verify
+          the supporting documentation.
         </p>
       </section>
 
@@ -501,22 +671,24 @@ export default function Expenses() {
             <h2 className="text-xl font-bold sm:text-2xl">
               Support Your Community
             </h2>
+
             <p className="mt-2 text-sm text-slate-400">
-              Voluntary contributions can help build a safety reserve
-              and fund improvements to shared spaces.
+              Request to contribute towards a reserve fund or a
+              community improvement project.
             </p>
           </div>
         </div>
 
-        <p className="rounded-lg border border-slate-700 bg-slate-800 p-3 text-xs text-slate-300">
-          Contributions are optional. This demonstration does not accept
-          payments. Amounts shown below are illustrative, not verified
-          contributions.
+        <p className="rounded-lg border border-slate-700 bg-slate-800 p-3 text-xs leading-5 text-slate-300">
+          Contributions are optional. This demo does not accept payments.
+          The progress figures are illustrative, not verified totals.
         </p>
 
-        {/* SELECT A GOAL */}
+        {/* SELECT GOAL */}
         <div>
-          <h3 className="mb-3 font-semibold">Choose a contribution goal</h3>
+          <h3 className="mb-3 font-semibold">
+            1. Choose a contribution goal
+          </h3>
 
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
             {contributionGoals.map((item) => {
@@ -528,7 +700,12 @@ export default function Expenses() {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setSelectedGoal(item.id)}
+                  type="button"
+                  onClick={() => {
+                    setSelectedGoal(item.id);
+                    setRequestSubmitted(false);
+                    setRequestMessage("");
+                  }}
                   className={`rounded-xl border p-4 text-left transition ${
                     selectedGoal === item.id
                       ? "border-emerald-500 bg-emerald-950/40"
@@ -542,7 +719,10 @@ export default function Expenses() {
                   </p>
 
                   <div className="mt-4 flex justify-between gap-2 text-xs">
-                    <span className="text-slate-400">Demo progress</span>
+                    <span className="text-slate-400">
+                      Demo progress
+                    </span>
+
                     <span className="text-emerald-400">
                       {Math.round(progress)}%
                     </span>
@@ -565,49 +745,88 @@ export default function Expenses() {
           </div>
         </div>
 
-        {/* SELECT AMOUNT */}
-        <div className="rounded-xl bg-slate-800 p-4 sm:p-5">
-          <h3 className="font-semibold">Choose an amount</h3>
+        {/* CONTRIBUTION REQUEST FORM */}
+        <form
+          onSubmit={handleContributionRequest}
+          className="space-y-4 rounded-xl bg-slate-800 p-4 sm:p-5"
+        >
+          <h3 className="font-semibold">
+            2. Enter your contribution amount
+          </h3>
 
-          <p className="mt-1 text-sm text-slate-400">
-            Selected goal: {goal.name}
+          <p className="text-sm text-slate-400">
+            Selected goal:{" "}
+            <span className="text-emerald-400">{goal.name}</span>
           </p>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            {[100, 500, 1000, 2000].map((amount) => (
-              <button
-                key={amount}
-                onClick={() => setSelectedAmount(amount)}
-                className={`rounded-lg border px-4 py-2 text-sm ${
-                  selectedAmount === amount
-                    ? "border-emerald-500 bg-emerald-600 text-white"
-                    : "border-slate-600 text-slate-300 hover:border-emerald-500"
-                }`}
-              >
-                {formatMoney(amount)}
-              </button>
-            ))}
+          <div>
+            <label
+              htmlFor="contributionAmount"
+              className="mb-2 block text-sm text-slate-300"
+            >
+              Amount (₹)
+            </label>
+
+            <input
+              id="contributionAmount"
+              type="number"
+              min="0.01"
+              max="1000000000"
+              step="0.01"
+              required
+              value={selectedAmount}
+              onChange={(event) => {
+                setSelectedAmount(event.target.value);
+                setRequestSubmitted(false);
+                setRequestMessage("");
+              }}
+              placeholder="Enter amount"
+              className="w-full rounded-lg border border-slate-600 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
+            />
           </div>
 
-          <div className="mt-5 rounded-lg border border-slate-700 p-4">
-            <p className="text-sm text-slate-400">Your selected amount</p>
-            <p className="mt-1 text-2xl font-bold">
-              {formatMoney(selectedAmount)}
+          <div className="rounded-lg border border-slate-700 p-4">
+            <p className="text-sm text-slate-400">
+              Your requested contribution
             </p>
-            <p className="mt-2 text-xs text-slate-500">
-              Your identity would remain private on the public dashboard.
-              Appropriate authorised records would still be required for
-              accounting and payment confirmation.
+
+            <p className="mt-1 text-2xl font-bold">
+              {formatMoney(Number(selectedAmount) || 0)}
+            </p>
+
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              Contributor identities should not be displayed publicly.
+              Authorised records may still be required for accounting
+              and payment confirmation.
             </p>
           </div>
 
           <button
-            disabled
-            className="mt-4 w-full cursor-not-allowed rounded-lg bg-emerald-700 px-4 py-3 font-semibold opacity-60"
+            type="submit"
+            className="w-full rounded-lg bg-emerald-600 px-4 py-3 font-semibold transition hover:bg-emerald-500"
           >
-            Payments not available in demo
+            Submit Contribution Request
           </button>
-        </div>
+
+          {requestMessage && (
+            <p
+              role="status"
+              className={`rounded-lg border p-3 text-sm leading-5 ${
+                requestSubmitted
+                  ? "border-amber-700 bg-amber-950/40 text-amber-200"
+                  : "border-rose-800 bg-rose-950/40 text-rose-200"
+              }`}
+            >
+              {requestMessage}
+            </p>
+          )}
+
+          <p className="text-xs leading-5 text-slate-500">
+            Frontend demo only. A real version needs a backend to save
+            requests securely and let admins review and contact residents.
+            This button does not send a request to anyone.
+          </p>
+        </form>
       </section>
 
       {/* FOOTER */}
