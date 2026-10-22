@@ -2,10 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
+  CalendarDays,
+  LayoutDashboard,
   FileWarning,
   ShieldAlert,
   User,
   Sparkles,
+  Users,
+  PhoneCall,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -41,11 +45,26 @@ const CitizenLayout = () => {
       href: "/citizen/home",
       icon: Home,
     },
-    // {
-    //   label: "Dashboard",
-    //   href: "/citizen/dashboard",
-    //   icon: LayoutDashboard,
-    // },
+    {
+      label: "Dashboard",
+      href: "/citizen/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      label: "Events",
+      href: "/citizen/events",
+      icon: CalendarDays,
+    },
+    {
+      label: "Community Hub",
+      href: "/citizen/community",
+      icon: Users,
+    },
+    {
+      label: "Emergency",
+      href: "/citizen/emergency",
+      icon: PhoneCall,
+    },
     {
       label: "Report Issue",
       href: "/citizen/report",

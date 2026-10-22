@@ -83,6 +83,7 @@ const Navbar = ({
   const profilePath = location.pathname.startsWith("/authority")
     ? "/authority/profile"
     : "/citizen/profile";
+  const isCitizenHome = location.pathname === "/citizen/home";
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-md transition-colors duration-200 dark:border-slate-800 dark:bg-slate-950/95">
@@ -138,7 +139,7 @@ const Navbar = ({
         <div className="hidden items-center gap-2 md:flex">
 
           {/* CITIZEN SOS BUTTON */}
-          {!location.pathname.startsWith('/authority') && (
+          {!location.pathname.startsWith('/authority') && !isCitizenHome && (
             <button
               onClick={() => setSosModalOpen(true)}
               className="group relative flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 px-3.5 py-2 text-xs font-black tracking-wider text-white shadow-md shadow-red-600/30 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-600/40 active:scale-95 animate-pulse"
