@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import {
   User,
   Mail,
@@ -28,9 +27,20 @@ import {
   Globe,
   Building2,
   Hash,
+  Briefcase,
+  Calendar,
+  Sparkles,
+  Shield,
+  HeartHandshake
 } from "lucide-react";
-
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  selectProfile,
+  selectProfileStats,
+  updateProfile,
+  setAvatarStyle
+} from "../../store/slices/profileSlice";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { getIssues } from "../../data/mockIssues";
@@ -39,9 +49,17 @@ import UserAvatar, { avatarStyles } from "../../components/ui/UserAvatar";
 const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const { theme, toggleTheme } = useTheme();
-  const { user, updateUserProfile, logout } = useAuth();
+  const { user: authUser, updateUserProfile, logout } = useAuth();
   const isSettingsPage = location.pathname.endsWith("/settings");
+
+  // Redux Toolkit Profile State
+  const reduxProfile = useSelector(selectProfile);
+  const profileStats = useSelector(selectProfileStats);
+
+  // Active profile fallback
+  const profile = reduxProfile || authUser || {};
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -51,12 +69,47 @@ const Profile = () => {
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const [ownIssues, setOwnIssues] = useState([]);
 
+  // Form State for Editing
+  const [editForm, setEditForm] = useState({
+    name: profile.name || "",
+    phone: profile.phone || "",
+    age: profile.age || 25,
+    occupation: profile.occupation || "",
+    blockNumber: profile.blockNumber || "Block A",
+    houseOrFlatNo: profile.houseOrFlatNo || "",
+    occupancyType: profile.occupancyType || "Flat Owner",
+    emergencyContact: profile.emergencyContact || "",
+    bio: profile.bio || ""
+  });
+
+  // Keep form state in sync when profile updates
+  useEffect(() => {
+    if (profile) {
+      setEditForm({
+        name: profile.name || "",
+        phone: profile.phone || "",
+        age: profile.age || 25,
+        occupation: profile.occupation || "",
+        blockNumber: profile.blockNumber || "Block A",
+        houseOrFlatNo: profile.houseOrFlatNo || "",
+        occupancyType: profile.occupancyType || "Flat Owner",
+        emergencyContact: profile.emergencyContact || "",
+        bio: profile.bio || ""
+      });
+    }
+  }, [profile.name, profile.phone, profile.age, profile.occupation, profile.blockNumber, profile.houseOrFlatNo, profile.occupancyType, profile.emergencyContact, profile.bio]);
+
+  // Load user's own issues
   useEffect(() => {
     const loadOwnIssues = () => {
-      const email = user?.email?.trim().toLowerCase();
-      setOwnIssues(getIssues().filter((issue) =>
-        issue.reportedByEmail?.trim().toLowerCase() === email || issue.reportedById === user?.id
-      ));
+      const email = profile.email?.trim().toLowerCase();
+      setOwnIssues(
+        getIssues().filter(
+          (issue) =>
+            issue.reportedByEmail?.trim().toLowerCase() === email ||
+            issue.reportedById === profile.id
+        )
+      );
     };
     loadOwnIssues();
     window.addEventListener("sociosphere_data_updated", loadOwnIssues);
@@ -65,72 +118,25 @@ const Profile = () => {
       window.removeEventListener("sociosphere_data_updated", loadOwnIssues);
       window.removeEventListener("storage", loadOwnIssues);
     };
-  }, [user?.email, user?.id]);
-
-  // ---------------------------------------
-  // Convert unitNumber into block/apartment
-  // Example: "Block B - 402"
-  // ---------------------------------------
-  const getUnitDetails = (unitNumber = "") => {
-    const parts = unitNumber.split(" - ");
-
-    if (parts.length >= 2) {
-      return {
-        block: parts[0],
-        apartment: parts.slice(1).join(" - "),
-      };
-    }
-
-    return {
-      block: "",
-      apartment: unitNumber,
-    };
-  };
-
-  const getProfileFromUser = (currentUser) => {
-    const unitDetails = getUnitDetails(currentUser?.unitNumber);
-
-    return {
-      name: currentUser?.name || "",
-      email: currentUser?.email || "",
-      phone: currentUser?.phone || "",
-      society: currentUser?.communityName || "",
-      block: unitDetails.block,
-      apartment: unitDetails.apartment,
-      city: currentUser?.communityCity || currentUser?.city || "Rajpura",
-    };
-  };
-
-  const [profile, setProfile] = useState(() => getProfileFromUser(user));
-
-  const [editProfile, setEditProfile] = useState(() =>
-    getProfileFromUser(user)
-  );
-
-  // Keep Profile synchronized with AuthContext/localStorage
-  useEffect(() => {
-    const updatedProfile = getProfileFromUser(user);
-
-    setProfile(updatedProfile);
-    setEditProfile(updatedProfile);
-  }, [
-    user?.name,
-    user?.email,
-    user?.phone,
-    user?.communityName,
-    user?.communityCity,
-    user?.city,
-    user?.unitNumber,
-  ]);
+  }, [profile.email, profile.id]);
 
   const handleEdit = () => {
-    setEditProfile(profile);
+    setEditForm({
+      name: profile.name || "",
+      phone: profile.phone || "",
+      age: profile.age || 25,
+      occupation: profile.occupation || "",
+      blockNumber: profile.blockNumber || "Block A",
+      houseOrFlatNo: profile.houseOrFlatNo || "",
+      occupancyType: profile.occupancyType || "Flat Owner",
+      emergencyContact: profile.emergencyContact || "",
+      bio: profile.bio || ""
+    });
     setIsEditing(true);
     setShowSaveSuccess(false);
   };
 
   const handleCancel = () => {
-    setEditProfile(profile);
     setIsEditing(false);
     setShowSaveSuccess(false);
   };
@@ -138,43 +144,45 @@ const Profile = () => {
   const handleSave = () => {
     setIsSaving(true);
 
+    const updatedUnitNumber = editForm.houseOrFlatNo
+      ? `${editForm.blockNumber} - ${editForm.houseOrFlatNo.trim()}`
+      : editForm.blockNumber;
+
+    const payload = {
+      name: editForm.name.trim() || profile.name,
+      phone: editForm.phone.trim(),
+      age: parseInt(editForm.age, 10) || profile.age,
+      occupation: editForm.occupation.trim(),
+      blockNumber: editForm.blockNumber,
+      houseOrFlatNo: editForm.houseOrFlatNo.trim(),
+      unitNumber: updatedUnitNumber,
+      occupancyType: editForm.occupancyType,
+      emergencyContact: editForm.emergencyContact.trim(),
+      bio: editForm.bio.trim()
+    };
+
     setTimeout(() => {
-      const updatedUnitNumber = [editProfile.block, editProfile.apartment]
-        .filter(Boolean)
-        .join(" - ");
+      // 1. Dispatch update through Redux Toolkit
+      dispatch(updateProfile(payload));
 
-      const updatedUserFields = {
-        name: profile.name,
-        email: profile.email,
-        phone: editProfile.phone,
-        communityName: editProfile.society,
-        unitNumber: updatedUnitNumber,
-      };
+      // 2. Synchronize with AuthContext
+      if (updateUserProfile) {
+        updateUserProfile(payload);
+      }
 
-      // Update AuthContext + localStorage
-      updateUserProfile(updatedUserFields);
-
-      setProfile(editProfile);
       setIsEditing(false);
       setIsSaving(false);
       setShowSaveSuccess(true);
 
       setTimeout(() => {
         setShowSaveSuccess(false);
-      }, 3000);
-    }, 800);
+      }, 3500);
+    }, 600);
   };
 
   const handleLogout = () => {
     logout();
     navigate("/login");
-  };
-
-  const handleChange = (field, value) => {
-    setEditProfile((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
   };
 
   const resolvedIssues = ownIssues.filter((issue) => issue.status === "Resolved");
@@ -183,15 +191,7 @@ const Profile = () => {
   const getActivityPercentage = (count) =>
     ownIssues.length === 0 ? 0 : Math.round((count / ownIssues.length) * 100);
 
-  if (!user) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Unable to load profile information.
-        </p>
-      </div>
-    );
-  }
+  const isAuthority = profile.role === "authority";
 
   return (
     <div className={`profile-page space-y-8 pb-8 ${theme === "dark" ? "theme-dark" : "theme-light"}`}>
@@ -201,7 +201,7 @@ const Profile = () => {
           <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 shadow-lg backdrop-blur-sm">
             <CheckCircle2 size={18} className="text-emerald-500" />
             <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-              Profile updated successfully!
+              Profile updated & synced via Redux Toolkit!
             </span>
           </div>
         </div>
@@ -213,7 +213,7 @@ const Profile = () => {
           <div className="mb-2 flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
             <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-              Account
+              Redux State Profile
             </p>
           </div>
 
@@ -223,11 +223,48 @@ const Profile = () => {
 
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
             {isSettingsPage
-              ? "Manage your SocioSphere account, status, and sign-out preferences."
-              : "Manage your personal information and account preferences."}
+              ? "Manage your SocioSphere account, security, and preferences."
+              : "Dynamic profile loaded from Redux Toolkit containing all resident & membership records."}
           </p>
         </div>
 
+        {!isEditing ? (
+          <button
+            onClick={handleEdit}
+            className="group inline-flex w-fit items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-500 active:translate-y-0"
+          >
+            <Pencil size={16} className="transition-transform group-hover:rotate-12" />
+            <span>Edit Profile</span>
+          </button>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={handleCancel}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-200 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              <X size={16} />
+              Cancel
+            </button>
+
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition-all duration-200 hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSaving ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Check size={16} />
+                  Save Changes
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ==================== PROFILE HERO ==================== */}
@@ -263,7 +300,7 @@ const Profile = () => {
                 onMouseLeave={() => setAvatarHover(false)}
               >
                 <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-gradient-to-br from-emerald-500 to-teal-600 text-4xl font-extrabold text-white shadow-xl transition-all duration-300 hover:scale-105 dark:border-[#0D1524] sm:h-32 sm:w-32 sm:text-5xl">
-                  <UserAvatar user={user} className="h-full w-full rounded-none" iconSize={48} />
+                  <UserAvatar user={profile} className="h-full w-full rounded-none" iconSize={48} />
                 </div>
 
                 {avatarHover && (
@@ -281,15 +318,17 @@ const Profile = () => {
                   <div className="absolute left-0 top-full z-20 mt-3 flex gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
                     {avatarStyles.map((style) => {
                       const Icon = style.icon;
-                      const isSelected = user.avatarStyle === style.id ||
-                        (!user.avatarStyle && style.id === "classic");
+                      const isSelected = profile.avatarStyle === style.id;
 
                       return (
                         <button
                           key={style.id}
                           type="button"
                           onClick={() => {
-                            updateUserProfile({ avatarStyle: style.id });
+                            dispatch(setAvatarStyle(style.id));
+                            if (updateUserProfile) {
+                              updateUserProfile({ avatarStyle: style.id });
+                            }
                             setAvatarPickerOpen(false);
                           }}
                           className={`flex h-10 w-10 items-center justify-center rounded-full ${style.className} ring-2 ring-offset-2 transition-transform hover:scale-110 dark:ring-offset-slate-900 ${
@@ -306,444 +345,363 @@ const Profile = () => {
                 )}
 
                 <div className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-emerald-500 shadow-lg dark:border-[#0D1524]">
-                  <BadgeCheck
-                    size={16}
-                    strokeWidth={2.5}
-                    className="text-white"
-                  />
+                  <BadgeCheck size={16} strokeWidth={2.5} className="text-white" />
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setAvatarPickerOpen((open) => !open)}
-                className="absolute left-0 top-[8.5rem] rounded-lg border border-emerald-500/30 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-bold text-emerald-700 shadow-sm transition hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 sm:top-[9.5rem]"
-              >
-                Choose avatar
-              </button>
-
               <div className="min-w-0 flex-1 sm:pb-2">
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <h2 className="min-w-0 break-words text-2xl font-extrabold tracking-tight text-slate-800 dark:text-slate-50 sm:text-3xl">
                     {profile.name}
                   </h2>
 
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
                     <ShieldCheck size={13} />
-                    {user.role === "authority"
-                      ? "Verified Authority"
-                      : "Verified Citizen"}
+                    {isAuthority ? "Verified Authority Admin" : "Verified Resident"}
+                  </span>
+
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50 px-2.5 py-0.5 text-xs font-semibold">
+                    {profile.designation || (isAuthority ? "RWA Committee" : "Resident")}
                   </span>
                 </div>
 
-                <p className="mt-2 flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
-                  <Home size={14} className="text-emerald-500" />
-                  {profile.society || "Community not available"}
-                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-400 font-medium">
+                  <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+                    <Building2 size={15} />
+                    {profile.society}
+                    <span className="font-mono text-xs bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 ml-1">
+                      {profile.societyCode}
+                    </span>
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <Home size={14} className="text-slate-400" />
+                    {profile.unitNumber || `${profile.blockNumber} - ${profile.houseOrFlatNo}`}
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <Briefcase size={14} className="text-slate-400" />
+                    {profile.occupation}
+                  </span>
+                </div>
               </div>
             </div>
 
             <div className="flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-2 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
               <MapPin size={14} className="text-emerald-500" />
-              {profile.city || "Location unavailable"}
+              {profile.city || "Rajpura"}, Punjab
             </div>
           </div>
         </div>
       </section>
 
-      {/* ==================== MAIN GRID ==================== */}
-      <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        {/* PERSONAL INFORMATION */}
-        <section className="rounded-2xl border border-slate-800 bg-[#0D1524] p-6 sm:p-7">
-          <div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500 shadow-lg shadow-emerald-500/20">
-                <User size={20} className="text-slate-950" />
+      {/* ==================== ALL USER DATA: GRID SECTIONS ==================== */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* SECTION 1: PERSONAL INFORMATION */}
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D1524] p-6 sm:p-7 shadow-sm">
+          <div className="mb-6 flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20">
+                <User size={20} />
               </div>
-
               <div>
-                <h3 className="text-lg font-bold text-slate-50">
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">
                   Personal Information
                 </h3>
-
-                <p className="text-xs text-slate-400">
-                  Your basic account information
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Contact details and demographics
                 </p>
-                {isEditing && (
-                  <p className="mt-1 text-xs font-medium text-amber-400">
-                    Name and email are linked to your account and cannot be changed.
-                  </p>
-                )}
               </div>
             </div>
-
-            {!isEditing ? (
-              <button
-                onClick={handleEdit}
-                className="group inline-flex w-fit items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-400"
-              >
-                <Pencil
-                  size={16}
-                  className="transition-transform group-hover:rotate-12"
-                />
-                Edit details
-              </button>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={handleCancel}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-200 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                >
-                  <X size={16} />
-                  Cancel
-                </button>
-
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isSaving ? (
-                    <>
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Check size={16} />
-                      Save Changes
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+              Redux Managed
+            </span>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <ProfileField
               icon={User}
               label="Full Name"
-              value={isEditing ? editProfile.name : profile.name}
-              editing={false}
-              placeholder="Enter your full name"
+              value={isEditing ? editForm.name : profile.name}
+              editing={isEditing}
+              onChange={(val) => setEditForm(prev => ({ ...prev, name: val }))}
+              placeholder="Full Name"
             />
 
             <ProfileField
               icon={Mail}
               label="Email Address"
-              value={isEditing ? editProfile.email : profile.email}
+              value={profile.email}
               editing={false}
-              type="email"
-              placeholder="Enter your email"
+              placeholder="Email Address"
             />
 
             <ProfileField
               icon={Phone}
               label="Phone Number"
-              value={isEditing ? editProfile.phone : profile.phone}
+              value={isEditing ? editForm.phone : profile.phone}
               editing={isEditing}
-              onChange={(value) => handleChange("phone", value)}
-              placeholder="Enter your phone number"
+              onChange={(val) => setEditForm(prev => ({ ...prev, phone: val }))}
+              placeholder="Phone Number"
             />
 
             <ProfileField
-              icon={Building2}
-              label="Society"
-              value={isEditing ? editProfile.society : profile.society}
+              icon={Calendar}
+              label="Age"
+              value={isEditing ? editForm.age : `${profile.age} years old`}
               editing={isEditing}
-              onChange={(value) => handleChange("society", value)}
-              placeholder="Enter society name"
+              type="number"
+              onChange={(val) => setEditForm(prev => ({ ...prev, age: val }))}
+              placeholder="Age"
+            />
+
+            <ProfileField
+              icon={Briefcase}
+              label="Occupation"
+              value={isEditing ? editForm.occupation : profile.occupation}
+              editing={isEditing}
+              onChange={(val) => setEditForm(prev => ({ ...prev, occupation: val }))}
+              placeholder="Occupation"
+            />
+
+            <ProfileField
+              icon={Phone}
+              label="Emergency Contact"
+              value={isEditing ? editForm.emergencyContact : profile.emergencyContact}
+              editing={isEditing}
+              onChange={(val) => setEditForm(prev => ({ ...prev, emergencyContact: val }))}
+              placeholder="Emergency Contact"
+            />
+          </div>
+
+          <div className="mt-4">
+            <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Resident Bio / Statement
+            </label>
+            {isEditing ? (
+              <textarea
+                value={editForm.bio}
+                onChange={(e) => setEditForm(prev => ({ ...prev, bio: e.target.value }))}
+                rows={2}
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 p-3 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-emerald-500"
+                placeholder="Brief intro or community statement..."
+              />
+            ) : (
+              <p className="text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800 leading-relaxed">
+                {profile.bio || "Active verified resident participating in society activities and neighborhood community."}
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* SECTION 2: RESIDENTIAL & SOCIETY DATA */}
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D1524] p-6 sm:p-7 shadow-sm">
+          <div className="mb-6 flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 dark:bg-blue-500/20">
+                <Building2 size={20} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">
+                  Residential & Society Details
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Apartment allocation and tenancy
+                </p>
+              </div>
+            </div>
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+              Multi-Tenant Isolated
+            </span>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <ProfileField
+              icon={Building2}
+              label="Assigned Society (Locked)"
+              value={profile.society}
+              editing={false}
+              placeholder="Assigned Society"
             />
 
             <ProfileField
               icon={Hash}
-              label="Block"
-              value={isEditing ? editProfile.block : profile.block}
+              label="Society Code (Locked)"
+              value={profile.societyCode}
+              editing={false}
+              placeholder="Society Code"
+            />
+
+            <ProfileField
+              icon={Hash}
+              label="Block Number"
+              value={isEditing ? editForm.blockNumber : profile.blockNumber}
               editing={isEditing}
-              onChange={(value) => handleChange("block", value)}
-              placeholder="Enter block"
+              onChange={(val) => setEditForm(prev => ({ ...prev, blockNumber: val }))}
+              placeholder="e.g. Block A"
             />
 
             <ProfileField
               icon={Home}
-              label="Apartment"
-              value={isEditing ? editProfile.apartment : profile.apartment}
+              label="House / Flat No."
+              value={isEditing ? editForm.houseOrFlatNo : profile.houseOrFlatNo}
               editing={isEditing}
-              onChange={(value) => handleChange("apartment", value)}
-              placeholder="Enter apartment number"
+              onChange={(val) => setEditForm(prev => ({ ...prev, houseOrFlatNo: val }))}
+              placeholder="e.g. 707"
             />
+
+            <ProfileField
+              icon={Award}
+              label="Occupancy Status"
+              value={isEditing ? editForm.occupancyType : profile.occupancyType}
+              editing={isEditing}
+              onChange={(val) => setEditForm(prev => ({ ...prev, occupancyType: val }))}
+              placeholder="e.g. Flat Owner, Tenant"
+            />
+
+            <ProfileField
+              icon={MapPin}
+              label="City & Region"
+              value={`${profile.city || "Rajpura"}, Punjab`}
+              editing={false}
+              placeholder="City"
+            />
+          </div>
+
+          <div className="mt-4 p-3 rounded-xl border border-blue-500/20 bg-blue-500/5 flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+              Complete Unit Address
+            </span>
+            <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400">
+              {profile.unitNumber || `${profile.blockNumber} - ${profile.houseOrFlatNo}`}
+            </span>
           </div>
         </section>
 
-        {/* ACCOUNT STATUS */}
-        <section className="hidden">
-          <div className="mb-6 flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500 shadow-lg shadow-blue-500/20">
-              <ShieldCheck size={20} className="text-white" />
+        {/* SECTION 3: MEMBERSHIP & BADGES */}
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D1524] p-6 sm:p-7 shadow-sm">
+          <div className="mb-6 flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500 dark:bg-purple-500/20">
+                <Award size={20} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">
+                  Membership & Society Badges
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Credentials, roles, and verification honours
+                </p>
+              </div>
+            </div>
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+              {profile.status || "Verified"}
+            </span>
+          </div>
+
+          <div className="space-y-3.5">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Official Designation</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{profile.designation || "Resident"}</span>
+            </div>
+
+            <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Member Since</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{profile.joinedDate || "Jan 2024"}</span>
+            </div>
+
+            <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Database Verification</span>
+              <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 size={14} /> 100% Verified
+              </span>
             </div>
 
             <div>
-              <h3 className="text-lg font-bold text-slate-50">
-                Account Status
-              </h3>
-
-              <p className="text-xs text-slate-400">
-                Your SocioSphere account
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <StatusRow
-              label="Account"
-              value="Active"
-              icon={CheckCircle2}
-              positive
-              iconClass="bg-emerald-500/10 text-emerald-400"
-            />
-
-            <StatusRow
-              label="Email"
-              value="Verified"
-              icon={Mail}
-              positive
-              iconClass="bg-blue-500/10 text-blue-400"
-            />
-
-            <StatusRow
-              label="Role"
-              value={
-                user.role === "authority"
-                  ? "Authority"
-                  : "Citizen"
-              }
-              icon={Home}
-              positive
-              iconClass="bg-purple-500/10 text-purple-400"
-            />
-
-            <StatusRow
-              label="Member Since"
-              value={user.joinedDate || "Not available"}
-              icon={CalendarDays}
-              iconClass="bg-amber-500/10 text-amber-400"
-            />
-
-            <div className="mt-2 rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300">
-                  Verification Score
-                </span>
-
-                <span className="text-sm font-bold text-emerald-400">
-                  100%
-                </span>
-              </div>
-
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-800">
-                <div className="h-full w-full rounded-full bg-emerald-500" />
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* ==================== STATS ==================== */}
-      <section>
-        <div className="mb-5">
-          <h3 className="text-lg font-bold text-slate-50">
-            Community Activity
-          </h3>
-
-          <p className="mt-1 text-sm text-slate-400">
-            Your contribution to the community
-          </p>
-        </div>
-
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            icon={AlertCircle}
-            label="Issues Reported"
-            value={String(ownIssues.length)}
-            description="Reports you submitted"
-            iconClass="bg-blue-500"
-            trend={`${ownIssues.length ? 100 : 0}%`}
-            trendUp={ownIssues.length > 0}
-          />
-
-          <StatCard
-            icon={CheckCircle2}
-            label="Issues Resolved"
-            value={String(resolvedIssues.length)}
-            description="Successfully resolved"
-            iconClass="bg-emerald-500"
-            trend={`${getActivityPercentage(resolvedIssues.length)}%`}
-            trendUp={resolvedIssues.length > 0}
-          />
-
-          <StatCard
-            icon={Clock3}
-            label="In Progress"
-            value={String(inProgressIssues.length)}
-            description="Currently being handled"
-            iconClass="bg-amber-500"
-            trend={`${getActivityPercentage(inProgressIssues.length)}%`}
-            trendUp={inProgressIssues.length > 0}
-          />
-
-          <StatCard
-            icon={Users}
-            label="Open Reports"
-            value={String(openIssues.length)}
-            description="Awaiting resolution"
-            iconClass="bg-purple-500"
-            trend={`${getActivityPercentage(openIssues.length)}%`}
-            trendUp={openIssues.length > 0}
-          />
-        </div>
-      </section>
-
-      {/* ==================== LOWER GRID ==================== */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* RECENT ACTIVITY */}
-        <section className="rounded-2xl border border-slate-800 bg-[#0D1524] p-6 sm:p-7">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-slate-50">
-                Recent Activity
-              </h3>
-
-              <p className="mt-1 text-sm text-slate-400">
-                Your latest community actions
-              </p>
-            </div>
-
-            <button
-              onClick={() => navigate("/citizen/home")}
-              className="inline-flex items-center gap-1 rounded-lg bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-300 transition-colors hover:bg-slate-700"
-            >
-              View all
-              <ChevronRight size={14} />
-            </button>
-          </div>
-
-          <div className="space-y-5">
-            {ownIssues.slice(0, 4).map((issue) => (
-              <ActivityItem
-                key={issue.id}
-                icon={issue.status === "Resolved" ? CheckCircle2 : AlertCircle}
-                iconClass={issue.status === "Resolved" ? "bg-emerald-500" : "bg-blue-500"}
-                title={issue.title}
-                description={`${issue.category} · ${issue.status}`}
-                time={new Date(issue.createdAt || issue.timestamp).toLocaleDateString()}
-              />
-            ))}
-            {ownIssues.length === 0 && <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Your submitted reports will appear here.</p>}
-          </div>
-        </section>
-
-        {/* PREFERENCES */}
-        <section className="hidden rounded-2xl border border-slate-800 bg-[#0D1524] p-6 sm:p-7">
-          <div className="mb-6">
-            <h3 className="text-lg font-bold text-slate-50">
-              Preferences
-            </h3>
-
-            <p className="mt-1 text-sm text-slate-400">
-              Customize your SocioSphere experience
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <PreferenceRow
-              icon={theme === "dark" ? Moon : Sun}
-              title="Appearance"
-              description={
-                theme === "dark"
-                  ? "Dark mode enabled"
-                  : "Light mode enabled"
-              }
-              action={
-                <button
-                  onClick={toggleTheme}
-                  className="relative flex h-8 w-14 items-center rounded-full bg-slate-700 transition-all duration-300 hover:scale-105"
-                  aria-label="Toggle theme"
-                >
-                  <div
-                    className={`absolute flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 ${
-                      theme === "dark" ? "left-7" : "left-1"
-                    }`}
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 mt-3">Active Society Badges</p>
+              <div className="flex flex-wrap gap-2">
+                {(profile.badges || ['Verified Resident', 'Flat Owner']).map((badge, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-500/10 to-teal-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
                   >
-                    {theme === "dark" ? (
-                      <Moon size={14} className="text-slate-700" />
-                    ) : (
-                      <Sun size={14} className="text-amber-500" />
-                    )}
-                  </div>
-                </button>
-              }
-            />
+                    <Sparkles size={12} className="text-emerald-500" />
+                    {badge}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
 
-            <PreferenceRow
-              icon={Bell}
-              title="Notifications"
-              description={
-                notificationsEnabled
-                  ? "Notifications are on"
-                  : "Notifications are off"
-              }
-              action={
-                <button
-                  onClick={() =>
-                    setNotificationsEnabled(!notificationsEnabled)
-                  }
-                  className={`relative h-8 w-14 rounded-full transition-all duration-300 ${
-                    notificationsEnabled
-                      ? "bg-emerald-500"
-                      : "bg-slate-700"
-                  }`}
-                  aria-label="Toggle notifications"
-                >
-                  <div
-                    className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow-md transition-all duration-300 ${
-                      notificationsEnabled ? "left-7" : "left-1"
-                    }`}
-                  />
-                </button>
-              }
-            />
+        {/* SECTION 4: CIVIC METRICS & COMMUNITY ACTIVITY */}
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D1524] p-6 sm:p-7 shadow-sm">
+          <div className="mb-6 flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 dark:bg-amber-500/20">
+                <TrendingUp size={20} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">
+                  Community Activity & Impact
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Reports, resolution performance, and points
+                </p>
+              </div>
+            </div>
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+              Live Feed
+            </span>
+          </div>
 
-            <PreferenceRow
-              icon={Globe}
-              title="Language"
-              description="English (US)"
-              action={
-                <button className="flex items-center gap-1 text-xs font-semibold text-slate-300 transition-colors hover:text-emerald-400">
-                  Change
-                  <ChevronRight size={14} />
-                </button>
-              }
-            />
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium block">Issues Reported</span>
+              <span className="text-2xl font-extrabold text-slate-900 dark:text-slate-50">{ownIssues.length}</span>
+            </div>
 
-            <PreferenceRow
-              icon={Settings}
-              title="Account Settings"
-              description="Security and privacy options"
-              action={
-                <button
-                  className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-all duration-200 hover:bg-slate-800 hover:text-slate-200"
-                  aria-label="Account settings"
-                >
-                  <ChevronRight size={18} />
-                </button>
-              }
-            />
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium block">Resolved Reports</span>
+              <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{resolvedIssues.length}</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium block">Resolution Rate</span>
+              <span className="text-2xl font-extrabold text-blue-600 dark:text-blue-400">
+                {ownIssues.length ? `${getActivityPercentage(resolvedIssues.length)}%` : "100%"}
+              </span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium block">Civic Points</span>
+              <span className="text-2xl font-extrabold text-amber-500">
+                {profileStats?.communityPoints || 120} pts
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">Recent Submissions</h4>
+            <div className="space-y-2">
+              {ownIssues.slice(0, 2).map((issue) => (
+                <div key={issue.id} className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800/60 text-xs">
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[200px]">{issue.title}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${issue.status === 'Resolved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'}`}>
+                    {issue.status}
+                  </span>
+                </div>
+              ))}
+              {ownIssues.length === 0 && (
+                <p className="text-xs text-slate-400 py-2 text-center">No recent civic issues submitted.</p>
+              )}
+            </div>
           </div>
         </section>
       </div>
 
-      {/* ==================== LOGOUT ==================== */}
-      <section className="hidden rounded-2xl border border-rose-500/20 bg-rose-500/5 p-6 transition-all duration-300 hover:border-rose-500/30 sm:p-7">
+      {/* ==================== LOGOUT BAR ==================== */}
+      <section className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-6 transition-all duration-300 hover:border-rose-500/30 sm:p-7">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-rose-500 shadow-lg shadow-rose-500/20">
@@ -751,19 +709,19 @@ const Profile = () => {
             </div>
 
             <div>
-              <h3 className="text-base font-bold text-slate-50">
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">
                 Sign out of SocioSphere
               </h3>
 
-              <p className="mt-1 text-sm text-slate-400">
-                You will need to sign in again to access your account.
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                End your active session for {profile.name} ({profile.society}).
               </p>
             </div>
           </div>
 
           <button
             onClick={handleLogout}
-            className="group inline-flex items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-5 py-3 text-sm font-bold text-rose-400 transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-500/20"
+            className="group inline-flex items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-5 py-3 text-sm font-bold text-rose-500 dark:text-rose-400 transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-500/20"
           >
             <LogOut
               size={16}
@@ -778,9 +736,8 @@ const Profile = () => {
 };
 
 /* =========================================================
-   PROFILE FIELD
+   REUSABLE PROFILE FIELD
 ========================================================= */
-
 const ProfileField = ({
   icon: Icon,
   label,
@@ -794,21 +751,21 @@ const ProfileField = ({
 
   return (
     <div className="group">
-      <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
+      <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
         {label}
       </label>
 
       <div
-        className={`flex items-center gap-3 rounded-xl border px-4 py-3 transition-all duration-200 ${
+        className={`flex items-center gap-3 rounded-xl border px-3.5 py-2.5 transition-all duration-200 ${
           editing
             ? isFocused
-              ? "border-emerald-500 bg-slate-900 shadow-lg shadow-emerald-500/10"
-              : "border-slate-700 bg-slate-900 hover:border-emerald-400"
-            : "border-slate-800 bg-slate-900/60"
+              ? "border-emerald-500 bg-white dark:bg-slate-900 shadow-md shadow-emerald-500/10"
+              : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-emerald-400"
+            : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60"
         }`}
       >
         <Icon
-          size={17}
+          size={16}
           className={`shrink-0 ${
             editing && isFocused
               ? "text-emerald-500"
@@ -824,10 +781,10 @@ const ProfileField = ({
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
-            className="min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-100 outline-none placeholder:text-slate-500"
+            className="min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-400"
           />
         ) : (
-          <span className="min-w-0 truncate text-sm font-medium text-slate-200">
+          <span className="min-w-0 truncate text-sm font-medium text-slate-800 dark:text-slate-200">
             {value || "Not available"}
           </span>
         )}
@@ -846,218 +803,5 @@ const ProfileField = ({
     </div>
   );
 };
-
-/* =========================================================
-   STATUS ROW
-========================================================= */
-
-const StatusRow = ({
-  label,
-  value,
-  icon: Icon,
-  positive = false,
-  iconClass,
-}) => {
-  return (
-    <div className="group flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3.5 transition-all duration-200 hover:border-slate-700">
-      <div className="flex items-center gap-3">
-        <div
-          className={`flex h-9 w-9 items-center justify-center rounded-lg ${iconClass}`}
-        >
-          <Icon size={16} />
-        </div>
-
-        <span className="text-sm font-medium text-slate-300">
-          {label}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-2">
-        {positive && (
-          <CheckCircle2 size={14} className="text-emerald-500" />
-        )}
-
-        <span
-          className={`text-xs font-bold ${
-            positive ? "text-emerald-500" : "text-slate-400"
-          }`}
-        >
-          {value}
-        </span>
-      </div>
-    </div>
-  );
-};
-
-/* =========================================================
-   STAT CARD
-========================================================= */
-
-const StatCard = ({
-  icon: Icon,
-  label,
-  value,
-  description,
-  iconClass,
-  trend,
-  trendUp,
-}) => {
-  const numericTrend = Number.parseFloat(trend);
-  const isNeutralTrend = Number.isFinite(numericTrend) && numericTrend === 0;
-
-  return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-[#0D1524] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-slate-700">
-      <div className="relative">
-        <div className="flex items-start justify-between">
-          <div
-            className={`flex h-12 w-12 items-center justify-center rounded-xl ${iconClass} shadow-lg transition-transform duration-300 group-hover:scale-110`}
-          >
-            <Icon size={20} className="text-white" />
-          </div>
-
-          {trend && (
-            <span
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold ${
-                isNeutralTrend
-                  ? "bg-slate-500/10 text-slate-400"
-                  : trendUp
-                  ? "bg-emerald-500/10 text-emerald-500"
-                  : "bg-rose-500/10 text-rose-500"
-              }`}
-            >
-              {isNeutralTrend ? (
-                <span className="block h-0.5 w-3 rounded-full bg-slate-400" aria-hidden="true" />
-              ) : (
-                <TrendingUp
-                  size={12}
-                  className={trendUp ? "" : "rotate-180"}
-                />
-              )}
-              {trend}
-            </span>
-          )}
-        </div>
-
-        <div className="mt-5">
-          <p className="text-3xl font-extrabold text-slate-50">
-            {value}
-          </p>
-
-          <p className="mt-1 text-sm font-semibold text-slate-200">
-            {label}
-          </p>
-
-          <p className="mt-1 text-xs text-slate-400">
-            {description}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* =========================================================
-   ACTIVITY ITEM
-========================================================= */
-
-const ActivityItem = ({
-  icon: Icon,
-  iconClass,
-  title,
-  description,
-  time,
-}) => {
-  return (
-    <div className="group flex gap-4 rounded-xl p-2 transition-all duration-200 hover:bg-slate-900/40">
-      <div className="relative">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconClass} shadow-md transition-transform duration-300 group-hover:scale-110`}
-        >
-          <Icon size={17} className="text-white" />
-        </div>
-
-        <div className="absolute left-1/2 top-full h-full w-px -translate-x-1/2 bg-slate-800" />
-      </div>
-
-      <div className="min-w-0 flex-1 pb-4">
-        <div className="flex flex-col justify-between gap-1 sm:flex-row sm:items-center">
-          <p className="text-sm font-bold text-slate-200 group-hover:text-emerald-400">
-            {title}
-          </p>
-
-          <span className="shrink-0 rounded-full bg-slate-800 px-2 py-1 text-[10px] font-medium text-slate-400">
-            {time}
-          </span>
-        </div>
-
-        <p className="mt-1 text-xs leading-relaxed text-slate-400">
-          {description}
-        </p>
-      </div>
-    </div>
-  );
-};
-
-/* =========================================================
-   PREFERENCE ROW
-========================================================= */
-
-const PreferenceRow = ({
-  icon: Icon,
-  title,
-  description,
-  action,
-}) => {
-  return (
-    <div className="group flex items-center justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-all duration-200 hover:border-slate-700">
-      <div className="flex min-w-0 items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-800 text-slate-300 transition-all duration-300 group-hover:bg-slate-700">
-          <Icon size={18} />
-        </div>
-
-        <div className="min-w-0">
-          <p className="text-sm font-bold text-slate-200">
-            {title}
-          </p>
-
-          <p className="mt-0.5 truncate text-xs text-slate-400">
-            {description}
-          </p>
-        </div>
-      </div>
-
-      <div className="shrink-0">{action}</div>
-    </div>
-  );
-};
-
-/* =========================================================
-   ANIMATION
-========================================================= */
-
-const style = document.createElement("style");
-
-style.textContent = `
-  @keyframes slide-in-right {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-
-  .animate-slide-in-right {
-    animation: slide-in-right 0.3s ease-out;
-  }
-`;
-
-if (!document.head.querySelector("#profile-animation-style")) {
-  style.id = "profile-animation-style";
-  document.head.appendChild(style);
-}
 
 export default Profile;

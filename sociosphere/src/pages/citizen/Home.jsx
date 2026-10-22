@@ -155,143 +155,83 @@ export default function Home() {
      LOAD REPORTS FROM THE CURRENT USER'S SOCIETY
   ========================================================= */
 
- const loadUserReports = () => {
-  try {
-    const currentEmail =
-      user?.email?.trim().toLowerCase();
+  const loadUserReports = () => {
+    try {
+      const storedReports = JSON.parse(localStorage.getItem("sociosphere_user_reports") || "[]");
+      const authorityIssues = getIssues();
+      const authorityCrimes = getCrimes();
 
-    const currentUserId = user?.id;
-    const currentCommunityId = user?.communityId;
-    const currentCommunityName = user?.communityName?.trim().toLowerCase();
+      // Merge all items: authority issues, authority crimes, and user reports
+      const combinedMap = new Map();
 
-    if (!currentEmail && !currentUserId && !currentCommunityId && !currentCommunityName) {
-      setUserReports([]);
-      return;
-    }
+      // 1. Add authority issues
+      (authorityIssues || []).forEach((item) => {
+        if (item && item.id) {
+          combinedMap.set(item.id, { ...item, reportType: item.reportType || "civic" });
+        }
+      });
 
-    // =====================================================
-    // ALL USER REPORTS
-    // Civic + Crime
-    // =====================================================
+      // 2. Add authority crimes
+      (authorityCrimes || []).forEach((item) => {
+        if (item && item.id) {
+          combinedMap.set(item.id, { ...item, reportType: "crime" });
+        }
+      });
 
-    const legacyReports = JSON.parse(
-      localStorage.getItem("sociosphere_user_reports") || "[]"
-    );
-    const authorityIssues = getIssues();
-    const storedReports = [
-      ...authorityIssues,
-      ...legacyReports.filter((report) =>
-        !authorityIssues.some((issue) => issue.id === report.id)
-      ),
-    ];
+      // 3. Add stored user reports
+      (storedReports || []).forEach((item) => {
+        if (item && item.id) {
+          const isCrime = item.reportType === "crime" || item.id.startsWith("CRM-");
+          combinedMap.set(item.id, { ...item, reportType: isCrime ? "crime" : "civic" });
+        }
+      });
 
-    const filteredReports = storedReports
-      .filter((report) => {
-        const reportEmail =
-          report?.reportedByEmail
-            ?.trim()
-            .toLowerCase();
+      const userSociety = (user?.society || user?.communityName || 'Gandhi Colony').trim();
+      const userEmail = (user?.email || '').trim().toLowerCase();
+      const userId = user?.id;
+      const userCommunityId = user?.communityId;
 
-        const emailMatches =
-          currentEmail &&
-          reportEmail === currentEmail;
+      // Filter reports strictly to this citizen's society (or items reported by this citizen)
+      const societyReports = Array.from(combinedMap.values()).filter((item) => {
+        if (!item) return false;
+        // Direct reporter match
+        if (userEmail && item.reportedByEmail && item.reportedByEmail.trim().toLowerCase() === userEmail) return true;
+        if (userId && item.reportedById && item.reportedById === userId) return true;
 
-        const idMatches =
-          currentUserId &&
-          report?.reportedById === currentUserId;
+        // Society match
+        const itemSoc = (item.society || item.communityName || item.colony || item.colonyName || '').trim().toLowerCase();
+        if (itemSoc && itemSoc === userSociety.toLowerCase()) return true;
+        if (userCommunityId && item.communityId && item.communityId === userCommunityId) return true;
 
-        const reportCommunityId = report?.communityId;
-        const reportCommunityName = (
-          report?.communityName ||
-          report?.colonyName ||
-          report?.society ||
-          report?.community
-        )?.trim().toLowerCase();
+        // Default seed backwards compatibility for Gandhi Colony
+        if (userSociety.toLowerCase() === 'gandhi colony' && (itemSoc === 'green meadows heights' || !itemSoc)) {
+          return true;
+        }
 
-        const communityMatches =
-          (currentCommunityId && reportCommunityId === currentCommunityId) ||
-          (currentCommunityName && reportCommunityName === currentCommunityName);
+        return false;
+      });
 
-        // Legacy records without society metadata remain visible only to their author.
-        return communityMatches || (
-          !reportCommunityId &&
-          !reportCommunityName &&
-          (emailMatches || idMatches)
-        );
-      })
-      .map((report) => {
-        const isCrime =
-          report?.reportType === "crime" ||
-          report?.id?.startsWith("CRM-");
-
+      const normalized = societyReports.map((report) => {
+        const isCrime = report?.reportType === "crime" || report?.id?.startsWith("CRM-");
         return {
           ...report,
-
-          priority:
-            report.priority ||
-            (report.severity
-              ? `${report.severity} Priority`
-              : isCrime
-                ? "High Priority"
-                : "Medium Priority"),
-
-          priorityClass:
-            report.priorityClass ||
-            (
-              report.severity ||
-              (isCrime ? "critical" : "medium")
-            ).toLowerCase(),
-
-          status:
-            report.status ||
-            "In Progress",
-
-          statusClass:
-            report.statusClass ||
-            (
-              report.status === "Resolved"
-                ? "resolved"
-                : "progress"
-            ),
-
-          date:
-            report.date ||
-            (
-              report.createdAt ||
-              report.timestamp
-            )
-              ? new Date(
-                  report.createdAt ||
-                  report.timestamp
-                ).toLocaleDateString()
-              : "Recently",
-
-          eta:
-            report.eta ||
-            report.aiAnalysis
-              ?.estimatedResolutionTime ||
-            (isCrime
-              ? "Security Dispatched"
-              : "Pending Dispatch"),
-
-          image:
-            report.image || null,
-
-          reportType:
-            isCrime ? "crime" : "civic",
+          priority: report.priority || (report.severity ? `${report.severity} Priority` : isCrime ? "High Priority" : "Medium Priority"),
+          priorityClass: report.priorityClass || (report.severity || (isCrime ? "critical" : "medium")).toLowerCase(),
+          status: report.status || "In Progress",
+          statusClass: report.statusClass || (report.status === "Resolved" ? "resolved" : "progress"),
+          date: report.date || (report.createdAt || report.timestamp ? new Date(report.createdAt || report.timestamp).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "Recently"),
+          eta: report.eta || report.aiAnalysis?.estimatedResolutionTime || (isCrime ? "Security Dispatched" : "Pending Dispatch"),
+          image: report.image || null,
+          reportType: isCrime ? "crime" : "civic",
         };
       });
 
-    setUserReports(filteredReports);
-  } catch (error) {
-    console.error(
-      "Failed to load user reports:",
-      error
-    );
-
-    setUserReports([]);
-  }
-};
+      setUserReports(normalized);
+    } catch (error) {
+      console.error("Failed to load user reports:", error);
+      setUserReports([]);
+    }
+  };
 
   /* =========================================================
      LOAD ON USER CHANGE + DATA UPDATE
@@ -300,18 +240,16 @@ export default function Home() {
   useEffect(() => {
     loadUserReports();
 
-    window.addEventListener(
-      "sociosphere_data_updated",
-      loadUserReports
-    );
+    window.addEventListener("sociosphere_data_updated", loadUserReports);
+    window.addEventListener("sociosphere_crimes_updated", loadUserReports);
+    window.addEventListener("storage", loadUserReports);
 
     return () => {
-      window.removeEventListener(
-        "sociosphere_data_updated",
-        loadUserReports
-      );
+      window.removeEventListener("sociosphere_data_updated", loadUserReports);
+      window.removeEventListener("sociosphere_crimes_updated", loadUserReports);
+      window.removeEventListener("storage", loadUserReports);
     };
-  }, [user?.email, user?.id]);
+  }, [user?.email, user?.id, user?.communityName, user?.society]);
 
   /* =========================================================
      QUICK ACTIONS
@@ -584,6 +522,12 @@ export default function Home() {
             .includes("HIGH"))
     ).length;
 
+  const userSociety = user?.society || user?.communityName || 'Gandhi Colony';
+  const userSocietyCode = user?.societyCode || (
+    userSociety === 'Gandhi Colony' ? 'GC-101' :
+    userSociety === 'Shayam Nagar' ? 'SN-202' : 'DV-303'
+  );
+
   const displayName = user?.name && !user.name.includes("@")
     ? user.name.split(" ")[0]
     : "Resident";
@@ -618,9 +562,9 @@ export default function Home() {
 
       <header className="home-navbar">
         <div className="navbar-inner">
-          <div
+<div
             className="location-section"
-            title={`Current weather in ${user?.communityName || "your colony"}: ${weather.description || weather.condition || "Clear sky"}, ${weather.temp ?? 26}°C`}
+            title={`Current weather in ${userSociety}: ${weather.description || weather.condition || "Clear sky"}, ${weather.temp ?? 26}°C`}
           >
             <span className="weather-inline-chip">
               <span className="weather-inline-icon" role="img" aria-label={weather.condition || "weather"}>
@@ -631,8 +575,11 @@ export default function Home() {
               </span>
             </span>
             <span className="location-divider" aria-hidden="true">|</span>
-            <MapPin size={16} className="location-pin-icon" />
-            <span className="community-name-text">{user?.communityName || "Your Community"}</span>
+            <MapPin size={16} className="location-pin-icon text-emerald-500" />
+            <span className="community-name-text font-bold">{userSociety}</span>
+            <span className="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30">
+              {userSocietyCode}
+            </span>
             <span className="online-dot" title="Colony live" />
           </div>
         </div>

@@ -6,6 +6,7 @@ import {
   ShieldAlert,
   User,
   Sparkles,
+  Users,
 } from "lucide-react";
 
 import Navbar from "./Navbar";
@@ -51,6 +52,11 @@ const AuthorityLayout = () => {
       label: "Crimes",
       href: "/authority/crimes",
       icon: ShieldAlert,
+    },
+    {
+      label: "Directory",
+      href: "/authority/members",
+      icon: Users,
     },
     {
       label: "Profile",
