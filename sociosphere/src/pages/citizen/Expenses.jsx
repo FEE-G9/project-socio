@@ -770,9 +770,9 @@ export default function Expenses() {
             <input
               id="contributionAmount"
               type="number"
-              min="0.01"
+              min="100"
               max="1000000000"
-              step="0.01"
+              step="500"
               required
               value={selectedAmount}
               onChange={(event) => {
