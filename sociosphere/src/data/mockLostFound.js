@@ -217,6 +217,7 @@ export const INITIAL_LOST_FOUND_ITEMS = [
 const STORAGE_KEY = "sociosphere_lost_found";
 
 export const getLostFoundItems = () => {
+  //This is so that the app doesn't crash if used in node environment 
   if (typeof window === "undefined" || !window.localStorage) {
     return INITIAL_LOST_FOUND_ITEMS;
   }

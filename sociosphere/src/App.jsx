@@ -8,6 +8,7 @@ import AuthorityLayout from "./components/layout/AuthorityLayout";
 import Landing from "./pages/public/Landing";
 import SignUp from "./pages/public/Sign_up";
 import Login from "./pages/public/Login";
+import NotFound from "./pages/public/NotFound";
 
 // Viewing portal for the citizen Report page:
 import Report from "./pages/citizen/Report";
@@ -76,11 +77,9 @@ function App() {
           <Route path="profile" element={<AuthorityProfile />} />
         </Route>
 
-        {/* ================= FALLBACK ================= */}
-        <Route
-          path="*"
-          element={<Navigate to="/" replace />}
-        />
+        {/* ================= 404 / FALLBACK ================= */}
+        <Route path="/404" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <BackToTop />
     </>
