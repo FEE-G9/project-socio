@@ -8,6 +8,7 @@ import Report from "./Report";
 import ReportCrime from "./ReportCrime";
 
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
 import { getIssues, saveIssues } from "../../data/mockIssues";
 import { getAnnouncements } from "../../data/mockAnnouncements";
@@ -104,6 +105,7 @@ export default function Home() {
   const [showIssueTimeline, setShowIssueTimeline] = useState(false);
   const { theme } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const weather = useWeather();
   const [colonyAnnouncements, setColonyAnnouncements] = useState([]);
 
@@ -647,7 +649,7 @@ export default function Home() {
 
       <section className="home-welcome">
         <h1>{timeGreeting}, {displayName}</h1>
-        <p>A better neighbourhood starts with you</p>
+        <p>{t("welcomeTitle", "A better neighbourhood starts with you")}</p>
       </section>
 
       {/* =====================================================
