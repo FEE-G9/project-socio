@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
+import { useWeather } from "../../hooks/useWeather";
 
 import Report from "./Report";
 import ReportCrime from "./ReportCrime";
@@ -9,6 +10,7 @@ import ReportCrime from "./ReportCrime";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { getIssues, saveIssues } from "../../data/mockIssues";
+import { getAnnouncements } from "../../data/mockAnnouncements";
 // import Map from "./Map";
 
 import {
@@ -32,7 +34,22 @@ import {
   FileText,
   ShieldAlert,
   PhoneCall,
+  Cloud,
+  Gauge,
+  Megaphone,
 } from "lucide-react";
+
+function getWeatherEmoji(condition) {
+  const c = (condition || "").toLowerCase();
+  if (c.includes("thunder")) return "⛈️";
+  if (c.includes("drizzle") || c.includes("rain")) return "🌧️";
+  if (c.includes("snow")) return "❄️";
+  if (c.includes("mist") || c.includes("fog") || c.includes("haze")) return "🌫️";
+  if (c.includes("few") || c.includes("partly") || c.includes("scatter")) return "🌤️";
+  if (c.includes("cloud") || c.includes("overcast")) return "⛅";
+  if (c.includes("clear") || c.includes("sun")) return "☀️";
+  return "☀️";
+}
 
 const quickActions = [
   {
@@ -85,9 +102,42 @@ export default function Home() {
   const [showAllIssues, setShowAllIssues] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueTimeline, setShowIssueTimeline] = useState(false);
-
   const { theme } = useTheme();
   const { user } = useAuth();
+  const weather = useWeather();
+  const [colonyAnnouncements, setColonyAnnouncements] = useState([]);
+
+  useEffect(() => {
+    const loadAnnouncements = () => {
+      try {
+        const all = getAnnouncements() || [];
+        const userColonyId = user?.communityId || user?.colonyId;
+        const userColonyName = (user?.communityName || "").trim().toLowerCase();
+
+        const matching = all.filter((item) => {
+          if (!item) return false;
+          const itemColonyId = item.colonyId;
+          const itemColonyName = (item.communityName || item.colonyName || "").trim().toLowerCase();
+          if (userColonyId && itemColonyId && itemColonyId === userColonyId) return true;
+          if (userColonyName && itemColonyName && itemColonyName === userColonyName) return true;
+          if (!itemColonyId && !itemColonyName) return true;
+          return false;
+        });
+
+        setColonyAnnouncements(matching.length > 0 ? matching : all);
+      } catch {
+        setColonyAnnouncements([]);
+      }
+    };
+
+    loadAnnouncements();
+    window.addEventListener("sociosphere_data_updated", loadAnnouncements);
+    window.addEventListener("storage", loadAnnouncements);
+    return () => {
+      window.removeEventListener("sociosphere_data_updated", loadAnnouncements);
+      window.removeEventListener("storage", loadAnnouncements);
+    };
+  }, [user?.communityId, user?.communityName, user?.colonyId]);
 
   /* =========================================================
      TOAST
@@ -284,7 +334,7 @@ export default function Home() {
     // }
 
     if (title === "Maintenance") {
-      setComingSoonFeature(title);
+      navigate("/citizen/fees");
       return;
     }
 
@@ -568,40 +618,89 @@ export default function Home() {
 
       <header className="home-navbar">
         <div className="navbar-inner">
-          <div className="location-section">
-            <MapPin size={16} />
-
-            <span>
-              {user?.communityName ||
-                "Your Community"}
-            </span>
-
-            <span className="online-dot" />
-          </div>
-
-          <div className="navbar-actions">
-            <button
-              className="emergency-button"
-              onClick={() => {
-                setActiveModal("emergency");
-              }}
-              aria-haspopup="dialog"
-              aria-label="Open emergency call options"
-            >
-              <span className="emergency-icon">
-                !
+          <div
+            className="location-section"
+            title={`Current weather in ${user?.communityName || "your colony"}: ${weather.description || weather.condition || "Clear sky"}, ${weather.temp ?? 26}°C`}
+          >
+            <span className="weather-inline-chip">
+              <span className="weather-inline-icon" role="img" aria-label={weather.condition || "weather"}>
+                {getWeatherEmoji(weather.condition)}
               </span>
-
-              SOS
-
-              <strong>Emergency</strong>
-            </button>
+              <span className="weather-inline-temp">
+                {weather.temp != null ? `${weather.temp}°C` : "26°C"}
+              </span>
+            </span>
+            <span className="location-divider" aria-hidden="true">|</span>
+            <MapPin size={16} className="location-pin-icon" />
+            <span className="community-name-text">{user?.communityName || "Your Community"}</span>
+            <span className="online-dot" title="Colony live" />
           </div>
         </div>
       </header>
 
+      {/* =====================================================
+          COLONY IMPORTANT ANNOUNCEMENT (MARQUEE)
+      ===================================================== */}
+      <section className="colony-ticker-section" aria-label="Colony Announcements">
+        <div className="ticker-badge">
+          <Megaphone size={14} className="ticker-badge-icon" />
+          <span>Notice</span>
+        </div>
+
+        <div
+          className="ticker-track"
+          onClick={() => navigate("/citizen/announcements")}
+          title="Click to view all announcements"
+        >
+          <marquee
+            behavior="scroll"
+            direction="left"
+            scrollamount="5"
+            className="ticker-marquee"
+            onMouseEnter={(e) => e.target.stop()}
+            onMouseLeave={(e) => e.target.start()}
+          >
+            {(colonyAnnouncements.length > 0
+              ? colonyAnnouncements
+              : [
+                  {
+                    id: "default-colony-notice",
+                    title: `Welcome to ${user?.communityName || "Your Colony"} Portal`,
+                    content: "Stay updated with recent notices, report local civic concerns, and connect with your neighbours.",
+                    important: true,
+                    category: "Notice",
+                  },
+                ]
+            ).map((ann, idx) => (
+              <span key={ann.id || idx} className="ticker-item">
+                {ann.important && (
+                  <span className="ticker-pill-urgent">IMPORTANT</span>
+                )}
+                <span className="ticker-category">[{ann.category || "Notice"}]</span>
+                <strong className="ticker-title">{ann.title}</strong>
+                {ann.content && (
+                  <span className="ticker-desc">— {ann.content}</span>
+                )}
+                <span className="ticker-sep">✦</span>
+              </span>
+            ))}
+          </marquee>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate("/citizen/announcements")}
+          className="ticker-action-btn"
+          title="View all colony announcements"
+        >
+          <span>View all</span>
+          <ChevronRight size={14} />
+        </button>
+      </section>
+
       <section className="home-welcome">
         <h1>{timeGreeting}, {displayName}</h1>
+        <p>A better neighbourhood starts with you</p>
       </section>
 
       {/* =====================================================
@@ -655,7 +754,7 @@ export default function Home() {
 
       <section className="section-header quick-header">
           <h2>Quick Civic Actions</h2>
-          <span>One-tap resident utilities</span>
+           
         </section>
 
         <section className="quick-actions">
@@ -711,7 +810,7 @@ export default function Home() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">{issue.title}</h3>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{issue.category} · {issue.status}</p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{issue.category} Â· {issue.status}</p>
                   </div>
                   <button
                     type="button"
@@ -895,7 +994,7 @@ export default function Home() {
                       <div className="issue-time">
                         <span>{issue.date}</span>
 
-                        <span>•</span>
+                        <span>â€¢</span>
 
                         <strong>
                           ETA: {issue.eta || "Pending"}
@@ -1105,7 +1204,7 @@ export default function Home() {
                       <div className="issue-time">
                         <span>{crime.date}</span>
 
-                        <span>•</span>
+                        <span>â€¢</span>
 
                         <strong className="text-rose-300">
                           Status:{" "}
@@ -1183,7 +1282,7 @@ export default function Home() {
               </strong>
 
               <p>
-                Tomorrow • 10:00 AM • Open Amphitheatre
+                Tomorrow â€¢ 10:00 AM â€¢ Open Amphitheatre
               </p>
             </div>
           </div>
@@ -1247,125 +1346,6 @@ export default function Home() {
               </div>
             )}
           </section>
-        </div>,
-        document.body
-      )}
-
-      {/* =====================================================
-          FOOTER
-      ===================================================== */}
-
-      <footer className="home-footer">
-        <div>
-          <Shield size={16} />
-
-          <strong>
-            SocioSphere Citizen Dashboard
-          </strong>
-
-          <span>
-            • {user?.communityName || "Your Community"}
-          </span>
-        </div>
-
-        <div>
-          <span>
-            Powered by SocioAI Civic Engine
-          </span>
-
-          <span>•</span>
-
-          <button
-            onClick={() =>
-              showToast("Privacy Policy")
-            }
-          >
-            Privacy
-          </button>
-
-          <button
-            onClick={() =>
-              showToast("Terms of Civic Service")
-            }
-          >
-            Terms
-          </button>
-
-          <button
-            onClick={() =>
-              showToast("RWA Constitution")
-            }
-          >
-            Bylaws
-          </button>
-        </div>
-      </footer>
-
-      {/* FOOTER */}
-
-      {/* =====================================================
-          EMERGENCY CALL MODAL
-      ===================================================== */}
-
-      {activeModal === "emergency" && createPortal(
-        <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/10 p-4 backdrop-blur-sm dark:bg-slate-950/15"
-          onClick={() => setActiveModal(null)}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="emergency-title"
-        >
-          <div
-            className="relative w-full max-w-md rounded-2xl border border-rose-500/40 bg-white p-6 shadow-2xl dark:bg-[#0D1524]"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setActiveModal(null)}
-              className="absolute right-4 top-4 rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
-              aria-label="Close emergency options"
-            >
-              <X size={20} />
-            </button>
-
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400">
-              <PhoneCall size={27} />
-            </div>
-
-            <h2 id="emergency-title" className="mt-4 text-2xl font-extrabold text-slate-900 dark:text-white">
-              Emergency assistance
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-              If there is immediate danger, call emergency services now. Your device will open its calling app.
-            </p>
-
-            <div className="mt-6 space-y-3">
-              <a
-                href="tel:112"
-                onClick={() => setActiveModal(null)}
-                className="flex items-center justify-between rounded-xl bg-rose-500 px-5 py-4 font-bold text-white transition hover:bg-rose-400"
-              >
-                <span className="flex items-center gap-3"><PhoneCall size={20} /> Call 112</span>
-                <span className="text-sm">National Emergency</span>
-              </a>
-              <a
-                href="tel:108"
-                onClick={() => setActiveModal(null)}
-                className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 font-bold text-slate-900 transition hover:border-rose-400 hover:bg-rose-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-              >
-                <span className="flex items-center gap-3"><PhoneCall size={20} /> Call 108</span>
-                <span className="text-sm text-slate-500 dark:text-slate-400">Ambulance</span>
-              </a>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setActiveModal("reportCrime")}
-              className="mt-5 w-full text-sm font-semibold text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
-            >
-              It is not immediate — report a crime or safety issue
-            </button>
-          </div>
         </div>,
         document.body
       )}
@@ -1641,5 +1621,63 @@ export default function Home() {
         </div>
       )}
     </div>
+  );
+}
+
+function WeatherBox({ weather }) {
+  const [now, setNow] = useState(() => new Date());
+  const icon = getWeatherEmoji(weather.condition);
+  const description = weather.description
+    ? weather.description.charAt(0).toUpperCase() + weather.description.slice(1)
+    : weather.loading
+      ? "Getting latest conditions"
+      : "Weather unavailable";
+  const time = now.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(new Date()), 60000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const metrics = [
+    { label: "Humidity", value: weather.humidity == null ? "--" : weather.humidity + "%", icon: Droplets },
+    { label: "Wind", value: weather.windSpeed == null ? "--" : weather.windSpeed + " km/h", icon: Zap },
+    { label: "Pressure", value: weather.pressure == null ? "--" : weather.pressure + " hPa", icon: Gauge },
+    { label: "Clouds", value: weather.cloudCoverage == null ? "--" : weather.cloudCoverage + "%", icon: Cloud },
+  ];
+
+  return (
+    <section className="weather-card" aria-label="Current weather">
+      <div className="weather-card-heading">
+        <h2>Current Weather</h2>
+        <span>{time}</span>
+      </div>
+
+      <div className="weather-card-current">
+        <span className="weather-card-icon" aria-hidden="true">
+          {weather.loading ? "..." : icon}
+        </span>
+        <div className="weather-card-reading">
+          <div className="weather-card-temperature">
+            {weather.temp == null ? "26" : weather.temp}
+            <span>&deg;C</span>
+          </div>
+          <p>{description}</p>
+        </div>
+      </div>
+
+      <div className="weather-card-metrics">
+        {metrics.map(({ label, value, icon: Icon }) => (
+          <div className="weather-metric" key={label}>
+            <Icon size={17} aria-hidden="true" />
+            <span>{value}</span>
+            <small>{label}</small>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

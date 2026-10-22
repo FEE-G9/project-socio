@@ -52,7 +52,7 @@ function GroupChatButton() {
     if (open) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, open]);
 
-  if (location.pathname.startsWith("/authority")) return null;
+  if (!location.pathname.startsWith("/citizen")) return null;
 
   const sendMessage = () => {
     const trimmed = text.trim();
