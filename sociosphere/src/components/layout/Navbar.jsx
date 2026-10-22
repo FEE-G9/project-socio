@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   MapPin,
   Radio,
+  Globe,
 } from "lucide-react";
 
 import {
@@ -20,6 +21,7 @@ import {
 } from "react-router-dom";
 
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import UserAvatar from "../ui/UserAvatar";
 import CitizenSOSModal from "../ui/CitizenSOSModal";
 
@@ -51,6 +53,7 @@ const Navbar = ({
     theme,
     toggleTheme,
   } = useTheme();
+  const { language, setLanguage, languages } = useLanguage();
 
   const isActive = (href) => {
     if (href === "/") {
@@ -139,7 +142,7 @@ const Navbar = ({
         <div className="hidden items-center gap-2 md:flex">
 
           {/* CITIZEN SOS BUTTON */}
-          {!location.pathname.startsWith('/authority') && !isCitizenHome && (
+          {!location.pathname.startsWith('/authority') && (
             <button
               onClick={() => setSosModalOpen(true)}
               className="group relative flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 px-3.5 py-2 text-xs font-black tracking-wider text-white shadow-md shadow-red-600/30 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-600/40 active:scale-95 animate-pulse"
@@ -385,6 +388,34 @@ const Navbar = ({
                 TRIGGER EMERGENCY SOS
               </button>
             )}
+
+            {/* MOBILE LANGUAGE */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/60">
+              <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <Globe size={14} className="text-emerald-500" />
+                <span>Language / भाषा / ਭਾਸ਼ਾ</span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => {
+                      setLanguage(lang.code);
+                      setMobileOpen(false);
+                    }}
+                    className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold transition-all ${
+                      language === lang.code
+                        ? "bg-emerald-500 text-white font-bold"
+                        : "bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300"
+                    }`}
+                  >
+                    <span>{lang.flag}</span>
+                    <span className="truncate">{lang.nativeName}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* MOBILE THEME */}
             <button

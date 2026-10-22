@@ -12,6 +12,7 @@ import {
   PhoneCall,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
@@ -23,6 +24,7 @@ const CitizenLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const [showWelcome, setShowWelcome] = useState(
     () => sessionStorage.getItem("sociosphere_show_welcome") === "true"
   );

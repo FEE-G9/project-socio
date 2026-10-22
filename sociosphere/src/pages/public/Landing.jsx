@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Shield, ArrowRight, AlertTriangle, ShieldAlert } from "lucide-react";
 import "./landing.css";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../../context/LanguageContext";
 export default function Landing() {
   const [selectedFeature, setSelectedFeature] = useState("issues");
+  const { language, setLanguage, languages } = useLanguage();
   return (
     <div className="landing-shell">
 
@@ -37,7 +39,18 @@ export default function Landing() {
         </nav>
 
         <div className="header-actions">
-        {/* <button className="language-btn">EN</button>*/}
+          <select
+            className="language-btn"
+            value={language}
+            onChange={(event) => setLanguage(event.target.value)}
+            aria-label="Select language"
+          >
+            {languages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.nativeName}
+              </option>
+            ))}
+          </select>
           <Link to="/login" className="login-btn">Login</Link>
           <Link to="/signup" className="signup-btn">Sign Up</Link>
         </div>
@@ -267,4 +280,3 @@ export default function Landing() {
     </div>
   );
 }
-
