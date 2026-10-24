@@ -35,6 +35,7 @@ import {
   FileText,
   ShieldAlert,
   PhoneCall,
+  PackageSearch,
   Cloud,
   Gauge,
   Megaphone,
@@ -64,6 +65,12 @@ const quickActions = [
     description: "Security alert & guard dispatch",
     icon: Shield,
     className: "action-red",
+  },
+  {
+    title: "Lost & Found",
+    description: "Report & recover misplaced items",
+    icon: PackageSearch,
+    className: "action-blue",
   },
   // {
   //   title: "View Map",
@@ -268,10 +275,10 @@ export default function Home() {
       return;
     }
 
-    // if (title === "View Map") {
-    //   setActiveModal("map");
-    //   return;
-    // }
+    if (title === "Lost & Found") {
+      navigate("/citizen/lost-found");
+      return;
+    }
 
     if (title === "Maintenance") {
       navigate("/citizen/fees");

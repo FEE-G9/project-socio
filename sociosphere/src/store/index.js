@@ -5,7 +5,7 @@ export const store = configureStore({
   reducer: {
     profile: profileReducer,
   },
-  devTools: process.env.NODE_ENV !== 'production',
+  devTools: import.meta.env?.DEV ?? true,
 });
 
 export default store;

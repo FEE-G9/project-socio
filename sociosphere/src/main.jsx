@@ -8,6 +8,7 @@ import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { AlertProvider } from "./context/AlertContext.jsx";
+import { SocietyProvider } from "./context/SocietyContext.jsx";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
 import { sanitizeLocalStorage } from "./utils/storageSanitizer.js";
 
@@ -18,23 +19,16 @@ sanitizeLocalStorage();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <ThemeProvider>
-          <AlertProvider>
-            <LanguageProvider>
-              <App />
-            </LanguageProvider>
-          </AlertProvider>
-        </ThemeProvider>
-      </AuthProvider>
-    </BrowserRouter>
     <Provider store={store}>
       <BrowserRouter>
         <AuthProvider>
           <ThemeProvider>
             <AlertProvider>
-              <App />
+              <SocietyProvider>
+                <LanguageProvider>
+                  <App />
+                </LanguageProvider>
+              </SocietyProvider>
             </AlertProvider>
           </ThemeProvider>
         </AuthProvider>
