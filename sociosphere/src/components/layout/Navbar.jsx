@@ -13,6 +13,7 @@ import {
   MapPin,
   Radio,
   Globe,
+  HelpCircle,
 } from "lucide-react";
 
 import {
@@ -321,6 +322,15 @@ const Navbar = ({
                   Account settings
                 </button>
 
+                {/* HELP & FAQS */}
+                <button
+                  onClick={() => handleProfileNavigation("/faqs")}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+                >
+                  <HelpCircle size={16} />
+                  Help & FAQs
+                </button>
+
                 <div className="my-2 border-t border-slate-200 dark:border-slate-700" />
 
                 {/* LOGOUT */}
@@ -472,6 +482,14 @@ const Navbar = ({
             >
               <Settings size={18} />
               Settings
+            </button>
+
+            <button
+              onClick={() => handleProfileNavigation("/faqs")}
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              <HelpCircle size={18} />
+              Help & FAQs
             </button>
 
             {/* MOBILE LOGOUT */}

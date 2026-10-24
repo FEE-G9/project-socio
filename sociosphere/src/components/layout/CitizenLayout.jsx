@@ -11,6 +11,7 @@ import {
   PackageSearch,
   Users,
   PhoneCall,
+  HelpCircle,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
@@ -87,6 +88,11 @@ const CitizenLayout = () => {
       label: "Profile",
       href: "/citizen/profile",
       icon: User,
+    },
+    {
+      label: "Help & FAQs",
+      href: "/citizen/faqs",
+      icon: HelpCircle,
     },
   ];
 

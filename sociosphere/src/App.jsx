@@ -10,6 +10,7 @@ import AuthorityLayout from "./components/layout/AuthorityLayout";
 import Landing from "./pages/public/Landing";
 import SignUp from "./pages/public/Sign_up";
 import Login from "./pages/public/Login";
+import FAQs from "./pages/public/FAQs";
 import NotFound from "./pages/public/NotFound";
 
 import Report from "./pages/citizen/Report";
@@ -159,6 +160,8 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/faqs" element={<FAQs />} />
+          <Route path="/faq" element={<Navigate to="/faqs" replace />} />
         </Route>
 
         {/* ================= CITIZEN ================= */}
@@ -178,6 +181,8 @@ function App() {
           <Route path="events" element={<Events />} />
           <Route path="community" element={<Community />} />
           <Route path="emergency" element={<Emergency />} />
+          <Route path="faqs" element={<FAQs />} />
+          <Route path="faq" element={<Navigate to="/citizen/faqs" replace />} />
         </Route>
 
         {/* ================= AUTHORITY ================= */}
