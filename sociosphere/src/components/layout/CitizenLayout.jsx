@@ -8,6 +8,7 @@ import {
   ShieldAlert,
   User,
   Sparkles,
+  PackageSearch,
   Users,
   PhoneCall,
 } from "lucide-react";
@@ -76,6 +77,11 @@ const CitizenLayout = () => {
       label: "Report Crime",
       href: "/citizen/report-crime",
       icon: ShieldAlert,
+    },
+    {
+      label: "Lost & Found",
+      href: "/citizen/lost-found",
+      icon: PackageSearch,
     },
     {
       label: "Profile",
