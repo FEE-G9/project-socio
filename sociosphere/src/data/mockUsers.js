@@ -227,26 +227,26 @@ export const DEFAULT_USERS = [
   // =========================================================
   {
     id: 'sn-admin-1',
-    name: 'Sanjay Singhal',
-    email: 'admin.shayam@sociosphere.io',
-    password: 'Admin@SN202',
-    age: 51,
+    name: 'Ekjyot Kaur',
+    email: 'ekjyot@gmail.com',
+    password: 'ekjyot123',
+    age: 19,
     society: 'Shayam Nagar',
     societyCode: 'SN-202',
     communityId: 'colony-shayam',
     communityName: 'Shayam Nagar',
-    occupation: 'Business Director & RWA Chief',
+    occupation: 'Software Engineer',
     blockNumber: 'Block A',
     houseOrFlatNo: 'House 1',
     unitNumber: 'Block A - House 1',
-    phone: '+91 98110 99887',
+    phone: '+91 98765 43210',
     type: 'member',
     role: 'authority',
     designation: 'RWA President',
     status: 'Verified',
     avatarStyle: 'shield',
     joinedDate: 'Feb 2024',
-    emergencyContact: '+91 98110 99880',
+    emergencyContact: '+91 98765 43210',
     badges: ['Board President', 'Civic Council']
   },
   {
@@ -573,11 +573,16 @@ const DEFAULT_PASSWORDS = DEFAULT_USERS.reduce((acc, user) => {
   acc[user.email.toLowerCase()] = user.password;
   return acc;
 }, {
-  'admin@sociosphere.io': 'vansh12345'
+  'admin@sociosphere.io': 'vansh12345',
+  'ekjyot@gmail.com': 'ekjyot123',
+  'admin.shayam@sociosphere.io': 'ekjyot123'
 });
 
 export const getUsers = (societyFilter) => {
-  const stored = localStorage.getItem('sociosphere_users');
+  let stored = null;
+  if (typeof localStorage !== 'undefined') {
+    stored = localStorage.getItem('sociosphere_users');
+  }
   let userList = DEFAULT_USERS;
 
   if (stored) {
@@ -586,7 +591,7 @@ export const getUsers = (societyFilter) => {
       if (Array.isArray(parsed) && parsed.some(u => u.societyCode === 'GC-101')) {
         let needsSave = false;
         userList = parsed.map(u => {
-          // If admin profile needs upgrade to Vansh Goyal
+          // If admin profile needs upgrade to Vansh Goyal (Gandhi Colony - One and only admin)
           if (u.id === 'gc-admin-1') {
             if (u.name !== 'Vansh Goyal' || u.email !== 'goyalvansh63708@gmail.com' || u.password !== 'vansh12345') {
               needsSave = true;
@@ -608,6 +613,36 @@ export const getUsers = (societyFilter) => {
             }
           }
 
+          // If Shayam Nagar admin profile needs upgrade to Ekjyot Kaur
+          if (u.id === 'sn-admin-1' || u.email === 'admin.shayam@sociosphere.io' || u.email === 'ekjyot@gmail.com') {
+            if (u.name !== 'Ekjyot Kaur' || u.email !== 'ekjyot@gmail.com' || u.password !== 'ekjyot123' || u.age !== 19 || u.occupation !== 'Software Engineer') {
+              needsSave = true;
+              return {
+                ...u,
+                id: 'sn-admin-1',
+                name: 'Ekjyot Kaur',
+                email: 'ekjyot@gmail.com',
+                password: 'ekjyot123',
+                age: 19,
+                society: 'Shayam Nagar',
+                societyCode: 'SN-202',
+                communityId: 'colony-shayam',
+                communityName: 'Shayam Nagar',
+                occupation: 'Software Engineer',
+                blockNumber: 'Block A',
+                houseOrFlatNo: 'House 1',
+                unitNumber: 'Block A - House 1',
+                phone: '+91 98765 43210',
+                type: 'member',
+                role: 'authority',
+                designation: 'RWA President',
+                status: 'Verified',
+                emergencyContact: '+91 98765 43210',
+                badges: ['Board President', 'Civic Council']
+              };
+            }
+          }
+
           // If user still has the generic placeholder password or out-of-date password, update with their realistic human password
           const defaultHumanPass = DEFAULT_PASSWORDS[u.id] || DEFAULT_PASSWORDS[(u.email || '').toLowerCase()];
           if (defaultHumanPass && u.password !== defaultHumanPass && (u.id.startsWith('gc-') || u.id.startsWith('sn-') || u.id.startsWith('dv-') || u.password === 'password123')) {
@@ -620,11 +655,13 @@ export const getUsers = (societyFilter) => {
           return u;
         });
 
-        if (needsSave) {
+        if (needsSave && typeof localStorage !== 'undefined') {
           localStorage.setItem('sociosphere_users', JSON.stringify(userList));
         }
       } else {
-        localStorage.setItem('sociosphere_users', JSON.stringify(DEFAULT_USERS));
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('sociosphere_users', JSON.stringify(DEFAULT_USERS));
+        }
         userList = DEFAULT_USERS;
       }
     } catch (err) {
@@ -632,7 +669,9 @@ export const getUsers = (societyFilter) => {
       userList = DEFAULT_USERS;
     }
   } else {
-    localStorage.setItem('sociosphere_users', JSON.stringify(DEFAULT_USERS));
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('sociosphere_users', JSON.stringify(DEFAULT_USERS));
+    }
   }
 
   if (societyFilter && societyFilter !== 'all') {

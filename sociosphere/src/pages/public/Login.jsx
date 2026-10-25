@@ -228,24 +228,32 @@ function Login() {
           {/* QUICK DEMO SHORTCUTS */}
           <div className="mt-4 pt-3 border-t border-white/10 text-left">
             <span className="text-[11px] font-bold uppercase tracking-wider text-white/50 block mb-2">
-              Quick Demo Access (Gandhi Colony):
+              Quick Demo Access:
             </span>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-3 gap-1.5 text-xs">
               <button
                 type="button"
                 onClick={() => handleQuickLogin("goyalvansh63708@gmail.com", "vansh12345")}
-                className="rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 p-2 text-center text-emerald-300 font-bold transition truncate"
-                title="Admin: Vansh Goyal (Pass: vansh12345)"
+                className="rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 p-2 text-center text-emerald-300 font-bold transition truncate text-[11px]"
+                title="Gandhi Colony Admin: Vansh Goyal (Pass: vansh12345)"
               >
-                Admin (Vansh)
+                GC: Vansh
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickLogin("ekjyot@gmail.com", "ekjyot123")}
+                className="rounded-lg bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 p-2 text-center text-purple-300 font-bold transition truncate text-[11px]"
+                title="Shayam Nagar Admin: Ekjyot Kaur (Pass: ekjyot123)"
+              >
+                SN: Ekjyot
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickLogin("aarav@sociosphere.io", "Aarav@402!")}
-                className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 p-2 text-center text-blue-300 font-medium transition truncate"
+                className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 p-2 text-center text-blue-300 font-medium transition truncate text-[11px]"
                 title="Resident: Aarav Sharma (Pass: Aarav@402!)"
               >
-                Resident (Aarav)
+                Res: Aarav
               </button>
             </div>
           </div>
