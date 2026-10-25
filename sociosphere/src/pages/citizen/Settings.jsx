@@ -161,10 +161,10 @@ export default function Settings() {
             title="Language"
             description="Choose your preferred language"
             action={
-              <select value={language} onChange={(event) => setLanguage(event.target.value)} className="max-w-[130px] rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200" aria-label="Language">
+              <select value={language} onChange={(event) => setLanguage(event.target.value)} className="max-w-[150px] rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200" aria-label="Language">
                 {languages.map((lang) => (
                   <option key={lang.code} value={lang.code}>
-                    {lang.name} ({lang.nativeName})
+                    {lang.flag} {lang.nativeName || lang.name}
                   </option>
                 ))}
               </select>
