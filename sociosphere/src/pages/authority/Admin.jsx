@@ -121,10 +121,12 @@ const AdminHome = () => {
 
   const handleApproveApplicant = (applicantId, applicantName, e) => {
     if (e) e.stopPropagation();
+    const applicant = societyUsers.find(u => u.id === applicantId);
+    const isAuth = applicant?.role === 'authority' || applicant?.type === 'member';
     approveUser(applicantId);
     setApprovalToast({
       type: 'success',
-      message: `✓ ${applicantName} has been approved and admitted to ${adminSociety}! Their resident account is now active.`
+      message: `✓ ${applicantName} has been approved and admitted to ${adminSociety}! ${isAuth ? 'Their administrative authority account is now active.' : 'Their resident account is now active.'}`
     });
     setTimeout(() => setApprovalToast(null), 5000);
   };
@@ -274,7 +276,7 @@ const AdminHome = () => {
             </div>
           )}
 
-          {/* Incoming Resident Applications (Pending Approvals) */}
+          {/* Incoming Society Applications (Pending Approvals) */}
           {pendingRequests.length > 0 && (
             <section className="rounded-2xl border-2 border-amber-400/60 dark:border-amber-500/40 bg-gradient-to-br from-amber-50/50 via-white to-amber-50/20 dark:from-amber-950/20 dark:via-[#0D1524] dark:to-amber-950/10 p-6 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-amber-200/60 dark:border-amber-700/40">
@@ -284,7 +286,7 @@ const AdminHome = () => {
                   </div>
                   <div>
                     <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                      Incoming Resident Applications
+                      Incoming Society Applications
                       <span className="px-2 py-0.5 text-xs font-bold bg-amber-500 text-white rounded-full">
                         {pendingRequests.length} Pending
                       </span>
@@ -303,63 +305,73 @@ const AdminHome = () => {
               </div>
 
               <div className="space-y-3">
-                {pendingRequests.map(applicant => (
-                  <div
-                    key={applicant.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm gap-4 hover:border-amber-400 transition-colors"
-                  >
-                    <div className="flex items-start gap-3">
-                      <UserAvatar user={applicant} size="md" />
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{applicant.name}</h4>
-                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700/50">
-                            Awaiting Approval
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1 flex-wrap">
-                          <span className="flex items-center gap-1">
-                            <Building2 size={13} className="text-slate-400" />
-                            {applicant.blockNumber || 'Block A'} • Flat {applicant.houseOrFlatNo || applicant.unitNumber || 'N/A'}
-                          </span>
-                          {applicant.occupation && (
-                            <span className="flex items-center gap-1">
-                              <Briefcase size={13} className="text-slate-400" />
-                              {applicant.occupation}
+                {pendingRequests.map(applicant => {
+                  const isAuthApplicant = applicant.role === 'authority' || applicant.type === 'member';
+                  return (
+                    <div
+                      key={applicant.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm gap-4 hover:border-amber-400 transition-colors"
+                    >
+                      <div className="flex items-start gap-3">
+                        <UserAvatar user={applicant} size="md" />
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{applicant.name}</h4>
+                            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                              isAuthApplicant
+                                ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700/50'
+                                : 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700/50'
+                            }`}>
+                              {isAuthApplicant ? 'Authority Request' : 'Resident Request'}
                             </span>
-                          )}
-                          {applicant.phone && (
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1 flex-wrap">
                             <span className="flex items-center gap-1">
-                              <Phone size={13} className="text-slate-400" />
-                              {applicant.phone}
+                              <Building2 size={13} className="text-slate-400" />
+                              {isAuthApplicant
+                                ? (applicant.designation || 'Board Committee Member')
+                                : `${applicant.blockNumber || 'Block A'} • Flat ${applicant.houseOrFlatNo || applicant.unitNumber || 'N/A'}`
+                              }
                             </span>
-                          )}
-                        </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
-                          <Mail size={13} className="text-slate-400" />
-                          {applicant.email}
+                            {applicant.occupation && (
+                              <span className="flex items-center gap-1">
+                                <Briefcase size={13} className="text-slate-400" />
+                                {applicant.occupation}
+                              </span>
+                            )}
+                            {applicant.phone && (
+                              <span className="flex items-center gap-1">
+                                <Phone size={13} className="text-slate-400" />
+                                {applicant.phone}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+                            <Mail size={13} className="text-slate-400" />
+                            {applicant.email}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                      <button
-                        type="button"
-                        onClick={(e) => handleDeclineApplicant(applicant.id, applicant.name, e)}
-                        className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 transition-colors"
-                      >
-                        Decline
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => handleApproveApplicant(applicant.id, applicant.name, e)}
-                        className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                      >
-                        Approve & Admit
-                      </button>
+                      <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeclineApplicant(applicant.id, applicant.name, e)}
+                          className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 transition-colors"
+                        >
+                          Decline
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleApproveApplicant(applicant.id, applicant.name, e)}
+                          className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                          {isAuthApplicant ? 'Authorize Admin' : 'Approve & Admit'}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           )}
@@ -424,28 +436,23 @@ const AdminHome = () => {
                 <ChevronRight className="absolute bottom-5 right-5 text-red-600 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" size={20} />
               </Link>
 
-              {/* Maintenance Fees & Ledger */}
-              <Link to="/authority/fees" className="group relative flex flex-col items-start justify-between p-5 rounded-2xl border transition-all duration-300 bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-amber-500/30 hover:-translate-y-1 hover:border-amber-500/60 hover:shadow-md">
-                <div className="p-3 bg-amber-500 text-white rounded-xl shadow-md shadow-amber-500/40 mb-3 group-hover:scale-110 transition-transform">
-                  <Wallet size={24} />
+              {/* Finance & Maintenance Hub */}
+              <Link to="/authority/fees" className="group relative flex flex-col items-start justify-between p-5 rounded-2xl border transition-all duration-300 bg-gradient-to-br from-amber-500/10 via-emerald-500/5 to-indigo-500/10 border-amber-500/30 hover:-translate-y-1 hover:border-amber-500/60 hover:shadow-md md:col-span-2">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-3 bg-amber-500 text-white rounded-xl shadow-md shadow-amber-500/40 group-hover:scale-110 transition-transform">
+                    <Wallet size={24} />
+                  </div>
+                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                    Unified Accounts & Maintenance Hub
+                  </span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base mb-1">Maintenance Fees & Dues</h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">Track flat payments, offline cheque entries & send reminders.</p>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base mb-1">Finance & Maintenance Hub</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Unified management of flat maintenance collections, offline receipts, vendor payouts, AMC contracts, and reserve fund audit.
+                  </p>
                 </div>
                 <ChevronRight className="absolute bottom-5 right-5 text-amber-500 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" size={20} />
-              </Link>
-
-              {/* Colony Expenses & Vendor Bills */}
-              <Link to="/authority/expenses" className="group relative flex flex-col items-start justify-between p-5 rounded-2xl border transition-all duration-300 bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 border-indigo-500/30 hover:-translate-y-1 hover:border-indigo-500/60 hover:shadow-md">
-                <div className="p-3 bg-indigo-500 text-white rounded-xl shadow-md shadow-indigo-500/40 mb-3 group-hover:scale-110 transition-transform">
-                  <TrendingDown size={24} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base mb-1">Colony Expenses & Ledger</h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">Vendor payouts, lift AMC contracts & budget audit summary.</p>
-                </div>
-                <ChevronRight className="absolute bottom-5 right-5 text-indigo-500 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" size={20} />
               </Link>
             </div>
           </section>
@@ -569,20 +576,7 @@ const AdminHome = () => {
                     <div className="p-2 bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 rounded-lg group-hover:bg-amber-100 dark:group-hover:bg-amber-500/20 transition-colors">
                       <Wallet size={18} />
                     </div>
-                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Maintenance Collections</span>
-                  </div>
-                  <ChevronRight size={16} className="text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300" />
-                </button>
-
-                <button 
-                  onClick={() => navigate('/authority/expenses')}
-                  className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400 rounded-lg group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-colors">
-                      <TrendingDown size={18} />
-                    </div>
-                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Colony Expense Ledger</span>
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Finance & Maintenance Hub</span>
                   </div>
                   <ChevronRight size={16} className="text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300" />
                 </button>

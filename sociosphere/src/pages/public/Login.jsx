@@ -129,16 +129,35 @@ function Login() {
 
           {/* PENDING APPROVAL NOTICE BANNER */}
           {pendingNotice && (
-            <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/15 p-3.5 text-left text-xs text-amber-200 animate-in fade-in">
-              <div className="flex items-center gap-1.5 font-bold text-amber-300 mb-1">
+            <div className={`mb-4 rounded-xl border p-3.5 text-left text-xs animate-in fade-in ${
+              pendingNotice.user?.role === 'authority' || pendingNotice.user?.type === 'member'
+                ? 'border-purple-500/40 bg-purple-500/15 text-purple-200'
+                : 'border-amber-500/40 bg-amber-500/15 text-amber-200'
+            }`}>
+              <div className={`flex items-center gap-1.5 font-bold mb-1 ${
+                pendingNotice.user?.role === 'authority' || pendingNotice.user?.type === 'member'
+                  ? 'text-purple-300'
+                  : 'text-amber-300'
+              }`}>
                 <Clock size={15} />
-                <span>Account Awaiting Admin Approval</span>
+                <span>
+                  {pendingNotice.user?.role === 'authority' || pendingNotice.user?.type === 'member'
+                    ? 'Administrative Privilege Awaiting Board Approval'
+                    : 'Account Awaiting Admin Approval'}
+                </span>
               </div>
               <p className="leading-relaxed">
                 {pendingNotice.message}
               </p>
-              <div className="mt-2 text-[11px] text-amber-300/80 border-t border-amber-500/20 pt-1.5">
-                Unit: {pendingNotice.user?.unitNumber} ({pendingNotice.user?.society})
+              <div className={`mt-2 text-[11px] border-t pt-1.5 ${
+                pendingNotice.user?.role === 'authority' || pendingNotice.user?.type === 'member'
+                  ? 'border-purple-500/20 text-purple-300/80'
+                  : 'border-amber-500/20 text-amber-300/80'
+              }`}>
+                {pendingNotice.user?.role === 'authority' || pendingNotice.user?.type === 'member'
+                  ? `Designation: ${pendingNotice.user?.designation || 'Authority / Committee Member'} (${pendingNotice.user?.society})`
+                  : `Unit: ${pendingNotice.user?.unitNumber} (${pendingNotice.user?.society})`
+                }
               </div>
             </div>
           )}

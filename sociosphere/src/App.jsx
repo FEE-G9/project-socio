@@ -34,7 +34,6 @@ import Crimes from "./pages/authority/Crimes";
 import Members from "./pages/authority/Members";
 import ManageEmergency from "./pages/authority/ManageEmergency";
 import ManageFees from "./pages/authority/ManageFees";
-import ManageExpenses from "./pages/authority/ManageExpenses";
 import AuthorityProfile from "./pages/authority/AuthorityProfile";
 import AdminFAQs from "./pages/authority/AdminFAQs";
 
@@ -219,7 +218,7 @@ function App() {
           <Route path="members" element={<Members />} />
           <Route path="emergency" element={<ManageEmergency />} />
           <Route path="fees" element={<ManageFees />} />
-          <Route path="expenses" element={<ManageExpenses />} />
+          <Route path="expenses" element={<Navigate to="/authority/fees" replace />} />
           <Route path="profile" element={<AuthorityProfile />} />
           <Route path="faqs" element={<AdminFAQs />} />
           <Route path="faq" element={<Navigate to="/authority/faqs" replace />} />

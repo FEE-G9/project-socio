@@ -9,7 +9,6 @@ import {
   Users,
   PhoneCall,
   Wallet,
-  TrendingDown,
   HelpCircle,
   MapPin,
   Megaphone
@@ -143,14 +142,9 @@ const AuthorityLayout = () => {
       icon: PhoneCall,
     },
     {
-      label: "Maintenance Fees",
+      label: "Finance & Accounts",
       href: "/authority/fees",
       icon: Wallet,
-    },
-    {
-      label: "Colony Expenses",
-      href: "/authority/expenses",
-      icon: TrendingDown,
     },
     {
       label: "Admin Profile",

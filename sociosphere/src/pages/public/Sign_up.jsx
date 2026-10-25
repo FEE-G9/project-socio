@@ -239,7 +239,7 @@ const SignUp = () => {
         ? formData.designation || formData.department
         : `Resident (${formData.occupancyType})`,
       password: formData.password,
-      status: isAuthority ? "Verified" : "Pending Approval"
+      status: "Pending Approval"
     });
 
     if (!result.success) {
@@ -247,21 +247,19 @@ const SignUp = () => {
       return;
     }
 
-    // If Citizen: Show Society Admin Request Screen
-    if (!isAuthority) {
-      setRegistrationSuccess({
-        name: formData.fullName.trim(),
-        society: formData.colony,
-        societyCode: societyCode,
-        block: formData.blockNumber,
-        unit: formData.houseOrFlatNo.trim(),
-        email: formData.email.trim()
-      });
-    } else {
-      // If Authority: direct verified login
-      login(result.user);
-      navigate("/authority/home");
-    }
+    // Show Society Approval Pending Screen for BOTH Citizen and Authority
+    setRegistrationSuccess({
+      name: formData.fullName.trim(),
+      society: formData.colony,
+      societyCode: societyCode,
+      block: formData.blockNumber,
+      unit: formData.houseOrFlatNo.trim(),
+      email: formData.email.trim(),
+      role: role,
+      designation: isAuthority
+        ? formData.designation || formData.department || "Executive Board Member"
+        : `Resident (${formData.occupancyType})`
+    });
   };
 
   return (
@@ -349,16 +347,20 @@ const SignUp = () => {
                 <CheckCircle2 size={44} />
               </div>
 
-              <span className="rounded-full bg-amber-400/20 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-amber-300 border border-amber-400/30">
-                Request Sent to Society Admin
+              <span className={`rounded-full px-3.5 py-1 text-xs font-black uppercase tracking-wider border ${
+                registrationSuccess.role === 'authority'
+                  ? 'bg-purple-500/20 text-purple-300 border-purple-400/40'
+                  : 'bg-amber-400/20 text-amber-300 border-amber-400/30'
+              }`}>
+                {registrationSuccess.role === 'authority' ? 'Administrative Privilege Request Sent' : 'Request Sent to Society Admin'}
               </span>
 
               <h2 className="mt-3 text-3xl font-black text-white">
-                Application Received!
+                {registrationSuccess.role === 'authority' ? 'Admin Application Queued!' : 'Application Received!'}
               </h2>
 
               <p className="mt-2 text-sm text-white/80 leading-relaxed max-w-md mx-auto">
-                Welcome <strong className="text-white font-bold">{registrationSuccess.name}</strong>! Your application to enter <strong className="text-emerald-400 font-bold">{registrationSuccess.society}</strong> ({registrationSuccess.societyCode}) has been dispatched to the society administration.
+                Welcome <strong className="text-white font-bold">{registrationSuccess.name}</strong>! Your application {registrationSuccess.role === 'authority' ? 'for administrative access to' : 'to enter'} <strong className="text-emerald-400 font-bold">{registrationSuccess.society}</strong> ({registrationSuccess.societyCode}) has been dispatched to the society board administration.
               </p>
 
               {/* DETAILS SUMMARY BOX */}
@@ -368,8 +370,10 @@ const SignUp = () => {
                   <span className="font-bold text-emerald-400">{registrationSuccess.society} ({registrationSuccess.societyCode})</span>
                 </div>
                 <div className="flex justify-between border-b border-white/10 pb-2">
-                  <span className="text-white/60">Residence Details:</span>
-                  <span className="font-semibold text-white">{registrationSuccess.block} - {registrationSuccess.unit}</span>
+                  <span className="text-white/60">{registrationSuccess.role === 'authority' ? 'Authority Role:' : 'Residence Details:'}</span>
+                  <span className="font-semibold text-white">
+                    {registrationSuccess.role === 'authority' ? registrationSuccess.designation : `${registrationSuccess.block} - ${registrationSuccess.unit}`}
+                  </span>
                 </div>
                 <div className="flex justify-between border-b border-white/10 pb-2">
                   <span className="text-white/60">Registered Email:</span>
@@ -379,13 +383,16 @@ const SignUp = () => {
                   <span className="text-white/60">Status:</span>
                   <span className="flex items-center gap-1 font-bold text-amber-300">
                     <Clock size={13} />
-                    Pending RWA Verification
+                    {registrationSuccess.role === 'authority' ? 'Pending Board Verification' : 'Pending RWA Verification'}
                   </span>
                 </div>
               </div>
 
               <div className="mt-5 rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-xs text-amber-200/90 text-left">
-                ℹ️ For resident safety, the society admin will verify your flat details before activating full account access.
+                {registrationSuccess.role === 'authority' 
+                  ? '🔒 For colony safety and governance, all administrative credentials must be verified and admitted by the existing RWA Board President before authority portal privileges are activated.'
+                  : 'ℹ️ For resident safety, the society admin will verify your flat details before activating full account access.'
+                }
               </div>
 
               <button

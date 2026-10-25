@@ -648,9 +648,13 @@ export const getUsers = (societyFilter) => {
 };
 
 export const saveUsers = (users) => {
-  localStorage.setItem('sociosphere_users', JSON.stringify(users));
-  window.dispatchEvent(new Event('sociosphere_users_updated'));
-  window.dispatchEvent(new Event('sociosphere_data_updated'));
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('sociosphere_users', JSON.stringify(users));
+  }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('sociosphere_users_updated'));
+    window.dispatchEvent(new Event('sociosphere_data_updated'));
+  }
 };
 
 export const getUserByEmail = (email) => {
@@ -696,11 +700,14 @@ export const authenticateUser = (identifier, password) => {
 
   // Check if pending verification by society admin
   if (foundUser.status === 'Pending Approval') {
+    const isAuth = foundUser.role === 'authority' || foundUser.type === 'member';
     return {
       success: false,
       isPending: true,
       user: foundUser,
-      error: `Your registration request for ${foundUser.society || foundUser.communityName} is currently awaiting Society Admin approval.`
+      error: isAuth
+        ? `Your administrative access request for ${foundUser.society || foundUser.communityName} is currently awaiting verification from the Society Board / RWA President.`
+        : `Your registration request for ${foundUser.society || foundUser.communityName} is currently awaiting Society Admin approval.`
     };
   }
 
@@ -731,12 +738,12 @@ export const registerUser = (userData) => {
     email: emailLower,
     password: userData.password || `${(userData.name || 'User').split(' ')[0]}@${userData.age || '2026'}#`,
     age: parseInt(userData.age, 10) || 30,
-    status: isAuthority ? 'Verified' : (userData.status || 'Pending Approval'),
+    status: userData.status || 'Pending Approval',
     type: userData.type || (isAuthority ? 'member' : 'resident'),
     role: isAuthority ? 'authority' : 'citizen',
     unitNumber: userData.unitNumber || `${userData.blockNumber || 'Block A'} - ${userData.houseOrFlatNo || 'Unit 1'}`,
     joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-    badges: isAuthority ? ['Committee Member'] : ['Verification In Progress']
+    badges: isAuthority ? ['Authority Request Pending'] : ['Verification In Progress']
   };
 
   const updated = [newUser, ...users];
@@ -761,12 +768,19 @@ export const approveUser = (userId) => {
   let approvedUser = null;
   const updated = users.map(user => {
     if (user.id === userId) {
+      const isAuth = user.role === 'authority' || user.type === 'member';
+      const updatedBadges = (user.badges || []).map(b => 
+        b.includes('Pending') || b.includes('Progress') 
+          ? (isAuth ? 'Committee Member' : 'Verified Resident') 
+          : b
+      );
+      if (updatedBadges.length === 0) {
+        updatedBadges.push(isAuth ? 'Committee Member' : 'Verified Resident');
+      }
       approvedUser = {
         ...user,
         status: 'Verified',
-        badges: (user.badges || []).map(b => 
-          b.includes('Pending') || b.includes('Progress') ? 'Verified Resident' : b
-        )
+        badges: updatedBadges
       };
       return approvedUser;
     }
