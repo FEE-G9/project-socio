@@ -32,13 +32,9 @@ import Analytics from "./pages/authority/Analytics";
 import Issues from "./pages/authority/Issues";
 import Crimes from "./pages/authority/Crimes";
 import Members from "./pages/authority/Members";
-import ManageLostFound from "./pages/authority/ManageLostFound";
-import ManageEvents from "./pages/authority/ManageEvents";
 import ManageEmergency from "./pages/authority/ManageEmergency";
 import ManageFees from "./pages/authority/ManageFees";
 import ManageExpenses from "./pages/authority/ManageExpenses";
-import AdminCommunity from "./pages/authority/AdminCommunity";
-import PostAnnouncement from "./pages/authority/PostAnnouncement";
 import AuthorityProfile from "./pages/authority/AuthorityProfile";
 import AdminFAQs from "./pages/authority/AdminFAQs";
 
@@ -221,13 +217,9 @@ function App() {
           <Route path="issues" element={<Issues />} />
           <Route path="crimes" element={<Crimes />} />
           <Route path="members" element={<Members />} />
-          <Route path="lost-found" element={<ManageLostFound />} />
-          <Route path="events" element={<ManageEvents />} />
           <Route path="emergency" element={<ManageEmergency />} />
           <Route path="fees" element={<ManageFees />} />
           <Route path="expenses" element={<ManageExpenses />} />
-          <Route path="community" element={<AdminCommunity />} />
-          <Route path="announcements" element={<PostAnnouncement />} />
           <Route path="profile" element={<AuthorityProfile />} />
           <Route path="faqs" element={<AdminFAQs />} />
           <Route path="faq" element={<Navigate to="/authority/faqs" replace />} />

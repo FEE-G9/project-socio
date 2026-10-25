@@ -18,15 +18,11 @@ import {
   Briefcase,
   Phone,
   Mail,
-  PackageSearch,
-  CalendarDays,
   PhoneCall,
-  Vote,
   HelpCircle,
   TrendingDown,
   Megaphone
 } from 'lucide-react';
-import StatCard from '../../components/ui/StatCard';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
@@ -38,7 +34,6 @@ import { getCrimes } from '../../data/mockCrimes';
 import { getUsers, approveUser, deleteUser } from '../../data/mockUsers';
 import { useAlert } from '../../context/AlertContext';
 import { useAuth } from '../../context/AuthContext';
-import { useLostFound } from '../../context/LostFoundContext';
 
 const TrendArrow = ({ direction = "up" }) => {
   const isUp = direction === "up";
@@ -69,9 +64,8 @@ const AdminHome = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { triggerAdminAlert } = useAlert();
-  const { items: lostFoundItems } = useLostFound();
 
-  const [activeModal, setActiveModal] = useState(null); // 'reports', 'announcement', 'logs', 'members'
+  const [activeModal, setActiveModal] = useState(null); // 'reports', 'redAlert'
   const [isLoading, setIsLoading] = useState(false);
   const [approvalToast, setApprovalToast] = useState(null);
   
@@ -164,10 +158,6 @@ const AdminHome = () => {
   const resolutionRate = totalIssues > 0 ? Math.round((resolvedIssues / totalIssues) * 100) : 100;
 
   const handleAction = (modalName) => {
-    if (modalName === 'announcement') {
-      navigate('/authority/announcements');
-      return;
-    }
     if (modalName === 'members') {
       navigate('/authority/members?tab=pending');
       return;
@@ -374,14 +364,14 @@ const AdminHome = () => {
             </section>
           )}
 
-          {/* ALL AUTHORITY MODULES (Admin Perspective) */}
+          {/* AUTHORITY OPERATIONAL MODULES */}
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                 Authority Operational Modules
               </h2>
               <span className="text-xs text-slate-500 dark:text-slate-400">
-                Comprehensive Administration Suite
+                Essential Administration Suite
               </span>
             </div>
             
@@ -420,30 +410,6 @@ const AdminHome = () => {
                   <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">Verify new resident applications and manage flat owner roster.</p>
                 </div>
                 <ChevronRight className="absolute bottom-5 right-5 text-purple-500 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" size={20} />
-              </Link>
-
-              {/* Lost & Found Custody Desk */}
-              <Link to="/authority/lost-found" className="group relative flex flex-col items-start justify-between p-5 rounded-2xl border transition-all duration-300 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/30 hover:-translate-y-1 hover:border-emerald-500/60 hover:shadow-md">
-                <div className="p-3 bg-emerald-600 text-white rounded-xl shadow-md shadow-emerald-600/40 mb-3 group-hover:scale-110 transition-transform">
-                  <PackageSearch size={24} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base mb-1">Lost & Found Custody Desk</h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">Gate custody lockers, resident claims verification & handover.</p>
-                </div>
-                <ChevronRight className="absolute bottom-5 right-5 text-emerald-600 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" size={20} />
-              </Link>
-
-              {/* Community Events & RSVPs */}
-              <Link to="/authority/events" className="group relative flex flex-col items-start justify-between p-5 rounded-2xl border transition-all duration-300 bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border-cyan-500/30 hover:-translate-y-1 hover:border-cyan-500/60 hover:shadow-md">
-                <div className="p-3 bg-cyan-600 text-white rounded-xl shadow-md shadow-cyan-600/40 mb-3 group-hover:scale-110 transition-transform">
-                  <CalendarDays size={24} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base mb-1">Events & RSVP Operations</h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">Publish festivals, export gate attendance rosters & volunteers.</p>
-                </div>
-                <ChevronRight className="absolute bottom-5 right-5 text-cyan-600 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" size={20} />
               </Link>
 
               {/* Emergency Command Center */}
@@ -583,40 +549,40 @@ const AdminHome = () => {
                 </button>
 
                 <button 
-                  onClick={() => navigate('/authority/events')}
+                  onClick={() => navigate('/authority/emergency')}
                   className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-cyan-50 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-400 rounded-lg group-hover:bg-cyan-100 dark:group-hover:bg-cyan-500/20 transition-colors">
-                      <CalendarDays size={18} />
+                    <div className="p-2 bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 rounded-lg group-hover:bg-rose-100 dark:group-hover:bg-rose-500/20 transition-colors">
+                      <PhoneCall size={18} />
                     </div>
-                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Schedule Colony Event</span>
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Emergency Command Center</span>
                   </div>
                   <ChevronRight size={16} className="text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300" />
                 </button>
 
                 <button 
-                  onClick={() => navigate('/authority/lost-found')}
+                  onClick={() => navigate('/authority/fees')}
                   className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-lg group-hover:bg-emerald-100 dark:group-hover:bg-emerald-500/20 transition-colors">
-                      <PackageSearch size={18} />
+                    <div className="p-2 bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 rounded-lg group-hover:bg-amber-100 dark:group-hover:bg-amber-500/20 transition-colors">
+                      <Wallet size={18} />
                     </div>
-                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Log Guard Custody Item</span>
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Maintenance Collections</span>
                   </div>
                   <ChevronRight size={16} className="text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300" />
                 </button>
 
                 <button 
-                  onClick={() => navigate('/authority/community')}
+                  onClick={() => navigate('/authority/expenses')}
                   className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400 rounded-lg group-hover:bg-purple-100 dark:group-hover:bg-purple-500/20 transition-colors">
-                      <Vote size={18} />
+                    <div className="p-2 bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400 rounded-lg group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-colors">
+                      <TrendingDown size={18} />
                     </div>
-                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Create Colony Poll</span>
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Colony Expense Ledger</span>
                   </div>
                   <ChevronRight size={16} className="text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300" />
                 </button>
