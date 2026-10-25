@@ -91,8 +91,8 @@ const quickActions = [
     className: "action-purple",
   },
   {
-    title: "Maintenance",
-    description: "Pay dues & view ledger",
+    title: "Expenses",
+    description: "Society income & expense ledger",
     icon: CreditCard,
     className: "action-yellow",
   },
@@ -280,8 +280,8 @@ export default function Home() {
       return;
     }
 
-    if (title === "Maintenance") {
-      navigate("/citizen/fees");
+    if (title === "Expenses") {
+      navigate("/citizen/expenses");
       return;
     }
 
@@ -532,10 +532,6 @@ export default function Home() {
     ).length;
 
   const userSociety = user?.society || user?.communityName || 'Gandhi Colony';
-  const userSocietyCode = user?.societyCode || (
-    userSociety === 'Gandhi Colony' ? 'GC-101' :
-    userSociety === 'Shayam Nagar' ? 'SN-202' : 'DV-303'
-  );
 
   const displayName = user?.name && !user.name.includes("@")
     ? user.name.split(" ")[0]
@@ -586,9 +582,6 @@ export default function Home() {
             <span className="location-divider" aria-hidden="true">|</span>
             <MapPin size={16} className="location-pin-icon text-emerald-500" />
             <span className="community-name-text font-bold">{userSociety}</span>
-            <span className="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30">
-              {userSocietyCode}
-            </span>
             <span className="online-dot" title="Colony live" />
           </div>
         </div>

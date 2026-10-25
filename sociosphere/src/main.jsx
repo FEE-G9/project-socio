@@ -10,6 +10,7 @@ import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { AlertProvider } from "./context/AlertContext.jsx";
 import { SocietyProvider } from "./context/SocietyContext.jsx";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
+import { FAQProvider } from "./context/FAQContext.jsx";
 import { sanitizeLocalStorage } from "./utils/storageSanitizer.js";
 
 import "./index.css";
@@ -26,7 +27,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <AlertProvider>
               <SocietyProvider>
                 <LanguageProvider>
-                  <App />
+                  <FAQProvider>
+                    <App />
+                  </FAQProvider>
                 </LanguageProvider>
               </SocietyProvider>
             </AlertProvider>
