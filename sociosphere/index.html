@@ -22,6 +22,21 @@
     <div id="google_translate_element"></div>
     <div id="root"></div>
     <script type="text/javascript">
+      // Guarantee English default on initial boot or when English is selected
+      try {
+        var savedLang = localStorage.getItem("sociosphere_language");
+        if (!savedLang || savedLang === "en") {
+          var h = window.location.hostname;
+          var p = ["/", window.location.pathname];
+          var doms = ["", h, "." + h];
+          doms.forEach(function(d) {
+            p.forEach(function(path) {
+              document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=" + path + ";" + (d ? " domain=" + d + ";" : "");
+            });
+          });
+        }
+      } catch(e) {}
+
       function googleTranslateElementInit() {
         if (window.google && window.google.translate) {
           new window.google.translate.TranslateElement({

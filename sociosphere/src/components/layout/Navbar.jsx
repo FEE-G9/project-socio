@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Menu,
   X,
@@ -13,6 +13,7 @@ import {
   MapPin,
   Radio,
   Globe,
+  Check,
   HelpCircle,
 } from "lucide-react";
 
@@ -20,6 +21,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
+
 
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
@@ -46,6 +48,8 @@ const Navbar = ({
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [sosModalOpen, setSosModalOpen] = useState(false);
+  const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const languageMenuRef = useRef(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,7 +58,23 @@ const Navbar = ({
     theme,
     toggleTheme,
   } = useTheme();
-  const { language, setLanguage, languages } = useLanguage();
+  const { language, setLanguage, languages, currentLanguageObj } = useLanguage();
+
+  const getLanguageLabel = (lang) => lang?.nativeName || lang?.name || lang?.uppercase || "English";
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (languageMenuRef.current && !languageMenuRef.current.contains(event.target)) {
+        setLanguageMenuOpen(false);
+      }
+    };
+    if (languageMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [languageMenuOpen]);
 
   const isActive = (href) => {
     if (href === "/") {
@@ -87,7 +107,6 @@ const Navbar = ({
   const profilePath = location.pathname.startsWith("/authority")
     ? "/authority/profile"
     : "/citizen/profile";
-  const isCitizenHome = location.pathname === "/citizen/home";
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-md transition-colors duration-200 dark:border-slate-800 dark:bg-slate-950/95">
@@ -115,29 +134,6 @@ const Navbar = ({
             </span>
           </button>
         )}
-
-        {/* DESKTOP NAVIGATION - COMMENTED OUT AS REQUESTED */}
-        {/* <nav className="hidden items-center gap-1 md:flex">
-          {links.map((link) => {
-            const active = isActive(link.href);
-
-            return (
-              <button
-                key={link.href}
-                onClick={() =>
-                  handleNavigation(link.href)
-                }
-                className={`rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 ${
-                  active
-                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
-                }`}
-              >
-                {link.label}
-              </button>
-            );
-          })}
-        </nav> */}
 
         {/* RIGHT SIDE */}
         <div className="hidden items-center gap-2 md:flex">
@@ -172,6 +168,61 @@ const Navbar = ({
               <Moon size={19} />
             )}
           </button>
+
+          {/* LANGUAGE PICKER DROPDOWN */}
+          <div className="relative" ref={languageMenuRef}>
+            <button
+              type="button"
+              onClick={() => setLanguageMenuOpen((prev) => !prev)}
+              className="group flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-100 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-200 dark:hover:bg-slate-800"
+              aria-label="Select language"
+              aria-expanded={languageMenuOpen}
+              title={`Selected language: ${getLanguageLabel(currentLanguageObj)}`}
+            >
+              <span className="text-lg leading-none select-none">{currentLanguageObj?.flag || "🇬🇧"}</span>
+              <span className="text-sm font-bold tracking-wide text-slate-700 dark:text-slate-200 select-none">
+                {getLanguageLabel(currentLanguageObj)}
+              </span>
+              <span className="text-[10px] text-slate-700 dark:text-slate-300 select-none">
+                {languageMenuOpen ? "▲" : "▼"}
+              </span>
+            </button>
+
+            {languageMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-800 dark:bg-slate-900 z-50">
+                <div className="max-h-72 overflow-y-auto divide-y-0 py-0.5">
+                  {languages.map((lang) => {
+                    const isSelected = language === lang.code;
+                    return (
+                      <button
+                        key={lang.code}
+                        type="button"
+                        onClick={() => {
+                          setLanguage(lang.code);
+                          setLanguageMenuOpen(false);
+                        }}
+                        className={`group flex w-full items-center justify-between px-3.5 py-2.5 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                          isSelected ? "bg-slate-50/80 dark:bg-slate-800/50" : ""
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg leading-none select-none">{lang.flag}</span>
+                          <span className={`text-xs font-bold tracking-wider ${
+                            isSelected ? "text-slate-900 dark:text-white" : "text-slate-700 dark:text-slate-300"
+                          }`}>
+                            {getLanguageLabel(lang)}
+                          </span>
+                        </div>
+                        {isSelected && (
+                          <Check size={16} className="text-emerald-600 dark:text-emerald-400 stroke-[3] shrink-0" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* NOTIFICATIONS */}
           {showNotifications && (
@@ -302,7 +353,6 @@ const Navbar = ({
                   Profile
                 </button>
 
-                {/* Citizen Dashboard is currently disabled. */}
                 {location.pathname.startsWith('/authority') && (
                   <button
                     onClick={() => handleProfileNavigation("/authority/home")}
@@ -371,27 +421,7 @@ const Navbar = ({
       {mobileOpen && (
         <div className="border-t border-slate-200 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-950 md:hidden">
 
-          <nav className="space-y-1">
-
-            {/* {links.map((link) => {
-              const active = isActive(link.href);
-
-              return (
-                <button
-                  key={link.href}
-                  onClick={() =>
-                    handleNavigation(link.href)
-                  }
-                  className={`block w-full rounded-xl px-4 py-3 text-left text-sm font-medium transition-all duration-200 ${
-                    active
-                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                      : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-                  }`}
-                >
-                  {link.label}
-                </button>
-              );
-            })} */}
+          <nav className="space-y-2">
 
             {/* MOBILE SOS BUTTON */}
             {!location.pathname.startsWith('/authority') && (
@@ -409,29 +439,40 @@ const Navbar = ({
 
             {/* MOBILE LANGUAGE */}
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/60">
-              <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                <Globe size={14} className="text-emerald-500" />
-                <span>Language / भाषा / ਭਾਸ਼ਾ</span>
+              <div className="mb-2 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-2">
+                  <Globe size={14} className="text-emerald-500" />
+                  <span>Language / भाषा</span>
+                </div>
+                <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                  {currentLanguageObj?.flag} {getLanguageLabel(currentLanguageObj)}
+                </span>
               </div>
-              <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1">
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    type="button"
-                    onClick={() => {
-                      setLanguage(lang.code);
-                      setMobileOpen(false);
-                    }}
-                    className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold transition-all ${
-                      language === lang.code
-                        ? "bg-emerald-500 text-white font-bold"
-                        : "bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300"
-                    }`}
-                  >
-                    <span>{lang.flag}</span>
-                    <span className="truncate">{lang.nativeName}</span>
-                  </button>
-                ))}
+              <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+                {languages.map((lang) => {
+                  const isSelected = language === lang.code;
+                  return (
+                    <button
+                      key={lang.code}
+                      type="button"
+                      onClick={() => {
+                        setLanguage(lang.code);
+                        setMobileOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-bold transition-all ${
+                        isSelected
+                          ? "bg-emerald-500 text-white font-extrabold shadow-sm"
+                          : "bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-200"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-base leading-none select-none">{lang.flag}</span>
+                        <span>{getLanguageLabel(lang)}</span>
+                      </div>
+                      {isSelected && <Check size={15} className="text-white stroke-[3] shrink-0" />}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
