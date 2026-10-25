@@ -8,8 +8,10 @@ import {
   ShieldAlert,
   User,
   Sparkles,
+  PackageSearch,
   Users,
   PhoneCall,
+  HelpCircle,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
@@ -78,9 +80,19 @@ const CitizenLayout = () => {
       icon: ShieldAlert,
     },
     {
+      label: "Lost & Found",
+      href: "/citizen/lost-found",
+      icon: PackageSearch,
+    },
+    {
       label: "Profile",
       href: "/citizen/profile",
       icon: User,
+    },
+    {
+      label: "Help & FAQs",
+      href: "/citizen/faqs",
+      icon: HelpCircle,
     },
   ];
 

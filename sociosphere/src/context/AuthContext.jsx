@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { ReactReduxContext } from 'react-redux';
 import { setProfile, updateProfile as updateReduxProfile, clearProfile } from '../store/slices/profileSlice';
 import { getColonies } from "../data/mockColonies";
 
@@ -62,7 +62,8 @@ export const AuthProvider = ({ children }) => {
     return null;
   });
 
-  const dispatch = useDispatch();
+  const reduxContext = useContext(ReactReduxContext);
+  const dispatch = reduxContext?.store?.dispatch || (() => {});
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('sociosphere_is_auth') !== 'false';
