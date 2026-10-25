@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -7,19 +7,64 @@ import {
   User,
   Sparkles,
   Users,
+  PackageSearch,
+  CalendarDays,
+  PhoneCall,
+  Wallet,
+  TrendingDown,
+  Vote,
+  Megaphone,
+  HelpCircle,
+  MapPin
 } from "lucide-react";
 
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
 import { useAuth } from "../../context/AuthContext";
+import { useWeather } from "../../hooks/useWeather";
+import { getAnnouncements } from "../../data/mockAnnouncements";
+import { getUsers } from "../../data/mockUsers";
 import ScrollReveal from "../ui/ScrollReveal";
 import AdminSOSReceiver from "../ui/AdminSOSReceiver";
+
+const getWeatherEmoji = (condition) => {
+  switch (condition?.toLowerCase()) {
+    case "rain":
+    case "drizzle":
+      return "🌧️";
+    case "clouds":
+      return "☁️";
+    case "clear":
+      return "☀️";
+    case "thunderstorm":
+      return "⛈️";
+    case "snow":
+      return "❄️";
+    case "mist":
+    case "smoke":
+    case "haze":
+    case "fog":
+      return "🌫️";
+    default:
+      return "🌤️";
+  }
+};
 
 const AuthorityLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const weather = useWeather();
+
+  const adminSociety = user?.society || user?.communityName || 'Gandhi Colony';
+  const adminSocietyCode = user?.societyCode || (
+    adminSociety === 'Gandhi Colony' ? 'GC-101' :
+    adminSociety === 'Shayam Nagar' ? 'SN-202' : 'DV-303'
+  );
+
+  const [announcements, setAnnouncements] = useState([]);
+  const [usersList, setUsersList] = useState([]);
   
   const [showWelcome, setShowWelcome] = useState(
     () => sessionStorage.getItem("sociosphere_show_welcome") === "true"
@@ -37,6 +82,42 @@ const AuthorityLayout = () => {
     }
   }, [showWelcome]);
 
+  useEffect(() => {
+    const loadData = () => {
+      try {
+        setAnnouncements(getAnnouncements() || []);
+      } catch { /* ignore */ }
+      try {
+        setUsersList(getUsers() || []);
+      } catch { /* ignore */ }
+    };
+    loadData();
+    window.addEventListener("sociosphere_data_updated", loadData);
+    window.addEventListener("sociosphere_users_updated", loadData);
+    window.addEventListener("storage", loadData);
+    return () => {
+      window.removeEventListener("sociosphere_data_updated", loadData);
+      window.removeEventListener("sociosphere_users_updated", loadData);
+      window.removeEventListener("storage", loadData);
+    };
+  }, []);
+
+  const pendingRequestsCount = useMemo(() => {
+    return usersList.filter(u => 
+      (u.society || u.communityName || '').toLowerCase() === adminSociety.toLowerCase() &&
+      u.status === 'Pending Approval'
+    ).length;
+  }, [usersList, adminSociety]);
+
+  const latestNotice = useMemo(() => {
+    const matching = announcements.filter(a => {
+      if (!a) return false;
+      const s = (a.society || a.communityName || a.colony || a.colonyName || '').toLowerCase();
+      return s === adminSociety.toLowerCase() || (adminSociety.toLowerCase() === 'gandhi colony' && (!s || a.societyCode === 'GC-101'));
+    });
+    return matching[0]?.title || `Welcome to ${adminSociety} Authority Portal — All Civic Systems Synchronized.`;
+  }, [announcements, adminSociety]);
+
   const links = [
     {
       label: "Admin Home",
@@ -44,24 +125,65 @@ const AuthorityLayout = () => {
       icon: LayoutDashboard,
     },
     {
-      label: "Issues",
+      label: "Issues Tracker",
       href: "/authority/issues",
       icon: AlertCircle,
     },
     {
-      label: "Crimes",
+      label: "Crime & Security",
       href: "/authority/crimes",
       icon: ShieldAlert,
     },
     {
-      label: "Directory",
+      label: "Resident Directory",
       href: "/authority/members",
       icon: Users,
+      badge: pendingRequestsCount > 0 ? `${pendingRequestsCount}` : null,
     },
     {
-      label: "Profile",
+      label: "Lost & Found Custody",
+      href: "/authority/lost-found",
+      icon: PackageSearch,
+    },
+    {
+      label: "Events & RSVPs",
+      href: "/authority/events",
+      icon: CalendarDays,
+    },
+    {
+      label: "Emergency Dispatch",
+      href: "/authority/emergency",
+      icon: PhoneCall,
+    },
+    {
+      label: "Maintenance Fees",
+      href: "/authority/fees",
+      icon: Wallet,
+    },
+    {
+      label: "Colony Expenses",
+      href: "/authority/expenses",
+      icon: TrendingDown,
+    },
+    {
+      label: "Community & Polls",
+      href: "/authority/community",
+      icon: Vote,
+    },
+    {
+      label: "Announcements",
+      href: "/authority/announcements",
+      icon: Megaphone,
+    },
+    {
+      label: "Admin Profile",
       href: "/authority/profile",
       icon: User,
+    },
+    {
+      label: "SOP Guidelines",
+      href: "/authority/faqs",
+      icon: HelpCircle,
     },
   ];
 
@@ -88,6 +210,47 @@ const AuthorityLayout = () => {
         <Sidebar links={links} />
 
         <main className="min-w-0 flex-1 pb-20 md:pb-0">
+          {/* DECORATIVE TOP STATUS BAR & MARQUEE TICKER (Matching Citizen Side) */}
+          <div className="border-b border-slate-200/80 bg-white/70 px-6 py-2.5 backdrop-blur-md dark:border-slate-800/80 dark:bg-[#0D1524]/70 sm:px-8 lg:px-10">
+            <div className="mx-auto flex max-w-[1440px] flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+              
+              {/* Weather & Society Badge */}
+              <div className="flex items-center gap-3 text-xs flex-wrap">
+                <span 
+                  className="flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 font-bold text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60"
+                  title={`Current weather in ${adminSociety}: ${weather.description || "Clear sky"}, ${weather.temp ?? 26}°C`}
+                >
+                  <span className="text-sm">{getWeatherEmoji(weather.condition)}</span>
+                  <span>{weather.temp != null ? `${weather.temp}°C` : "26°C"}</span>
+                  <span className="text-slate-400 font-normal">({weather.description || weather.condition || "Clear sky"})</span>
+                </span>
+
+                <span className="text-slate-300 dark:text-slate-700" aria-hidden="true">|</span>
+
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                  <MapPin size={14} className="text-emerald-500" />
+                  <span>{adminSociety}</span>
+                  <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                    {adminSocietyCode}
+                  </span>
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse ml-0.5" title="Colony live sync" />
+                </div>
+              </div>
+
+              {/* Marquee Ticker */}
+              <div className="flex items-center gap-2 overflow-hidden text-xs max-w-md sm:max-w-lg">
+                <span className="flex items-center gap-1 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider shrink-0 border border-amber-500/30">
+                  <Megaphone size={11} />
+                  Notice
+                </span>
+                <span className="truncate font-medium text-slate-600 dark:text-slate-300 text-xs">
+                  {latestNotice}
+                </span>
+              </div>
+
+            </div>
+          </div>
+
           <div className="mx-auto max-w-[1440px] px-6 py-6 sm:px-8 lg:px-10">
             <ScrollReveal key={location.pathname} className="w-full">
               <Outlet />
@@ -96,7 +259,7 @@ const AuthorityLayout = () => {
         </main>
       </div>
 
-      <BottomNav links={links} />
+      <BottomNav links={links.slice(0, 5)} />
 
       {showWelcome && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-950/35 p-4 backdrop-blur-md">
@@ -116,7 +279,7 @@ const AuthorityLayout = () => {
                   {user?.name?.split(" ")[0] || "Admin"}!
                 </p>
                 <p className="welcome-copy welcome-copy-delay-3 mt-4 max-w-xs text-base leading-7 text-slate-600 dark:text-slate-300">
-                  Welcome to <strong className="text-slate-900 dark:text-white">{user?.communityName || "your community"}</strong>
+                  Welcome to <strong className="text-slate-900 dark:text-white">{adminSociety}</strong>
                 </p>
               </div>
 
