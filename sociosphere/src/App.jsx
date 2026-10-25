@@ -35,7 +35,6 @@ import Members from "./pages/authority/Members";
 import ManageEmergency from "./pages/authority/ManageEmergency";
 import ManageFees from "./pages/authority/ManageFees";
 import AuthorityProfile from "./pages/authority/AuthorityProfile";
-import AdminFAQs from "./pages/authority/AdminFAQs";
 
 import RedAlertOverlay from "./components/ui/RedAlertOverlay";
 import BackToTop from "./components/ui/BackToTop";
@@ -220,8 +219,8 @@ function App() {
           <Route path="fees" element={<ManageFees />} />
           <Route path="expenses" element={<Navigate to="/authority/fees" replace />} />
           <Route path="profile" element={<AuthorityProfile />} />
-          <Route path="faqs" element={<AdminFAQs />} />
-          <Route path="faq" element={<Navigate to="/authority/faqs" replace />} />
+          <Route path="faqs" element={<Navigate to="/authority/home" replace />} />
+          <Route path="faq" element={<Navigate to="/authority/home" replace />} />
         </Route>
 
         {/* ================= 404 / FALLBACK ================= */}

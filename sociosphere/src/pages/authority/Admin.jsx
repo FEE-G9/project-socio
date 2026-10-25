@@ -19,7 +19,6 @@ import {
   Phone,
   Mail,
   PhoneCall,
-  HelpCircle,
   TrendingDown,
   Megaphone
 } from 'lucide-react';
@@ -577,19 +576,6 @@ const AdminHome = () => {
                       <Wallet size={18} />
                     </div>
                     <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Finance & Maintenance Hub</span>
-                  </div>
-                  <ChevronRight size={16} className="text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300" />
-                </button>
-
-                <button 
-                  onClick={() => navigate('/authority/faqs')}
-                  className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 rounded-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-500/20 transition-colors">
-                      <HelpCircle size={18} />
-                    </div>
-                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">RWA Governance Guidelines</span>
                   </div>
                   <ChevronRight size={16} className="text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300" />
                 </button>

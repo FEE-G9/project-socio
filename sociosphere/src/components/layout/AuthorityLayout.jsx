@@ -9,7 +9,6 @@ import {
   Users,
   PhoneCall,
   Wallet,
-  HelpCircle,
   MapPin,
   Megaphone
 } from "lucide-react";
@@ -150,11 +149,6 @@ const AuthorityLayout = () => {
       label: "Admin Profile",
       href: "/authority/profile",
       icon: User,
-    },
-    {
-      label: "SOP Guidelines",
-      href: "/authority/faqs",
-      icon: HelpCircle,
     },
   ];
 
