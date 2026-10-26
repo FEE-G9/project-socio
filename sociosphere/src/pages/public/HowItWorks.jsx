@@ -358,7 +358,7 @@ function HowItWorks() {
               >
 
                 <source
-                  src="/Create_account_final.mp4"
+                  src="\Create_account_final.mp4"
                   type="video/mp4"
                 />
 
