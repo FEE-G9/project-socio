@@ -16,6 +16,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import ScrollReveal from "../../components/ui/ScrollReveal";
 
 const PreferenceRow = ({ icon: Icon, title, description, action }) => (
@@ -50,7 +51,7 @@ export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [language, setLanguage] = useState("English (US)");
+  const { language, setLanguage, languages } = useLanguage();
 
   const handleLogout = () => {
     logout();
@@ -160,9 +161,12 @@ export default function Settings() {
             title="Language"
             description="Choose your preferred language"
             action={
-              <select value={language} onChange={(event) => setLanguage(event.target.value)} className="max-w-[130px] rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200" aria-label="Language">
-                <option>English (US)</option>
-                <option>Hindi</option>
+              <select value={language} onChange={(event) => setLanguage(event.target.value)} className="max-w-[150px] rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200" aria-label="Language">
+                {languages.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.flag} {lang.nativeName || lang.name}
+                  </option>
+                ))}
               </select>
             }
             />

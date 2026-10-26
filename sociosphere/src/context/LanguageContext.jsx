@@ -1,0 +1,516 @@
+import React, { createContext, useContext, useState, useEffect } from "react";
+
+export const LANGUAGES = [
+  { code: "en", name: "English", uppercase: "ENGLISH", nativeName: "English", flag: "🇬🇧" },
+  { code: "hi", name: "Hindi", uppercase: "HINDI", nativeName: "हिन्दी", flag: "🇮🇳" },
+  { code: "fr", name: "French", uppercase: "FRANÇAIS", nativeName: "Français", flag: "🇫🇷" },
+  { code: "mr", name: "Marathi", uppercase: "MARATHI", nativeName: "मराठी", flag: "🇮🇳" },
+  { code: "es", name: "Spanish", uppercase: "ESPAÑOL", nativeName: "Español", flag: "🇪🇸" },
+  { code: "it", name: "Italian", uppercase: "ITALIANO", nativeName: "Italiano", flag: "🇮🇹" },
+  { code: "pa", name: "Punjabi", uppercase: "PUNJABI", nativeName: "ਪੰਜਾਬੀ", flag: "🇮🇳" },
+  { code: "de", name: "German", uppercase: "DEUTSCH", nativeName: "Deutsch", flag: "🇩🇪" },
+  { code: "bn", name: "Bengali", uppercase: "BENGALI", nativeName: "বাংলা", flag: "🇮🇳" },
+  { code: "ta", name: "Tamil", uppercase: "TAMIL", nativeName: "தமிழ்", flag: "🇮🇳" },
+  { code: "te", name: "Telugu", uppercase: "TELUGU", nativeName: "తెలుగు", flag: "🇮🇳" },
+  { code: "gu", name: "Gujarati", uppercase: "GUJARATI", nativeName: "ગુજરાતી", flag: "🇮🇳" },
+  { code: "ur", name: "Urdu", uppercase: "URDU", nativeName: "اردو", flag: "🇵🇰" },
+  { code: "ar", name: "Arabic", uppercase: "ARABIC", nativeName: "العربية", flag: "🇸🇦" },
+  { code: "zh", name: "Chinese", uppercase: "CHINESE", nativeName: "中文", flag: "🇨🇳" },
+  { code: "ja", name: "Japanese", uppercase: "JAPANESE", nativeName: "日本語", flag: "🇯🇵" },
+  { code: "ru", name: "Russian", uppercase: "RUSSIAN", nativeName: "Русский", flag: "🇷🇺" },
+  { code: "pt", name: "Portuguese", uppercase: "PORTUGUÊS", nativeName: "Português", flag: "🇧🇷" },
+];
+
+export const TRANSLATIONS = {
+  en: {
+    home: "Home",
+    dashboard: "Dashboard",
+    events: "Events",
+    communityHub: "Community Hub",
+    emergency: "Emergency",
+    reportIssue: "Report Issue",
+    reportCrime: "Report Crime",
+    profile: "Profile",
+    settings: "Settings",
+    announcements: "Announcements",
+    maintenance: "Maintenance",
+    sosEmergency: "SOS EMERGENCY",
+    welcomeTitle: "A better neighbourhood starts with you",
+    quickCivicActions: "Quick Civic Actions",
+    oneTapUtilities: "One-tap resident utilities",
+    notice: "Notice",
+    urgent: "IMPORTANT",
+    viewAll: "View all",
+    currentWeather: "Current Weather",
+    humidity: "Humidity",
+    wind: "Wind",
+    pressure: "Pressure",
+    clouds: "Clouds",
+    language: "Language",
+    appearance: "Appearance",
+    notifications: "Notifications",
+    goodMorning: "Good morning",
+    goodAfternoon: "Good afternoon",
+    goodEvening: "Good evening",
+    goodNight: "Good night",
+    reportIssueDesc: "Pothole, leak, lights, garbage",
+    reportCrimeDesc: "Security alert & guard dispatch",
+    emergencyDesc: "Police, ambulance, fire helplines",
+    communityHubDesc: "Resident polls, clubs, rides",
+    maintenanceDesc: "Pay dues & view ledger",
+    totalIssues: "Total issues",
+    resolved: "Resolved",
+    activeIssues: "Active issues",
+    priorityAlerts: "Priority alerts",
+    signOut: "Sign out",
+  },
+  hi: {
+    home: "होम",
+    dashboard: "डैशबोर्ड",
+    events: "आयोजन",
+    communityHub: "कम्युनिटी हब",
+    emergency: "आपातकालीन",
+    reportIssue: "समस्या रिपोर्ट करें",
+    reportCrime: "अपराध रिपोर्ट करें",
+    profile: "प्रोफ़ाइल",
+    settings: "सेटिंग्स",
+    announcements: "घोषणाएं",
+    maintenance: "रखरखाव",
+    sosEmergency: "एसओएस आपातकाल",
+    welcomeTitle: "एक बेहतर पड़ोस आपसे शुरू होता है",
+    quickCivicActions: "त्वरित नागरिक कार्य",
+    oneTapUtilities: "एक-टैप निवासी सुविधाएं",
+    notice: "सूचना",
+    urgent: "महत्वपूर्ण",
+    viewAll: "सभी देखें",
+    currentWeather: "वर्तमान मौसम",
+    humidity: "आर्द्रता",
+    wind: "हवा",
+    pressure: "दबाव",
+    clouds: "बादल",
+    language: "भाषा",
+    appearance: "दिखावट",
+    notifications: "सूचनाएं",
+    goodMorning: "शुभ प्रभात",
+    goodAfternoon: "शुभ दोपहर",
+    goodEvening: "शुभ संध्या",
+    goodNight: "शुभ रात्रि",
+    reportIssueDesc: "गड्ढे, रिसाव, लाइटें, कचरा",
+    reportCrimeDesc: "सुरक्षा अलर्ट और गार्ड सहायता",
+    emergencyDesc: "पुलिस, एम्बुलेंस, फायर हेल्पलाइन",
+    communityHubDesc: "निवासी पोल, क्लब और समूह",
+    maintenanceDesc: "बकाया भुगतान करें और बहीखाता देखें",
+    totalIssues: "कुल समस्याएं",
+    resolved: "समाधान हुआ",
+    activeIssues: "सक्रिय समस्याएं",
+    priorityAlerts: "प्राथमिकता अलर्ट",
+    signOut: "साइन आउट",
+  },
+  fr: {
+    home: "Accueil",
+    dashboard: "Tableau de bord",
+    events: "Événements",
+    communityHub: "Communauté",
+    emergency: "Urgence",
+    reportIssue: "Signaler un Problème",
+    reportCrime: "Signaler un Crime",
+    profile: "Profil",
+    settings: "Paramètres",
+    announcements: "Annonces",
+    maintenance: "Maintenance",
+    sosEmergency: "SOS URGENCE",
+    welcomeTitle: "Un meilleur quartier commence avec vous",
+    quickCivicActions: "Actions Civiques Rapides",
+    oneTapUtilities: "Services résidents en un clic",
+    notice: "Avis",
+    urgent: "IMPORTANT",
+    viewAll: "Voir tout",
+    currentWeather: "Météo Actuelle",
+    humidity: "Humidité",
+    wind: "Vent",
+    pressure: "Pression",
+    clouds: "Nuages",
+    language: "Langue",
+    appearance: "Apparence",
+    notifications: "Notifications",
+    goodMorning: "Bonjour",
+    goodAfternoon: "Bon après-midi",
+    goodEvening: "Bonsoir",
+    goodNight: "Bonne nuit",
+    reportIssueDesc: "Nids-de-poule, fuites, lumières, déchets",
+    reportCrimeDesc: "Alerte de sécurité et envoi de gardes",
+    emergencyDesc: "Police, ambulance, pompiers",
+    communityHubDesc: "Sondages des résidents, clubs",
+    maintenanceDesc: "Payer les cotisations et voir le grand livre",
+    totalIssues: "Total des problèmes",
+    resolved: "Résolu",
+    activeIssues: "Problèmes actifs",
+    priorityAlerts: "Alertes prioritaires",
+    signOut: "Déconnexion",
+  },
+  mr: {
+    home: "मुख्यपृष्ठ",
+    dashboard: "डॅशबोर्ड",
+    events: "कार्यक्रम",
+    communityHub: "कम्युनिटी हब",
+    emergency: "तातडीची मदत",
+    reportIssue: "समस्या नोंदवा",
+    reportCrime: "गुन्ह्याची तक्रार",
+    profile: "प्रोफाइल",
+    settings: "सेटिंग्ज",
+    announcements: "घोषणा",
+    maintenance: "देखभाल",
+    sosEmergency: "SOS आणीबाणी",
+    welcomeTitle: "एक चांगला परिसर तुमच्यापासून सुरू होतो",
+    quickCivicActions: "त्वरित नागरिक कृती",
+    oneTapUtilities: "नागरिक सुविधा एका क्लिकवर",
+    notice: "सूचना",
+    urgent: "महत्त्वाचे",
+    viewAll: "सर्व पहा",
+    currentWeather: "सध्याचे हवामान",
+    humidity: "आर्द्रता",
+    wind: "वारा",
+    pressure: "हवेचा दाब",
+    clouds: "ढग",
+    language: "भाषा",
+    appearance: "दिसणे",
+    notifications: "सूचना",
+    goodMorning: "शुभ प्रभात",
+    goodAfternoon: "शुभ दुपार",
+    goodEvening: "शुभ संध्याकाळ",
+    goodNight: "शुभ रात्री",
+    reportIssueDesc: "खड्डे, गळती, दिवे, कचरा",
+    reportCrimeDesc: "सुरक्षा इशारा आणि रक्षक मदत",
+    emergencyDesc: "पोलीस, रुग्णवाहिका, अग्निशामक",
+    communityHubDesc: "नागरिक मतदान, क्लब आणि गट",
+    maintenanceDesc: "शुल्क भरा आणि खाते पहा",
+    totalIssues: "एकूण समस्या",
+    resolved: "निकाली काढले",
+    activeIssues: "सक्रिय समस्या",
+    priorityAlerts: "प्राधान्य सूचना",
+    signOut: "साइन आउट",
+  },
+  es: {
+    home: "Inicio",
+    dashboard: "Panel",
+    events: "Eventos",
+    communityHub: "Comunidad",
+    emergency: "Emergencia",
+    reportIssue: "Reportar Problema",
+    reportCrime: "Reportar Delito",
+    profile: "Perfil",
+    settings: "Configuración",
+    announcements: "Anuncios",
+    maintenance: "Mantenimiento",
+    sosEmergency: "SOS EMERGENCIA",
+    welcomeTitle: "Un mejor vecindario comienza contigo",
+    quickCivicActions: "Acciones Cívicas Rápidas",
+    oneTapUtilities: "Utilidades para residentes en un toque",
+    notice: "Aviso",
+    urgent: "IMPORTANTE",
+    viewAll: "Ver todo",
+    currentWeather: "Clima Actual",
+    humidity: "Humedad",
+    wind: "Viento",
+    pressure: "Presión",
+    clouds: "Nubes",
+    language: "Idioma",
+    appearance: "Apariencia",
+    notifications: "Notificaciones",
+    goodMorning: "Buenos días",
+    goodAfternoon: "Buenas tardes",
+    goodEvening: "Buenas noches",
+    goodNight: "Buenas noches",
+    reportIssueDesc: "Baches, fugas, luces, basura",
+    reportCrimeDesc: "Alerta de seguridad y despacho de guardias",
+    emergencyDesc: "Líneas de policía, ambulancia, bomberos",
+    communityHubDesc: "Encuestas de residentes, clubes, viajes",
+    maintenanceDesc: "Pagar cuotas y ver registro",
+    totalIssues: "Total de problemas",
+    resolved: "Resuelto",
+    activeIssues: "Problemas activos",
+    priorityAlerts: "Alertas prioritarias",
+    signOut: "Cerrar sesión",
+  },
+  it: {
+    home: "Home",
+    dashboard: "Dashboard",
+    events: "Eventi",
+    communityHub: "Comunità",
+    emergency: "Emergenza",
+    reportIssue: "Segnala Problema",
+    reportCrime: "Segnala Reato",
+    profile: "Profilo",
+    settings: "Impostazioni",
+    announcements: "Avvisi",
+    maintenance: "Manutenzione",
+    sosEmergency: "SOS EMERGENZA",
+    welcomeTitle: "Un quartiere migliore inizia da te",
+    quickCivicActions: "Azioni Civiche Rapide",
+    oneTapUtilities: "Servizi residenti in un tocco",
+    notice: "Avviso",
+    urgent: "IMPORTANTE",
+    viewAll: "Vedi tutti",
+    currentWeather: "Meteo Attuale",
+    humidity: "Umidità",
+    wind: "Vento",
+    pressure: "Pressione",
+    clouds: "Nuvole",
+    language: "Lingua",
+    appearance: "Aspetto",
+    notifications: "Notifiche",
+    goodMorning: "Buongiorno",
+    goodAfternoon: "Buon pomeriggio",
+    goodEvening: "Buonasera",
+    goodNight: "Buonanotte",
+    reportIssueDesc: "Buche, perdite, luci, rifiuti",
+    reportCrimeDesc: "Allerta sicurezza e invio guardie",
+    emergencyDesc: "Polizia, ambulanza, vigili del fuoco",
+    communityHubDesc: "Sondaggi dei residenti, club",
+    maintenanceDesc: "Paga quote e visualizza registro",
+    totalIssues: "Problemi totali",
+    resolved: "Risolti",
+    activeIssues: "Problemi attivi",
+    priorityAlerts: "Avvisi prioritari",
+    signOut: "Disconnetti",
+  },
+  pa: {
+    home: "ਹੋਮ",
+    dashboard: "ਡੈਸ਼ਬੋਰਡ",
+    events: "ਸਮਾਗਮ",
+    communityHub: "ਕਮਿਊਨਿਟੀ ਹੱਬ",
+    emergency: "ਐਮਰਜੈਂਸੀ",
+    reportIssue: "ਸਮੱਸਿਆ ਦਰਜ ਕਰੋ",
+    reportCrime: "ਅਪਰਾਧ ਦਰਜ ਕਰੋ",
+    profile: "ਪ੍ਰੋਫਾਈਲ",
+    settings: "ਸੈਟਿੰਗਾਂ",
+    announcements: "ਐਲਾਨ",
+    maintenance: "ਸੰਭਾਲ",
+    sosEmergency: "SOS ਐਮਰਜੈਂਸੀ",
+    welcomeTitle: "ਇੱਕ ਬਿਹਤਰ ਗੁਆਂਢ ਤੁਹਾਡੇ ਤੋਂ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ",
+    quickCivicActions: "ਤੁਰੰਤ ਨਾਗਰਿਕ ਕਾਰਵਾਈਆਂ",
+    oneTapUtilities: "ਇੱਕ-ਟੈਪ ਨਿਵਾਸੀ ਸਹੂਲਤਾਂ",
+    notice: "ਸੂਚਨਾ",
+    urgent: "ਮਹੱਤਵਪੂਰਨ",
+    viewAll: "ਸਾਰੇ ਦੇਖੋ",
+    currentWeather: "ਮੌਜੂਦਾ ਮੌਸਮ",
+    humidity: "ਨਮੀ",
+    wind: "ਹਵਾ",
+    pressure: "ਦਬਾਅ",
+    clouds: "ਬੱਦਲ",
+    language: "ਭਾਸ਼ਾ",
+    appearance: "ਦਿੱਖ",
+    notifications: "ਸੂਚਨਾਵਾਂ",
+    goodMorning: "ਸ਼ੁਭ ਸਵੇਰ",
+    goodAfternoon: "ਸ਼ੁਭ ਦੁਪਹਿਰ",
+    goodEvening: "ਸ਼ੁਭ ਸ਼ਾਮ",
+    goodNight: "ਸ਼ੁਭ ਰਾਤ",
+    reportIssueDesc: "ਟੋਏ, ਲੀਕ, ਲਾਈਟਾਂ, ਕੂੜਾ",
+    reportCrimeDesc: "ਸੁਰੱਖਿਆ ਚਿਤਾਵਨੀ ਅਤੇ ਗਾਰਡ ਮਦਦ",
+    emergencyDesc: "ਪੁਲਿਸ, ਐਂਬੂਲੈਂਸ, ਫਾਇਰ ਹੈਲਪਲਾਈਨ",
+    communityHubDesc: "ਨਿਵਾਸੀ ਪੋਲ, ਕਲੱਬ ਅਤੇ ਮੀਟਿੰਗਾਂ",
+    maintenanceDesc: "ਬਕਾਇਆ ਭਰੋ ਅਤੇ ਰਿਕਾਰਡ ਦੇਖੋ",
+    totalIssues: "ਕੁੱਲ ਮਾਮਲੇ",
+    resolved: "ਹੱਲ ਕੀਤੇ",
+    activeIssues: "ਸਰਗਰਮ ਮਾਮਲੇ",
+    priorityAlerts: "ਤਰਜੀਹੀ ਅਲਰਟ",
+    signOut: "ਸਾਈਨ ਆਊਟ",
+  },
+  de: {
+    home: "Startseite",
+    dashboard: "Dashboard",
+    events: "Veranstaltungen",
+    communityHub: "Gemeinschaft",
+    emergency: "Notfall",
+    reportIssue: "Problem melden",
+    reportCrime: "Straftat melden",
+    profile: "Profil",
+    settings: "Einstellungen",
+    announcements: "Ankündigungen",
+    maintenance: "Wartung",
+    sosEmergency: "SOS NOTFALL",
+    welcomeTitle: "Eine bessere Nachbarschaft beginnt mit dir",
+    quickCivicActions: "Schnelle Bürgeraktionen",
+    oneTapUtilities: "Ein-Klick-Bewohnerdienste",
+    notice: "Hinweis",
+    urgent: "WICHTIG",
+    viewAll: "Alle anzeigen",
+    currentWeather: "Aktuelles Wetter",
+    humidity: "Luftfeuchtigkeit",
+    wind: "Wind",
+    pressure: "Luftdruck",
+    clouds: "Bewölkung",
+    language: "Sprache",
+    appearance: "Erscheinungsbild",
+    notifications: "Benachrichtigungen",
+    goodMorning: "Guten Morgen",
+    goodAfternoon: "Guten Tag",
+    goodEvening: "Guten Abend",
+    goodNight: "Gute Nacht",
+    reportIssueDesc: "Schlaglöcher, Lecks, Lampen, Müll",
+    reportCrimeDesc: "Sicherheitswarnung und Wachdienst",
+    emergencyDesc: "Polizei, Krankenwagen, Feuerwehr",
+    communityHubDesc: "Bewohnerumfragen, Clubs, Fahrten",
+    maintenanceDesc: "Gebühren zahlen und Buch einsehen",
+    totalIssues: "Gesamtprobleme",
+    resolved: "Gelöst",
+    activeIssues: "Aktive Probleme",
+    priorityAlerts: "Prioritätswarnungen",
+    signOut: "Abmelden",
+  },
+};
+
+const LanguageContext = createContext(null);
+
+export const clearGoogtransCookies = () => {
+  try {
+    const hostname = window.location.hostname;
+    const paths = ["/", window.location.pathname];
+    const hostVariants = [
+      "",
+      hostname,
+      "." + hostname,
+      ...hostname.split(".").map((_, i, arr) => "." + arr.slice(i).join(".")).filter((d) => d.includes(".")),
+    ];
+
+    hostVariants.forEach((domain) => {
+      paths.forEach((path) => {
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};${
+          domain ? ` domain=${domain};` : ""
+        }`;
+      });
+    });
+  } catch {
+    // Ignore sandbox / restricted environments
+  }
+};
+
+export function LanguageProvider({ children }) {
+  // STRICT DEFAULT: Always initialize to English unless an explicitly supported language was previously chosen
+  const [currentLanguage, setCurrentLanguage] = useState(() => {
+    try {
+      const savedLanguage = localStorage.getItem("sociosphere_language");
+      if (savedLanguage && LANGUAGES.some((lang) => lang.code === savedLanguage)) {
+        return savedLanguage;
+      }
+    } catch {
+      // Fallback
+    }
+    // Default to 'en'
+    try {
+      localStorage.setItem("sociosphere_language", "en");
+    } catch {
+      // ignore
+    }
+    return "en";
+  });
+
+  const applyGoogleTranslate = (langCode) => {
+    try {
+      const hostname = window.location.hostname;
+      const paths = ["/", window.location.pathname];
+      const hostVariants = [
+        "",
+        hostname,
+        "." + hostname,
+        ...hostname.split(".").map((_, i, arr) => "." + arr.slice(i).join(".")).filter((d) => d.includes(".")),
+      ];
+
+      if (langCode === "en") {
+        // Clear all googtrans cookies so the site renders cleanly in default English
+        clearGoogtransCookies();
+
+        const select = document.querySelector(".goog-te-combo");
+        if (select && select.value && select.value !== "en") {
+          select.value = "en";
+          select.dispatchEvent(new Event("change"));
+        }
+        return;
+      }
+
+      // Set target language cookie for Google Translate
+      const target = `/auto/${langCode}`;
+      hostVariants.forEach((domain) => {
+        paths.forEach((path) => {
+          document.cookie = `googtrans=${target}; path=${path};${domain ? ` domain=${domain};` : ""}`;
+        });
+      });
+
+      const select = document.querySelector(".goog-te-combo");
+      if (select) {
+        select.value = langCode;
+        select.dispatchEvent(new Event("change"));
+      }
+    } catch {
+      // Ignore in sandbox or restricted cookie environment
+    }
+  };
+
+  const changeLanguage = (code) => {
+    const previous = currentLanguage;
+    setCurrentLanguage(code);
+    try {
+      localStorage.setItem("sociosphere_language", code);
+    } catch {
+      // ignore
+    }
+    applyGoogleTranslate(code);
+
+    // If switching back to English from another language, reload ensures any Google DOM mutations are cleanly reset
+    if (code === "en" && previous !== "en") {
+      setTimeout(() => {
+        window.location.reload();
+      }, 80);
+    }
+  };
+
+  useEffect(() => {
+    applyGoogleTranslate(currentLanguage);
+  }, [currentLanguage]);
+
+  // Translation helper function
+  const t = (key, fallback = "") => {
+    const langDict = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
+    if (langDict && langDict[key]) {
+      return langDict[key];
+    }
+    const defaultDict = TRANSLATIONS.en;
+    if (defaultDict && defaultDict[key]) {
+      return defaultDict[key];
+    }
+    return fallback || key;
+  };
+
+  const activeLanguageObj =
+    LANGUAGES.find((l) => l.code === currentLanguage) || LANGUAGES[0];
+
+  return (
+    <LanguageContext.Provider
+      value={{
+        language: currentLanguage,
+        setLanguage: changeLanguage,
+        changeLanguage,
+        currentLanguageObj: activeLanguageObj,
+        languages: LANGUAGES,
+        t,
+      }}
+    >
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    return {
+      language: "en",
+      setLanguage: () => {},
+      changeLanguage: () => {},
+      currentLanguageObj: LANGUAGES[0],
+      languages: LANGUAGES,
+      t: (key, fallback = "") => fallback || key,
+    };
+  }
+  return context;
+}

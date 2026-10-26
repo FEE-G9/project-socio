@@ -170,13 +170,22 @@ export default function Report({ onClose, isEmbedded = false, onSuccess }) {
     user?.id || "",
 
   communityId:
-    user?.communityId || "colony-1",
+    user?.communityId || "colony-gandhi",
+
+  society:
+    user?.society || user?.communityName || "Gandhi Colony",
+
+  societyCode:
+    user?.societyCode || "GC-101",
 
   communityName:
-    user?.communityName || "Green Meadows Heights",
+    user?.society || user?.communityName || "Gandhi Colony",
+
+  colonyName:
+    user?.society || user?.communityName || "Gandhi Colony",
 
   colony:
-    user?.communityName || user?.communityId || "Green Meadows Heights",
+    user?.society || user?.communityName || "Gandhi Colony",
   
   reportType: "civic",
 };

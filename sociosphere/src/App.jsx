@@ -10,6 +10,9 @@ import AuthorityLayout from "./components/layout/AuthorityLayout";
 import Landing from "./pages/public/Landing";
 import SignUp from "./pages/public/Sign_up";
 import Login from "./pages/public/Login";
+import FAQs from "./pages/public/FAQs";
+import NotFound from "./pages/public/NotFound";
+import HowItWorks from "./pages/public/HowItWorks";
 
 import Report from "./pages/citizen/Report";
 import ReportCrime from "./pages/citizen/ReportCrime";
@@ -21,6 +24,7 @@ import Settings from "./pages/citizen/Settings";
 import Announcements from "./pages/citizen/Announcements";
 import Events from "./pages/citizen/Events";
 import Maintenance from "./pages/citizen/Maintenance";
+import LostFound from "./pages/citizen/LostFound";
 import Expenses from "./pages/citizen/Expenses";
 import Community from "./pages/citizen/Community";
 import Emergency from "./pages/citizen/Emergency";
@@ -157,6 +161,10 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/faqs" element={<FAQs />} />
+          <Route path="/faq" element={<Navigate to="/faqs" replace />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/howitworks" element={<Navigate to="/how-it-works" replace />} />
         </Route>
 
         {/* ================= CITIZEN ================= */}
@@ -167,6 +175,7 @@ function App() {
           <Route path="login" element={<Navigate to="/login" replace />} />
           <Route path="report" element={<Report />} />
           <Route path="report-crime" element={<ReportCrime />} />
+          <Route path="lost-found" element={<LostFound />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
           <Route path="fees" element={<Maintenance />} />
@@ -175,6 +184,8 @@ function App() {
           <Route path="events" element={<Events />} />
           <Route path="community" element={<Community />} />
           <Route path="emergency" element={<Emergency />} />
+          <Route path="faqs" element={<FAQs />} />
+          <Route path="faq" element={<Navigate to="/citizen/faqs" replace />} />
         </Route>
 
         {/* ================= AUTHORITY ================= */}
@@ -190,8 +201,9 @@ function App() {
           <Route path="profile" element={<AuthorityProfile />} />
         </Route>
 
-        {/* ================= FALLBACK ================= */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* ================= 404 / FALLBACK ================= */}
+        <Route path="/404" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <GroupChatButton />
       <BackToTop />

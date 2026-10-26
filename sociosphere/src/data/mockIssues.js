@@ -5,21 +5,26 @@ export const INITIAL_ISSUES = [
     category: 'Water Supply & Plumbing',
     severity: 'High',
     status: 'In Progress',
-    colonyId: 'colony-1',
-    colonyName: 'Green Meadows Heights',
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    colonyId: 'colony-gandhi',
+    colonyName: 'Gandhi Colony',
+    colony: 'Gandhi Colony',
+    communityName: 'Gandhi Colony',
+    communityId: 'colony-gandhi',
     reportedBy: 'Aarav Sharma',
-    reportedByEmail: 'aarav@sociosphere.io',
+    reportedByEmail: 'aarav.sharma@gmail.com',
     reporterAvatar:
       'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
     createdAt: '2026-09-05T09:30:00Z',
     updatedAt: '2026-09-06T14:15:00Z',
-    location: 'Block B, Near Central Fountain',
+    location: 'Gandhi Colony - Block B, Near Central Fountain',
     description:
       'Clean drinking water is leaking profusely from the main pipeline connection. Water pressure in Block B apartments has dropped by 40%. Requires urgent plumbing repairs before water logging damages the park walkway.',
     image:
       'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?auto=format&fit=crop&w=800&q=80',
     upvotes: 42,
-    upvotedBy: ['aarav@sociosphere.io', 'priya@sociosphere.io'],
+    upvotedBy: ['aarav.sharma@gmail.com', 'priya.p@sociosphere.io'],
     aiAnalysis: {
       categoryDetected: 'Infrastructure / Plumbing Failure',
       severityScore: 88,
@@ -27,13 +32,13 @@ export const INITIAL_ISSUES = [
       assignedDepartment: 'Municipal Plumbing & Water Works',
       estimatedResolutionTime: '24 Hours',
       aiSummary:
-        'Computer Vision verified high-volume clean water pipe rupture. High priority due to local supply interruption.'
+        'Computer Vision verified high-volume clean water pipe rupture in Gandhi Colony Block B. High priority due to local supply interruption.'
     },
     timeline: [
       {
         step: 'Reported',
         date: '2026-09-05 09:30 AM',
-        note: 'Issue submitted by Aarav Sharma with geotagged photo evidence.'
+        note: 'Issue submitted by Aarav Sharma with geotagged photo evidence in Gandhi Colony.'
       },
       {
         step: 'AI Classified',
@@ -55,12 +60,12 @@ export const INITIAL_ISSUES = [
       {
         id: 'c1',
         author: 'Priya Patel',
-        text: 'Thank you for reporting! Water pressure was very low this morning.',
+        text: 'Thank you for reporting! Water pressure was very low this morning in Block B.',
         date: '2026-09-05T10:15:00Z'
       },
       {
         id: 'c2',
-        author: 'Authority - Maintenance',
+        author: 'Gandhi Colony Authority - Maintenance',
         text: 'Our team is on-site replacing the split joint valve.',
         date: '2026-09-06T14:20:00Z'
       }
@@ -73,29 +78,34 @@ export const INITIAL_ISSUES = [
     category: 'Electrical & Lighting',
     severity: 'Medium',
     status: 'Open',
-    colonyId: 'colony-1',
-    colonyName: 'Green Meadows Heights',
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    colonyId: 'colony-gandhi',
+    colonyName: 'Gandhi Colony',
+    colony: 'Gandhi Colony',
+    communityName: 'Gandhi Colony',
+    communityId: 'colony-gandhi',
     reportedBy: 'Priya Patel',
-    reportedByEmail: 'priya@sociosphere.io',
+    reportedByEmail: 'priya.p@sociosphere.io',
     reporterAvatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
     createdAt: '2026-09-06T18:45:00Z',
     updatedAt: '2026-09-06T18:45:00Z',
-    location: 'Perimeter Wall Gate 3 to Gate 4',
+    location: 'Gandhi Colony - Perimeter Wall Gate 3 to Gate 4',
     description:
       'Three consecutive solar streetlights have gone dark since yesterday evening. The stretch is dark during night hours posing safety concerns for senior residents taking evening walks.',
     image:
       'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80',
     upvotes: 27,
-    upvotedBy: ['priya@sociosphere.io'],
+    upvotedBy: ['priya.p@sociosphere.io'],
     aiAnalysis: {
       categoryDetected: 'Public Safety / Electrical Maintenance',
       severityScore: 65,
       suggestedPriority: 'Medium High',
-      assignedDepartment: 'Society Electrical Grid Team',
+      assignedDepartment: 'Gandhi Colony Electrical Grid Team',
       estimatedResolutionTime: '48 Hours',
       aiSummary:
-        'Likely battery failure or solar panel dust buildup on lamps #14, #15, #16.'
+        'Likely battery failure or solar panel dust buildup on lamps #14, #15, #16 along Gandhi Colony perimeter.'
     },
     timeline: [
       {
@@ -125,15 +135,20 @@ export const INITIAL_ISSUES = [
     category: 'Sanitation & Waste',
     severity: 'Low',
     status: 'Resolved',
-    colonyId: 'colony-1',
-    colonyName: 'Green Meadows Heights',
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    colonyId: 'colony-gandhi',
+    colonyName: 'Gandhi Colony',
+    colony: 'Gandhi Colony',
+    communityName: 'Gandhi Colony',
+    communityId: 'colony-gandhi',
     reportedBy: 'Rohan Verma',
-    reportedByEmail: 'rohan@sociosphere.io',
+    reportedByEmail: 'rohan.v@sociosphere.io',
     reporterAvatar:
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
     createdAt: '2026-09-02T10:00:00Z',
     updatedAt: '2026-09-03T16:00:00Z',
-    location: 'Community Center Lawn',
+    location: 'Gandhi Colony - Community Center Lawn',
     description:
       'Tree branches and garden clippings were left piled near the recycling bin area following seasonal tree trimming.',
     image:
@@ -168,13 +183,13 @@ export const INITIAL_ISSUES = [
       {
         step: 'Resolved',
         date: '2026-09-03 04:00 PM',
-        note: 'Piles cleared and transferred to society compost pit.'
+        note: 'Piles cleared and transferred to Gandhi Colony compost pit.'
       }
     ],
     comments: [
       {
         id: 'c4',
-        author: 'Sanitation Dept',
+        author: 'Gandhi Colony Sanitation',
         text: 'Cleared and composted on Sep 3rd.',
         date: '2026-09-03T16:05:00Z'
       }
@@ -187,35 +202,40 @@ export const INITIAL_ISSUES = [
     category: 'Security & Crime',
     severity: 'High',
     status: 'In Progress',
-    colonyId: 'colony-1',
-    colonyName: 'Green Meadows Heights',
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    colonyId: 'colony-gandhi',
+    colonyName: 'Gandhi Colony',
+    colony: 'Gandhi Colony',
+    communityName: 'Gandhi Colony',
+    communityId: 'colony-gandhi',
     reportedBy: 'Aarav Sharma',
-    reportedByEmail: 'aarav@sociosphere.io',
+    reportedByEmail: 'aarav.sharma@gmail.com',
     reporterAvatar:
       'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
     createdAt: '2026-09-06T23:15:00Z',
     updatedAt: '2026-09-07T08:30:00Z',
-    location: 'Basement B2, Pillar #14',
+    location: 'Gandhi Colony - Basement B2, Pillar #14',
     description:
       'Lock on gear cycle was tampered with between 10 PM and 11 PM. CCTV footage request submitted to society security desk.',
     image:
       'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=800&q=80',
     upvotes: 35,
-    upvotedBy: ['aarav@sociosphere.io'],
+    upvotedBy: ['aarav.sharma@gmail.com'],
     aiAnalysis: {
       categoryDetected: 'Security Threat / Vandalism',
       severityScore: 92,
       suggestedPriority: 'Urgent Security Alert',
-      assignedDepartment: 'Chief Security Officer & Guard Desk',
+      assignedDepartment: 'Gandhi Colony Security Officer & Guard Desk',
       estimatedResolutionTime: 'Immediate',
       aiSummary:
-        'CCTV timestamps flag non-resident entry via visitor gate at 10:14 PM.'
+        'CCTV timestamps flag non-resident entry via visitor gate at 10:14 PM in Gandhi Colony.'
     },
     timeline: [
       {
         step: 'Reported',
         date: '2026-09-06 11:15 PM',
-        note: 'Incident logged into security audit portal.'
+        note: 'Incident logged into Gandhi Colony security audit portal.'
       },
       {
         step: 'AI Classified',
@@ -232,12 +252,30 @@ export const INITIAL_ISSUES = [
   }
 ];
 
+// Helper to normalize any item to Gandhi Colony if not specifically assigned elsewhere
+const normalizeIssueToColony = (issue) => {
+  if (
+    !issue.society ||
+    issue.colonyName === 'Green Meadows Heights' ||
+    issue.society === 'Green Meadows Heights' ||
+    issue.communityName === 'Green Meadows Heights' ||
+    !issue.societyCode
+  ) {
+    return {
+      ...issue,
+      society: 'Gandhi Colony',
+      societyCode: 'GC-101',
+      colonyName: 'Gandhi Colony',
+      colony: 'Gandhi Colony',
+      communityName: 'Gandhi Colony',
+      communityId: 'colony-gandhi',
+    };
+  }
+  return issue;
+};
+
 /*
  * Get issues from localStorage.
- *
- * IMPORTANT:
- * We no longer seed INITIAL_ISSUES automatically.
- * This means a fresh/empty localStorage starts with NO issues.
  */
 export const getIssues = () => {
   const stored = localStorage.getItem('sociosphere_issues');
@@ -253,7 +291,20 @@ export const getIssues = () => {
       localStorage.setItem('sociosphere_issues', JSON.stringify(INITIAL_ISSUES));
       return INITIAL_ISSUES;
     }
-    return parsed;
+
+    // Ensure all existing issues belong to Gandhi Colony
+    let hasChanges = false;
+    const normalized = parsed.map(issue => {
+      const updated = normalizeIssueToColony(issue);
+      if (updated !== issue) hasChanges = true;
+      return updated;
+    });
+
+    if (hasChanges) {
+      localStorage.setItem('sociosphere_issues', JSON.stringify(normalized));
+    }
+
+    return normalized;
   } catch (error) {
     console.error('Failed to parse stored issues:', error);
     return INITIAL_ISSUES;
@@ -261,7 +312,8 @@ export const getIssues = () => {
 };
 
 export const saveIssues = (issues) => {
-  localStorage.setItem('sociosphere_issues', JSON.stringify(issues));
+  const normalized = issues.map(normalizeIssueToColony);
+  localStorage.setItem('sociosphere_issues', JSON.stringify(normalized));
   window.dispatchEvent(new Event('sociosphere_data_updated'));
 };
 
@@ -285,7 +337,7 @@ export const addIssue = (newIssue) => {
 
   const id = `ISSUE-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  const issueWithDefaults = {
+  const issueWithDefaults = normalizeIssueToColony({
     id,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -327,7 +379,7 @@ export const addIssue = (newIssue) => {
     },
 
     ...newIssue
-  };
+  });
 
   const updated = [issueWithDefaults, ...issues];
 

@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Shield, ArrowRight, AlertTriangle, ShieldAlert } from "lucide-react";
 import "./landing.css";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../../context/LanguageContext";
 export default function Landing() {
   const [selectedFeature, setSelectedFeature] = useState("issues");
+  const { language, setLanguage, languages } = useLanguage();
   return (
     <div className="landing-shell">
 
@@ -29,15 +31,24 @@ export default function Landing() {
           <a href="#features" className="nav-link">
            Explore Features
           </a>
-        {/*  <button className="nav-link active">Home</button>*/}
-        {/*  <Link to="/citizen/dashboard" className="nav-link">Dashboard</Link>*/}     
-         {/* <button className="nav-link">Community</button>*/}
-         {/* <button className="nav-link">About Us</button>*/}
-         {/* <button className="nav-link">Contact</button>*/}
+          <Link to="/faqs" className="nav-link">
+            FAQs
+          </Link>
         </nav>
 
         <div className="header-actions">
-        {/* <button className="language-btn">EN</button>*/}
+          <select
+            className="language-btn"
+            value={language}
+            onChange={(event) => setLanguage(event.target.value)}
+            aria-label="Select language"
+          >
+            {languages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.nativeName}
+              </option>
+            ))}
+          </select>
           <Link to="/login" className="login-btn">Login</Link>
           <Link to="/signup" className="signup-btn">Sign Up</Link>
         </div>
@@ -84,9 +95,9 @@ export default function Landing() {
               <ArrowRight size={18} />
             </Link>
 
-            <button className="secondary-cta">
-              How it works
-            </button>
+            <Link to="/how-it-works" className="secondary-cta" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+              How It Works
+            </Link>
 
           </div>
 
@@ -257,9 +268,14 @@ export default function Landing() {
       One community. everything connected.
     </p>
 
-    <a href="/signup" className="features-cta">
-      Join SocioSphere <span>→</span>
-    </a>
+    <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+      <Link to="/faqs" className="nav-link" style={{ fontSize: '15px', color: '#94a3b8' }}>
+        Frequently Asked Questions
+      </Link>
+      <Link to="/signup" className="features-cta">
+        Join SocioSphere <span>→</span>
+      </Link>
+    </div>
   </div>
 
 </section>
@@ -267,4 +283,3 @@ export default function Landing() {
     </div>
   );
 }
-

@@ -145,6 +145,14 @@ body {
 .language-btn {
   background: transparent;
   color: #cbd5e1;
+  max-width: 125px;
+  padding: 6px 4px;
+  font-size: 14px;
+}
+
+.language-btn option {
+  background: #070b14;
+  color: #f8fafc;
 }
 
 .login-btn {

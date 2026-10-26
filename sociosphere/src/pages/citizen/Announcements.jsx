@@ -4,6 +4,7 @@ import {
   Calendar, 
   AlertCircle,
   Bell,
+  Building2,
   BellRing,
   CalendarPlus,
   UserPlus
@@ -30,6 +31,12 @@ const exportCalendarEvent = (event) => {
 
 const Announcements = ({ eventsOnly = false }) => {
   const { user } = useAuth();
+  const userSociety = user?.society || user?.communityName || 'Gandhi Colony';
+  const userSocietyCode = user?.societyCode || (
+    userSociety === 'Gandhi Colony' ? 'GC-101' :
+    userSociety === 'Shayam Nagar' ? 'SN-202' : 'DV-303'
+  );
+
   const [announcements, setAnnouncements] = useState([]);
   const [reminderIds, setReminderIds] = useState([]);
   const [registrations, setRegistrations] = useState([]);
@@ -97,7 +104,12 @@ const Announcements = ({ eventsOnly = false }) => {
     }
   };
 
-  const visibleAnnouncements = announcements.filter((announcement) => eventsOnly ? announcement.category === 'Event' : announcement.category !== 'Event');
+  const societyAnnouncements = announcements.filter(a => 
+    (a.society && a.society.toLowerCase() === userSociety.toLowerCase()) ||
+    (userSociety === 'Gandhi Colony' && (!a.society || a.colonyId === 'colony-1' || a.societyCode === 'GC-101'))
+  );
+
+  const visibleAnnouncements = societyAnnouncements.filter((announcement) => eventsOnly ? announcement.category === 'Event' : announcement.category !== 'Event');
 
   return (
     <div className="space-y-8 pb-12">
@@ -109,9 +121,16 @@ const Announcements = ({ eventsOnly = false }) => {
             <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
               Community Hub
             </p>
+            <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 ml-2">
+              <Building2 size={12} />
+              <span>{userSociety}</span>
+              <span className="font-mono text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-1 rounded border border-emerald-500/30">
+                {userSocietyCode}
+              </span>
+            </span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{eventsOnly ? 'Community events' : 'Announcements'}</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{eventsOnly ? 'Register, volunteer, add events to your calendar, and set reminders.' : 'Official notices and updates from the Society Authority.'}</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{eventsOnly ? `${userSociety} Events` : `${userSociety} Announcements`}</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{eventsOnly ? 'Register, volunteer, add events to your calendar, and set reminders.' : `Official notices and updates from ${userSociety} Authority.`}</p>
         </div>
       </div>
 
