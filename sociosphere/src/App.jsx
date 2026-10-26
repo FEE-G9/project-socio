@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { MessageSquare, Send, X } from "lucide-react";
@@ -34,8 +33,8 @@ import Analytics from "./pages/authority/Analytics";
 import Issues from "./pages/authority/Issues";
 import Crimes from "./pages/authority/Crimes";
 import Members from "./pages/authority/Members";
+import ManageEmergency from "./pages/authority/ManageEmergency";
 import ManageFees from "./pages/authority/ManageFees";
-import PostAnnouncement from "./pages/authority/PostAnnouncement";
 import AuthorityProfile from "./pages/authority/AuthorityProfile";
 
 import RedAlertOverlay from "./components/ui/RedAlertOverlay";
@@ -57,90 +56,113 @@ function GroupChatButton() {
     if (open) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, open]);
 
-  if (!location.pathname.startsWith("/citizen")) return null;
+  if (!location.pathname.startsWith("/citizen") && !location.pathname.startsWith("/authority")) return null;
 
-  const sendMessage = () => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
+  const sendMessage = (e) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    const authorUser = (() => {
+      try {
+        return JSON.parse(localStorage.getItem("sociosphere_auth_user") || "null");
+      } catch {
+        return null;
+      }
+    })();
+    const sender = authorUser?.name && !authorUser.name.includes("@")
+      ? authorUser.name
+      : authorUser?.role === "authority" ? "Society Authority" : "Resident";
+
     const msg = {
       id: Date.now(),
-      text: trimmed,
-      sender: "You",
-      time: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
+      sender,
+      role: authorUser?.role || "citizen",
+      text: text.trim(),
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
-    const next = [...messages, msg];
-    setMessages(next);
-    localStorage.setItem(CHAT_KEY, JSON.stringify(next));
+    const updated = [...messages, msg];
+    setMessages(updated);
+    localStorage.setItem(CHAT_KEY, JSON.stringify(updated));
     setText("");
-  };
-
-  const handleKey = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
   return (
     <>
+      {/* Floating trigger button */}
       <button
-        type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="fixed bottom-[88px] right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-violet-500 bg-violet-500 text-white shadow-lg transition-all duration-200 hover:-translate-y-1 hover:bg-violet-600 hover:border-violet-600 focus:outline-none focus:ring-4 focus:ring-violet-500/30 dark:border-violet-400 dark:bg-violet-500 dark:hover:bg-violet-600 sm:bottom-[72px] sm:right-6"
-        aria-label="Group chat"
-        title="Group chat"
+        aria-label="Open Community Chat"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xl transition-all duration-200 hover:scale-105 hover:bg-emerald-600 active:scale-95 focus:outline-none focus:ring-4 focus:ring-emerald-400/40"
       >
-        {open ? <X size={20} strokeWidth={2.5} aria-hidden="true" /> : <MessageSquare size={20} strokeWidth={2.5} aria-hidden="true" />}
+        {open ? <X size={24} /> : <MessageSquare size={24} />}
       </button>
 
+      {/* Slide-in / popover chat panel */}
       {open && (
-        <div className="fixed bottom-[144px] right-4 z-50 flex w-80 flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-[#0D1524] sm:bottom-32 sm:right-6">
+        <div className="fixed bottom-24 right-6 z-50 flex h-[480px] w-96 flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl transition-all dark:border-slate-800 dark:bg-slate-900">
           {/* Header */}
-          <div className="flex items-center justify-between rounded-t-2xl bg-violet-600 px-4 py-3">
+          <div className="flex items-center justify-between rounded-t-2xl border-b border-slate-200 bg-emerald-500 px-4 py-3 text-white dark:border-slate-800">
             <div className="flex items-center gap-2">
-              <MessageSquare size={16} className="text-white" />
-              <span className="text-sm font-bold text-white">Community Group Chat</span>
+              <MessageSquare size={18} />
+              <span className="font-semibold text-sm">Community Group Chat</span>
             </div>
-            <button onClick={() => setOpen(false)} className="text-white/80 transition hover:text-white" aria-label="Close chat">
+            <button
+              onClick={() => setOpen(false)}
+              className="rounded-lg p-1 text-white/80 hover:bg-white/20 hover:text-white"
+            >
               <X size={16} />
             </button>
           </div>
 
-          {/* Messages area */}
-          <div className="flex h-56 flex-col gap-2 overflow-y-auto px-3 py-3">
+          {/* Message history */}
+          <div className="flex-1 space-y-3 overflow-y-auto p-4 text-sm">
             {messages.length === 0 ? (
-              <p className="my-auto text-center text-xs text-slate-400 dark:text-slate-500">
-                No messages yet. Say hello! 👋
+              <p className="mt-16 text-center text-xs text-slate-400">
+                No messages yet. Start the conversation with your neighbours!
               </p>
             ) : (
-              messages.map((msg) => (
-                <div key={msg.id} className="flex flex-col items-end">
-                  <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-violet-600 px-3 py-2 text-sm text-white">
-                    {msg.text}
+              messages.map((m) => (
+                <div key={m.id} className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-xs text-slate-700 dark:text-slate-300">
+                      {m.sender}
+                    </span>
+                    {m.role === "authority" && (
+                      <span className="rounded bg-emerald-100 px-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                        Admin
+                      </span>
+                    )}
+                    <span className="text-[10px] text-slate-400">{m.time}</span>
                   </div>
-                  <span className="mt-0.5 text-[10px] text-slate-400">{msg.time}</span>
+                  <p className="mt-0.5 max-w-[90%] rounded-xl bg-slate-100 px-3 py-1.5 text-xs text-slate-800 dark:bg-slate-800 dark:text-slate-100">
+                    {m.text}
+                  </p>
                 </div>
               ))
             )}
             <div ref={bottomRef} />
           </div>
 
-          {/* Input */}
-          <div className="flex items-center gap-2 border-t border-slate-100 px-3 py-3 dark:border-slate-800">
+          {/* Input row */}
+          <form
+            onSubmit={sendMessage}
+            className="flex items-center gap-2 border-t border-slate-200 p-3 dark:border-slate-800"
+          >
             <input
               type="text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              onKeyDown={handleKey}
-              placeholder="Type a message…"
-              className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500"
+              placeholder="Type a message to colony..."
+              className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
             <button
-              onClick={sendMessage}
+              type="submit"
+              aria-label="Send message"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white transition hover:bg-emerald-600 disabled:opacity-40"
               disabled={!text.trim()}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white transition hover:bg-violet-500 disabled:opacity-40"
-              aria-label="Send"
             >
               <Send size={15} />
             </button>
-          </div>
+          </form>
         </div>
       )}
     </>
@@ -196,9 +218,12 @@ function App() {
           <Route path="issues" element={<Issues />} />
           <Route path="crimes" element={<Crimes />} />
           <Route path="members" element={<Members />} />
+          <Route path="emergency" element={<ManageEmergency />} />
           <Route path="fees" element={<ManageFees />} />
-          <Route path="announcements" element={<PostAnnouncement />} />
+          <Route path="expenses" element={<Navigate to="/authority/fees" replace />} />
           <Route path="profile" element={<AuthorityProfile />} />
+          <Route path="faqs" element={<Navigate to="/authority/home" replace />} />
+          <Route path="faq" element={<Navigate to="/authority/home" replace />} />
         </Route>
 
         {/* ================= 404 / FALLBACK ================= */}

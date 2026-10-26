@@ -179,8 +179,9 @@ const Members = () => {
     if (e) e.stopPropagation();
     const targetUser = societyUsers.find(u => u.id === userId);
     const targetName = targetUser?.name || 'Resident';
+    const isAuth = targetUser?.role === 'authority' || targetUser?.type === 'member';
     approveUser(userId);
-    setToastMessage(`✓ ${targetName} approved & admitted into ${adminSociety}!`);
+    setToastMessage(`✓ ${targetName} approved & admitted into ${adminSociety}! ${isAuth ? 'Authority administrative account is now active.' : 'Resident account is now active.'}`);
     setTimeout(() => setToastMessage(null), 4000);
     if (selectedPerson && selectedPerson.id === userId) {
       setSelectedPerson(prev => prev ? { ...prev, status: 'Verified' } : null);
@@ -599,8 +600,12 @@ const Members = () => {
 
                     {/* STATUS OR ROLE BADGE */}
                     {isPending ? (
-                      <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-amber-800 dark:bg-amber-950/60 dark:text-amber-400 animate-pulse">
-                        Join Request
+                      <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wider animate-pulse ${
+                        isMember 
+                          ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-400/40' 
+                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-400'
+                      }`}>
+                        {isMember ? 'Authority Request' : 'Join Request'}
                       </span>
                     ) : isMember ? (
                       <span className="shrink-0 rounded-full bg-purple-100 px-2.5 py-1 text-[11px] font-bold text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 flex items-center gap-1">

@@ -129,16 +129,35 @@ function Login() {
 
           {/* PENDING APPROVAL NOTICE BANNER */}
           {pendingNotice && (
-            <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/15 p-3.5 text-left text-xs text-amber-200 animate-in fade-in">
-              <div className="flex items-center gap-1.5 font-bold text-amber-300 mb-1">
+            <div className={`mb-4 rounded-xl border p-3.5 text-left text-xs animate-in fade-in ${
+              pendingNotice.user?.role === 'authority' || pendingNotice.user?.type === 'member'
+                ? 'border-purple-500/40 bg-purple-500/15 text-purple-200'
+                : 'border-amber-500/40 bg-amber-500/15 text-amber-200'
+            }`}>
+              <div className={`flex items-center gap-1.5 font-bold mb-1 ${
+                pendingNotice.user?.role === 'authority' || pendingNotice.user?.type === 'member'
+                  ? 'text-purple-300'
+                  : 'text-amber-300'
+              }`}>
                 <Clock size={15} />
-                <span>Account Awaiting Admin Approval</span>
+                <span>
+                  {pendingNotice.user?.role === 'authority' || pendingNotice.user?.type === 'member'
+                    ? 'Administrative Privilege Awaiting Board Approval'
+                    : 'Account Awaiting Admin Approval'}
+                </span>
               </div>
               <p className="leading-relaxed">
                 {pendingNotice.message}
               </p>
-              <div className="mt-2 text-[11px] text-amber-300/80 border-t border-amber-500/20 pt-1.5">
-                Unit: {pendingNotice.user?.unitNumber} ({pendingNotice.user?.society})
+              <div className={`mt-2 text-[11px] border-t pt-1.5 ${
+                pendingNotice.user?.role === 'authority' || pendingNotice.user?.type === 'member'
+                  ? 'border-purple-500/20 text-purple-300/80'
+                  : 'border-amber-500/20 text-amber-300/80'
+              }`}>
+                {pendingNotice.user?.role === 'authority' || pendingNotice.user?.type === 'member'
+                  ? `Designation: ${pendingNotice.user?.designation || 'Authority / Committee Member'} (${pendingNotice.user?.society})`
+                  : `Unit: ${pendingNotice.user?.unitNumber} (${pendingNotice.user?.society})`
+                }
               </div>
             </div>
           )}
@@ -209,24 +228,32 @@ function Login() {
           {/* QUICK DEMO SHORTCUTS */}
           <div className="mt-4 pt-3 border-t border-white/10 text-left">
             <span className="text-[11px] font-bold uppercase tracking-wider text-white/50 block mb-2">
-              Quick Demo Access (Gandhi Colony):
+              Quick Demo Access:
             </span>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-3 gap-1.5 text-xs">
               <button
                 type="button"
                 onClick={() => handleQuickLogin("goyalvansh63708@gmail.com", "vansh12345")}
-                className="rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 p-2 text-center text-emerald-300 font-bold transition truncate"
-                title="Admin: Vansh Goyal (Pass: vansh12345)"
+                className="rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 p-2 text-center text-emerald-300 font-bold transition truncate text-[11px]"
+                title="Gandhi Colony Admin: Vansh Goyal (Pass: vansh12345)"
               >
-                Admin (Vansh)
+                GC: Vansh
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickLogin("ekjyot@gmail.com", "ekjyot123")}
+                className="rounded-lg bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 p-2 text-center text-purple-300 font-bold transition truncate text-[11px]"
+                title="Shayam Nagar Admin: Ekjyot Kaur (Pass: ekjyot123)"
+              >
+                SN: Ekjyot
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickLogin("aarav@sociosphere.io", "Aarav@402!")}
-                className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 p-2 text-center text-blue-300 font-medium transition truncate"
+                className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 p-2 text-center text-blue-300 font-medium transition truncate text-[11px]"
                 title="Resident: Aarav Sharma (Pass: Aarav@402!)"
               >
-                Resident (Aarav)
+                Res: Aarav
               </button>
             </div>
           </div>

@@ -13,8 +13,8 @@ const Sidebar = ({ links = [] }) => {
       return location.pathname === "/citizen/home";
     }
 
-    if (href === "/authority") {
-      return location.pathname === "/authority";
+    if (href === "/authority" || href === "/authority/home") {
+      return location.pathname === "/authority" || location.pathname === "/authority/home";
     }
 
     return (
@@ -68,7 +68,7 @@ const Sidebar = ({ links = [] }) => {
         </div>
 
         {/* NAVIGATION */}
-        <nav className="flex-1 space-y-2 p-3">
+        <nav className="flex-1 space-y-1.5 p-3 overflow-y-auto">
           {links.map((link) => {
             const Icon = link.icon;
             const active = isActive(link.href);
@@ -80,16 +80,16 @@ const Sidebar = ({ links = [] }) => {
                 title={collapsed ? link.label : undefined}
                 className={`group flex w-full items-center rounded-xl transition-all duration-200 ${
                   collapsed
-                    ? "justify-center px-2 py-3"
-                    : "gap-3 px-3 py-3"
+                    ? "justify-center px-2 py-2.5"
+                    : "gap-3 px-3 py-2.5"
                 } ${
                   active
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                    : "text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold"
+                    : "text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 font-medium"
                 }`}
               >
                 <Icon
-                  size={20}
+                  size={19}
                   className={`shrink-0 transition-transform duration-200 ${
                     active
                       ? "text-emerald-600 dark:text-emerald-400"
@@ -98,8 +98,14 @@ const Sidebar = ({ links = [] }) => {
                 />
 
                 {!collapsed && (
-                  <span className="truncate text-sm font-medium">
+                  <span className="truncate text-xs">
                     {link.label}
+                  </span>
+                )}
+
+                {!collapsed && link.badge && (
+                  <span className="ml-auto rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 px-1.5 py-0.2 text-[10px] font-bold">
+                    {link.badge}
                   </span>
                 )}
               </button>
