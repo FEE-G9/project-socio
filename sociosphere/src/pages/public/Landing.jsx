@@ -95,8 +95,8 @@ export default function Landing() {
               <ArrowRight size={18} />
             </Link>
 
-            <Link to="/faqs" className="secondary-cta" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
-              How it works & FAQs
+            <Link to="/how-it-works" className="secondary-cta" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+              How It Works
             </Link>
 
           </div>

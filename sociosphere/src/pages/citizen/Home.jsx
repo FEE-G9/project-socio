@@ -43,14 +43,14 @@ import {
 
 function getWeatherEmoji(condition) {
   const c = (condition || "").toLowerCase();
-  if (c.includes("thunder")) return "⛈️";
-  if (c.includes("drizzle") || c.includes("rain")) return "🌧️";
-  if (c.includes("snow")) return "❄️";
-  if (c.includes("mist") || c.includes("fog") || c.includes("haze")) return "🌫️";
-  if (c.includes("few") || c.includes("partly") || c.includes("scatter")) return "🌤️";
-  if (c.includes("cloud") || c.includes("overcast")) return "⛅";
-  if (c.includes("clear") || c.includes("sun")) return "☀️";
-  return "☀️";
+  if (c.includes("thunder")) return "â›ˆï¸";
+  if (c.includes("drizzle") || c.includes("rain")) return "ðŸŒ§ï¸";
+  if (c.includes("snow")) return "â„ï¸";
+  if (c.includes("mist") || c.includes("fog") || c.includes("haze")) return "ðŸŒ«ï¸";
+  if (c.includes("few") || c.includes("partly") || c.includes("scatter")) return "ðŸŒ¤ï¸";
+  if (c.includes("cloud") || c.includes("overcast")) return "â›…";
+  if (c.includes("clear") || c.includes("sun")) return "â˜€ï¸";
+  return "â˜€ï¸";
 }
 
 const quickActions = [
@@ -532,6 +532,10 @@ export default function Home() {
     ).length;
 
   const userSociety = user?.society || user?.communityName || 'Gandhi Colony';
+  const userSocietyCode = user?.societyCode || (
+    userSociety === 'Gandhi Colony' ? 'GC-101' :
+    userSociety === 'Shayam Nagar' ? 'SN-202' : 'DV-303'
+  );
 
   const displayName = user?.name && !user.name.includes("@")
     ? user.name.split(" ")[0]
@@ -569,19 +573,22 @@ export default function Home() {
         <div className="navbar-inner">
 <div
             className="location-section"
-            title={`Current weather in ${userSociety}: ${weather.description || weather.condition || "Clear sky"}, ${weather.temp ?? 26}°C`}
+            title={`Current weather in ${userSociety}: ${weather.description || weather.condition || "Clear sky"}, ${weather.temp ?? 26}Â°C`}
           >
             <span className="weather-inline-chip">
               <span className="weather-inline-icon" role="img" aria-label={weather.condition || "weather"}>
                 {getWeatherEmoji(weather.condition)}
               </span>
               <span className="weather-inline-temp">
-                {weather.temp != null ? `${weather.temp}°C` : "26°C"}
+                {weather.temp != null ? `${weather.temp}Â°C` : "26Â°C"}
               </span>
             </span>
             <span className="location-divider" aria-hidden="true">|</span>
             <MapPin size={16} className="location-pin-icon text-emerald-500" />
             <span className="community-name-text font-bold">{userSociety}</span>
+            <span className="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30">
+              {userSocietyCode}
+            </span>
             <span className="online-dot" title="Colony live" />
           </div>
         </div>
@@ -628,9 +635,9 @@ export default function Home() {
                 <span className="ticker-category">[{ann.category || "Notice"}]</span>
                 <strong className="ticker-title">{ann.title}</strong>
                 {ann.content && (
-                  <span className="ticker-desc">— {ann.content}</span>
+                  <span className="ticker-desc">â€” {ann.content}</span>
                 )}
-                <span className="ticker-sep">✦</span>
+                <span className="ticker-sep">âœ¦</span>
               </span>
             ))}
           </marquee>
@@ -759,7 +766,7 @@ export default function Home() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">{issue.title}</h3>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{issue.category} Â· {issue.status}</p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{issue.category} Ã‚Â· {issue.status}</p>
                   </div>
                   <button
                     type="button"
@@ -943,7 +950,7 @@ export default function Home() {
                       <div className="issue-time">
                         <span>{issue.date}</span>
 
-                        <span>â€¢</span>
+                        <span>Ã¢â‚¬Â¢</span>
 
                         <strong>
                           ETA: {issue.eta || "Pending"}
@@ -1153,7 +1160,7 @@ export default function Home() {
                       <div className="issue-time">
                         <span>{crime.date}</span>
 
-                        <span>â€¢</span>
+                        <span>Ã¢â‚¬Â¢</span>
 
                         <strong className="text-rose-300">
                           Status:{" "}
@@ -1231,7 +1238,7 @@ export default function Home() {
               </strong>
 
               <p>
-                Tomorrow â€¢ 10:00 AM â€¢ Open Amphitheatre
+                Tomorrow Ã¢â‚¬Â¢ 10:00 AM Ã¢â‚¬Â¢ Open Amphitheatre
               </p>
             </div>
           </div>

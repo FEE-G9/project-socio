@@ -11,6 +11,7 @@ import SignUp from "./pages/public/Sign_up";
 import Login from "./pages/public/Login";
 import FAQs from "./pages/public/FAQs";
 import NotFound from "./pages/public/NotFound";
+import HowItWorks from "./pages/public/HowItWorks";
 
 import Report from "./pages/citizen/Report";
 import ReportCrime from "./pages/citizen/ReportCrime";
@@ -184,6 +185,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/faqs" element={<FAQs />} />
           <Route path="/faq" element={<Navigate to="/faqs" replace />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/howitworks" element={<Navigate to="/how-it-works" replace />} />
         </Route>
 
         {/* ================= CITIZEN ================= */}
