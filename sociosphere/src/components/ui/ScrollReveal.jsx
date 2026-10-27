@@ -13,6 +13,13 @@ export default function ScrollReveal({
     const element = elementRef.current;
     if (!element) return undefined;
 
+    // Reveal immediately if already in viewport
+    const rect = element.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setVisible(true);
+      return undefined;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -20,7 +27,7 @@ export default function ScrollReveal({
           observer.unobserve(element);
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px" }
+      { threshold: 0.05, rootMargin: "30px" }
     );
 
     observer.observe(element);

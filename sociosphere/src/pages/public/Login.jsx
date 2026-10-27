@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Login.css";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -14,7 +14,17 @@ function Login() {
   const [pendingNotice, setPendingNotice] = useState(null);
 
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { user, isAuthenticated, login } = useAuth();
+
+  useEffect(() => {
+    if (user && isAuthenticated) {
+      if (user.role === "authority" || user.type === "member") {
+        navigate("/authority/home", { replace: true });
+      } else {
+        navigate("/citizen/home", { replace: true });
+      }
+    }
+  }, [user, isAuthenticated, navigate]);
 
   const handleLogin = (e) => {
     e.preventDefault();

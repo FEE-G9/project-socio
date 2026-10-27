@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }) => {
   const dispatch = reduxContext?.store?.dispatch || (() => {});
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('sociosphere_is_auth') !== 'false';
+    return Boolean(localStorage.getItem('sociosphere_auth_user'));
   });
 
   useEffect(() => {
@@ -219,6 +219,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('sociosphere_auth_user');
     localStorage.setItem('sociosphere_is_auth', 'false');

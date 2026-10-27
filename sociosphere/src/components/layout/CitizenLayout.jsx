@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   CalendarDays,
@@ -25,7 +25,12 @@ import CitizenSOSActiveBanner from "../ui/CitizenSOSActiveBanner";
 const CitizenLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  // Route protection: redirect unauthenticated visitors to login
+  if (!user || !isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
   const { t } = useLanguage();
   const [showWelcome, setShowWelcome] = useState(
     () => sessionStorage.getItem("sociosphere_show_welcome") === "true"
@@ -55,21 +60,6 @@ const CitizenLayout = () => {
       icon: LayoutDashboard,
     },
     {
-      label: "Events",
-      href: "/citizen/events",
-      icon: CalendarDays,
-    },
-    {
-      label: "Community Hub",
-      href: "/citizen/community",
-      icon: Users,
-    },
-    {
-      label: "Emergency",
-      href: "/citizen/emergency",
-      icon: PhoneCall,
-    },
-    {
       label: "Report Issue",
       href: "/citizen/report",
       icon: FileWarning,
@@ -80,9 +70,24 @@ const CitizenLayout = () => {
       icon: ShieldAlert,
     },
     {
+      label: "Community Hub",
+      href: "/citizen/community",
+      icon: Users,
+    },
+    {
+      label: "Events",
+      href: "/citizen/events",
+      icon: CalendarDays,
+    },
+    {
       label: "Lost & Found",
       href: "/citizen/lost-found",
       icon: PackageSearch,
+    },
+    {
+      label: "Emergency",
+      href: "/citizen/emergency",
+      icon: PhoneCall,
     },
     {
       label: "Profile",

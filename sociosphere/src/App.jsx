@@ -37,6 +37,7 @@ import ManageEmergency from "./pages/authority/ManageEmergency";
 import ManageFees from "./pages/authority/ManageFees";
 import AuthorityProfile from "./pages/authority/AuthorityProfile";
 
+import { useAuth } from "./context/AuthContext";
 import RedAlertOverlay from "./components/ui/RedAlertOverlay";
 import BackToTop from "./components/ui/BackToTop";
 
@@ -91,16 +92,16 @@ function GroupChatButton() {
       <button
         onClick={() => setOpen((prev) => !prev)}
         aria-label="Open Community Chat"
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xl transition-all duration-200 hover:scale-105 hover:bg-emerald-600 active:scale-95 focus:outline-none focus:ring-4 focus:ring-emerald-400/40"
+        className="fixed bottom-36 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-purple-600 text-white shadow-xl transition-all duration-200 hover:scale-105 hover:bg-purple-700 active:scale-95 focus:outline-none focus:ring-4 focus:ring-purple-400/40 sm:bottom-20 sm:right-6"
       >
         {open ? <X size={24} /> : <MessageSquare size={24} />}
       </button>
 
       {/* Slide-in / popover chat panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 flex h-[480px] w-96 flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl transition-all dark:border-slate-800 dark:bg-slate-900">
+        <div className="fixed bottom-[212px] right-4 z-50 flex h-[480px] w-96 max-h-[calc(100vh-14rem)] max-w-[calc(100vw-2rem)] flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl transition-all dark:border-slate-800 dark:bg-slate-900 sm:bottom-36 sm:right-6">
           {/* Header */}
-          <div className="flex items-center justify-between rounded-t-2xl border-b border-slate-200 bg-emerald-500 px-4 py-3 text-white dark:border-slate-800">
+          <div className="flex items-center justify-between rounded-t-2xl border-b border-slate-200 bg-purple-600 px-4 py-3 text-white dark:border-slate-800">
             <div className="flex items-center gap-2">
               <MessageSquare size={18} />
               <span className="font-semibold text-sm">Community Group Chat</span>
@@ -127,7 +128,7 @@ function GroupChatButton() {
                       {m.sender}
                     </span>
                     {m.role === "authority" && (
-                      <span className="rounded bg-emerald-100 px-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                      <span className="rounded bg-purple-100 px-1 text-[10px] font-bold text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
                         Admin
                       </span>
                     )}
@@ -152,12 +153,12 @@ function GroupChatButton() {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Type a message to colony..."
-              className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800 outline-none focus:border-purple-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
             <button
               type="submit"
               aria-label="Send message"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white transition hover:bg-emerald-600 disabled:opacity-40"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-600 text-white transition hover:bg-purple-700 disabled:opacity-40"
               disabled={!text.trim()}
             >
               <Send size={15} />
@@ -171,11 +172,13 @@ function GroupChatButton() {
 
 function App() {
   const location = useLocation();
+  const { user, isAuthenticated } = useAuth();
   const isAuthority = location.pathname.startsWith("/authority");
+  const isProtectedPath = location.pathname.startsWith("/citizen") || location.pathname.startsWith("/authority");
 
   return (
     <>
-      {!isAuthority && <RedAlertOverlay />}
+      {!isAuthority && isAuthenticated && user && <RedAlertOverlay />}
 
       <Routes>
         {/* ================= PUBLIC ================= */}
@@ -230,7 +233,7 @@ function App() {
         <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <GroupChatButton />
+      {isAuthenticated && user && isProtectedPath && <GroupChatButton />}
       <BackToTop />
     </>
   );

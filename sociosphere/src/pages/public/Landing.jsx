@@ -43,7 +43,7 @@ export default function Landing() {
             onChange={(event) => setLanguage(event.target.value)}
             aria-label="Select language"
           >
-            {languages.map((lang) => (
+            {(languages || []).map((lang) => (
               <option key={lang.code} value={lang.code}>
                 {lang.nativeName}
               </option>
