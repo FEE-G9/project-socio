@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { registerUser } from "../../data/mockUsers";
@@ -28,7 +28,17 @@ import {
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { user, isAuthenticated, login } = useAuth();
+
+  useEffect(() => {
+    if (user && isAuthenticated) {
+      if (user.role === "authority" || user.type === "member") {
+        navigate("/authority/home", { replace: true });
+      } else {
+        navigate("/citizen/home", { replace: true });
+      }
+    }
+  }, [user, isAuthenticated, navigate]);
   const colonies = getColonies();
 
   const [role, setRole] = useState("citizen");

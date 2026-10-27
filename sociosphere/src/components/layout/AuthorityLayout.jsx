@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   AlertCircle,
@@ -49,7 +49,18 @@ const getWeatherEmoji = (condition) => {
 const AuthorityLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  // Route protection: redirect unauthenticated visitors to login
+  if (!user || !isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Role protection: redirect non-authority residents to citizen home
+  const isAuthority = user?.role === "authority" || user?.type === "member";
+  if (!isAuthority) {
+    return <Navigate to="/citizen/home" replace />;
+  }
   const weather = useWeather();
 
   const adminSociety = user?.society || user?.communityName || 'Gandhi Colony';

@@ -11,6 +11,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
 import { getIssues, saveIssues } from "../../data/mockIssues";
+import { getCrimes } from "../../data/mockCrimes";
 import { getAnnouncements } from "../../data/mockAnnouncements";
 // import Map from "./Map";
 
@@ -345,7 +346,7 @@ export default function Home() {
       item.id.startsWith("CRM-")
   );
 
-  const atGlanceIssues = showAllIssues ? userReports : userReports.slice(0, 2);
+  const atGlanceIssues = showAllIssues ? userReports : userReports.slice(0, 3);
 
   const displayedCivicIssues = userCivicReports;
   const displayedCrimeIssues = userCrimeReports;
@@ -1202,22 +1203,6 @@ export default function Home() {
         =================================================== */}
 
         <section className="community-overview mt-10">
-          <div className="overview-card health-card">
-            <div className="overview-icon">
-              <Sparkles size={20} />
-            </div>
-
-            <div>
-              <span>COMMUNITY HEALTH</span>
-
-              <strong>94%</strong>
-
-              <p>
-                Excellent neighborhood health index
-              </p>
-            </div>
-          </div>
-
           <div className="overview-card">
             <div className="overview-icon">
               <Calendar size={20} />

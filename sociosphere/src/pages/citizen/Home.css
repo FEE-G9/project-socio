@@ -1335,7 +1335,7 @@
 .community-overview {
   margin-top: 20px;
   display: grid;
-  grid-template-columns: 1fr 1.5fr 1.2fr;
+  grid-template-columns: 1.2fr 1fr;
   gap: 15px;
 }
 
@@ -1615,9 +1615,7 @@
     grid-template-columns: 1fr 1fr;
   }
 
-  .community-overview .overview-card:last-child {
-    grid-column: 1 / -1;
-  }
+  /* 2 cards side by side */
 }
 
 @media (max-width: 900px) {

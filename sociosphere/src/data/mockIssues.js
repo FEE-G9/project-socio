@@ -197,6 +197,91 @@ export const INITIAL_ISSUES = [
   },
 
   {
+    id: 'ISSUE-104',
+    title: 'Pothole and Loose Pavers near Block A Main Gate',
+    category: 'Roads & Pavements',
+    severity: 'Medium',
+    status: 'Open',
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    colonyId: 'colony-gandhi',
+    colonyName: 'Gandhi Colony',
+    colony: 'Gandhi Colony',
+    communityName: 'Gandhi Colony',
+    communityId: 'colony-gandhi',
+    reportedBy: 'Neha Gupta',
+    reportedByEmail: 'neha.gupta@sociosphere.io',
+    createdAt: '2026-10-18T07:45:00Z',
+    updatedAt: '2026-10-18T07:45:00Z',
+    location: 'Gandhi Colony - Block A Main Gate, Visitor Lane',
+    description: 'A pothole beside the speed breaker and several loose pavers are making the visitor lane uneven, especially for two-wheelers and pedestrians during rain.',
+    upvotes: 16,
+    upvotedBy: ['neha.gupta@sociosphere.io'],
+    timeline: [
+      { step: 'Reported', date: '2026-10-18 07:45 AM', note: 'Reported with the gate-lane location.' },
+      { step: 'AI Classified', date: '2026-10-18 07:46 AM', note: 'Routed to the civil maintenance team.' }
+    ],
+    comments: []
+  },
+
+  {
+    id: 'ISSUE-105',
+    title: 'Drain Overflow near Community Hall Service Lane',
+    category: 'Drainage',
+    severity: 'High',
+    status: 'In Progress',
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    colonyId: 'colony-gandhi',
+    colonyName: 'Gandhi Colony',
+    colony: 'Gandhi Colony',
+    communityName: 'Gandhi Colony',
+    communityId: 'colony-gandhi',
+    reportedBy: 'Sunita Mehra',
+    reportedByEmail: 'sunita.mehra@sociosphere.io',
+    createdAt: '2026-10-20T10:20:00Z',
+    updatedAt: '2026-10-21T09:15:00Z',
+    location: 'Gandhi Colony - Community Hall Service Lane',
+    description: 'The storm-water drain is backing up after morning cleaning, leaving stagnant water along the service lane and a slippery approach to the community hall.',
+    upvotes: 31,
+    upvotedBy: ['sunita.mehra@sociosphere.io'],
+    timeline: [
+      { step: 'Reported', date: '2026-10-20 10:20 AM', note: 'Reported by Sunita Mehra.' },
+      { step: 'Assigned', date: '2026-10-20 12:10 PM', note: 'Drainage contractor assigned for jetting and debris removal.' },
+      { step: 'In Progress', date: '2026-10-21 09:15 AM', note: 'Team started clearing the blocked section.' }
+    ],
+    comments: []
+  },
+
+  {
+    id: 'ISSUE-106',
+    title: 'Damaged Swing Chain in Children\'s Park',
+    category: 'Parks & Recreation',
+    severity: 'High',
+    status: 'Pending Dispatch',
+    society: 'Gandhi Colony',
+    societyCode: 'GC-101',
+    colonyId: 'colony-gandhi',
+    colonyName: 'Gandhi Colony',
+    colony: 'Gandhi Colony',
+    communityName: 'Gandhi Colony',
+    communityId: 'colony-gandhi',
+    reportedBy: 'Ananya Singh',
+    reportedByEmail: 'ananya.singh@sociosphere.io',
+    createdAt: '2026-10-22T16:40:00Z',
+    updatedAt: '2026-10-22T16:42:00Z',
+    location: 'Gandhi Colony - Children\'s Park, Play Area East',
+    description: 'One swing chain is visibly worn and the seat is tilted. The equipment has been marked temporarily, but repair is needed before children use it again.',
+    upvotes: 24,
+    upvotedBy: ['ananya.singh@sociosphere.io'],
+    timeline: [
+      { step: 'Reported', date: '2026-10-22 04:40 PM', note: 'Safety concern reported from the play area.' },
+      { step: 'AI Classified', date: '2026-10-22 04:42 PM', note: 'Marked high priority because it involves playground equipment.' }
+    ],
+    comments: []
+  },
+
+  {
     id: 'CRIME-201',
     title: 'Unidentified Bicycle Theft Attempt near Underground Parking B2',
     category: 'Security & Crime',
@@ -274,6 +359,11 @@ const normalizeIssueToColony = (issue) => {
   return issue;
 };
 
+const GANDHI_COLONY_ISSUE_SEED_VERSION = 'gandhi-colony-issues-v2';
+const LATEST_GANDHI_COLONY_ISSUES = INITIAL_ISSUES.filter((issue) =>
+  ['ISSUE-104', 'ISSUE-105', 'ISSUE-106'].includes(issue.id)
+);
+
 /*
  * Get issues from localStorage.
  */
@@ -292,15 +382,30 @@ export const getIssues = () => {
       return INITIAL_ISSUES;
     }
 
+    // Add the new Gandhi Colony sample reports once without overwriting reports
+    // already created by a resident.
+    const hasLatestSeeds = localStorage.getItem('sociosphere_issue_seed_version') === GANDHI_COLONY_ISSUE_SEED_VERSION;
+    const existingIds = new Set(parsed.map((issue) => issue.id));
+    const withLatestSeeds = hasLatestSeeds
+      ? parsed
+      : [
+          ...LATEST_GANDHI_COLONY_ISSUES.filter((issue) => !existingIds.has(issue.id)),
+          ...parsed,
+        ];
+
+    if (!hasLatestSeeds) {
+      localStorage.setItem('sociosphere_issue_seed_version', GANDHI_COLONY_ISSUE_SEED_VERSION);
+    }
+
     // Ensure all existing issues belong to Gandhi Colony
     let hasChanges = false;
-    const normalized = parsed.map(issue => {
+    const normalized = withLatestSeeds.map(issue => {
       const updated = normalizeIssueToColony(issue);
       if (updated !== issue) hasChanges = true;
       return updated;
     });
 
-    if (hasChanges) {
+    if (hasChanges || !hasLatestSeeds) {
       localStorage.setItem('sociosphere_issues', JSON.stringify(normalized));
     }
 
