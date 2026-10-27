@@ -104,7 +104,11 @@ const Sidebar = ({ links = [] }) => {
                 )}
 
                 {!collapsed && link.badge && (
-                  <span className="ml-auto rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 px-1.5 py-0.2 text-[10px] font-bold">
+                  <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-bold border ${
+                    String(link.badge).includes('SOS')
+                      ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/40 animate-pulse'
+                      : 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
+                  }`}>
                     {link.badge}
                   </span>
                 )}

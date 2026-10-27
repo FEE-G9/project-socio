@@ -167,11 +167,11 @@ const ManageFees = () => {
   const handleMarkPaid = (id, name) => {
     const updated = markFeePaid(adminSocietyCode, id, name);
     setRecords(updated);
-    showToast(`✓ Payment recorded as Paid for ${name}! Receipt generated.`);
+    showToast(`Payment recorded as Paid for ${name}! Receipt generated.`);
   };
 
   const handleSendReminder = (name, unit) => {
-    showToast(`✓ Due payment reminder notice sent to ${name} (${unit}).`);
+    showToast(`Due payment reminder notice sent to ${name} (${unit}).`);
   };
 
   const handleRecordPaymentSubmit = (e) => {
@@ -193,14 +193,14 @@ const ManageFees = () => {
       method: 'Cash (Received at RWA Office)',
       notes: ''
     });
-    showToast(`✓ Payment of ₹${paymentForm.amount || 3500} recorded for ${paymentForm.name}! Receipt generated.`);
+    showToast(`Payment of ₹${paymentForm.amount || 3500} recorded for ${paymentForm.name}! Receipt generated.`);
   };
 
   // Actions: Expenses
   const handleApproveBill = (id, vendor) => {
     const updated = approveSocietyExpense(adminSocietyCode, id);
     setExpenses(updated);
-    showToast(`✓ Vendor invoice for ${vendor} approved & payout authorized!`);
+    showToast(`Vendor invoice for ${vendor} approved & payout authorized!`);
   };
 
   const handleAddExpenseSubmit = (e) => {
@@ -222,7 +222,7 @@ const ManageFees = () => {
       method: 'Bank Transfer',
       notes: ''
     });
-    showToast(`✓ Expense of ₹${expenseForm.amount} logged for ${expenseForm.vendor}!`);
+    showToast(`Expense of ₹${expenseForm.amount} logged for ${expenseForm.vendor}!`);
   };
 
   // Export Combined Audit Report
@@ -264,7 +264,7 @@ const ManageFees = () => {
     a.download = `audit-statement-${adminSociety.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('✓ Comprehensive Society Audit Statement exported successfully!');
+    showToast('Comprehensive Society Audit Statement exported successfully!');
   };
 
   return (
@@ -347,7 +347,14 @@ const ManageFees = () => {
             ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200'
             : 'bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 text-blue-900 dark:text-blue-200'
         }`}>
-          <span className="font-semibold text-sm">{toastMsg.text}</span>
+          <div className="flex items-center gap-2">
+            {toastMsg.type === 'success' ? (
+              <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+            ) : (
+              <Info size={18} className="text-blue-500 shrink-0" />
+            )}
+            <span className="font-semibold text-sm">{toastMsg.text}</span>
+          </div>
           <button onClick={() => setToastMsg(null)} className="text-slate-400 hover:text-slate-600">
             <X size={16} />
           </button>

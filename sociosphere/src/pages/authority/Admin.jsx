@@ -36,26 +36,16 @@ import { useAuth } from '../../context/AuthContext';
 
 const TrendArrow = ({ direction = "up" }) => {
   const isUp = direction === "up";
-  return (
-    <svg
-      viewBox="0 0 90 60"
-      className={`h-10 w-14 ${isUp ? "text-emerald-400" : "text-rose-500"}`}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      {isUp ? (
-        <>
-          <polyline points="6,40 25,50 48,27 62,38 84,8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          <polyline points="69,8 84,8 84,23" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-        </>
-      ) : (
-        <>
-          <polyline points="6,15 27,7 47,30 61,20 84,48" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          <polyline points="69,48 84,48 84,33" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-        </>
-      )}
-    </svg>
+  return isUp ? (
+    <div className="flex items-center gap-1 text-emerald-500 font-bold text-xs bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
+      <TrendingUp size={15} className="shrink-0" />
+      <span>+</span>
+    </div>
+  ) : (
+    <div className="flex items-center gap-1 text-rose-500 font-bold text-xs bg-rose-500/10 px-2 py-1 rounded-full border border-rose-500/20">
+      <TrendingDown size={15} className="shrink-0" />
+      <span>-</span>
+    </div>
   );
 };
 
@@ -125,7 +115,7 @@ const AdminHome = () => {
     approveUser(applicantId);
     setApprovalToast({
       type: 'success',
-      message: `✓ ${applicantName} has been approved and admitted to ${adminSociety}! ${isAuth ? 'Their administrative authority account is now active.' : 'Their resident account is now active.'}`
+      message: `${applicantName} has been approved and admitted to ${adminSociety}! ${isAuth ? 'Their administrative authority account is now active.' : 'Their resident account is now active.'}`
     });
     setTimeout(() => setApprovalToast(null), 5000);
   };
@@ -264,6 +254,11 @@ const AdminHome = () => {
                 : 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200'
             }`}>
               <div className="flex items-center gap-2">
+                {approvalToast.type === 'success' ? (
+                  <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+                ) : (
+                  <AlertTriangle size={18} className="text-amber-500 shrink-0" />
+                )}
                 <span className="font-semibold text-sm">{approvalToast.message}</span>
               </div>
               <button 
@@ -618,11 +613,11 @@ const AdminHome = () => {
           <div>
             <label className="block text-sm font-bold mb-1 text-slate-900 dark:text-slate-100">Emergency Category</label>
             <select id="redAlertCategory" className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-xl p-3 focus:ring-2 focus:ring-red-500 outline-none text-slate-900 dark:text-slate-100">
-              <option value="Fire">🔥 Fire</option>
-              <option value="Robbery / Intruder">🦹 Robbery / Intruder</option>
-              <option value="Medical Emergency">🚑 Medical Emergency</option>
-              <option value="Natural Disaster">🌪️ Natural Disaster</option>
-              <option value="Other">⚠️ Other</option>
+              <option value="Fire">Fire Incident / Evacuation</option>
+              <option value="Robbery / Intruder">Security Breach / Intruder</option>
+              <option value="Medical Emergency">Medical Emergency</option>
+              <option value="Natural Disaster">Natural Disaster / Severe Weather</option>
+              <option value="Other">Other Critical Emergency</option>
             </select>
           </div>
           

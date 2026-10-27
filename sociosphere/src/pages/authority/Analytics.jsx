@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
+  Sparkles,
+  AlertTriangle, 
   BarChart3, 
   TrendingUp, 
   TrendingDown,

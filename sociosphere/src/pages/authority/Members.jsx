@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
+  TrendingUp,
+  TrendingDown,
   Users,
   ShieldCheck,
   UserCheck,
@@ -43,26 +45,16 @@ import { getColonies } from '../../data/mockColonies';
 ========================================================= */
 const TrendArrow = ({ direction = "up" }) => {
   const isUp = direction === "up";
-  return (
-    <svg
-      viewBox="0 0 90 60"
-      className={`h-10 w-14 ${isUp ? "text-emerald-400" : "text-rose-500"}`}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      {isUp ? (
-        <>
-          <polyline points="6,40 25,50 48,27 62,38 84,8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          <polyline points="69,8 84,8 84,23" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-        </>
-      ) : (
-        <>
-          <polyline points="6,15 27,7 47,30 61,20 84,48" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          <polyline points="69,48 84,48 84,33" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-        </>
-      )}
-    </svg>
+  return isUp ? (
+    <div className="flex items-center gap-1 text-emerald-500 font-bold text-xs bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
+      <TrendingUp size={15} className="shrink-0" />
+      <span>+</span>
+    </div>
+  ) : (
+    <div className="flex items-center gap-1 text-rose-500 font-bold text-xs bg-rose-500/10 px-2 py-1 rounded-full border border-rose-500/20">
+      <TrendingDown size={15} className="shrink-0" />
+      <span>-</span>
+    </div>
   );
 };
 
@@ -100,6 +92,7 @@ const Members = () => {
   const [addFormData, setAddFormData] = useState({
     name: '',
     email: '',
+    password: '',
     phone: '',
     age: '',
     society: adminSociety,
@@ -181,7 +174,7 @@ const Members = () => {
     const targetName = targetUser?.name || 'Resident';
     const isAuth = targetUser?.role === 'authority' || targetUser?.type === 'member';
     approveUser(userId);
-    setToastMessage(`✓ ${targetName} approved & admitted into ${adminSociety}! ${isAuth ? 'Authority administrative account is now active.' : 'Resident account is now active.'}`);
+    setToastMessage(`${targetName} approved & admitted into ${adminSociety}! ${isAuth ? 'Authority administrative account is now active.' : 'Resident account is now active.'}`);
     setTimeout(() => setToastMessage(null), 4000);
     if (selectedPerson && selectedPerson.id === userId) {
       setSelectedPerson(prev => prev ? { ...prev, status: 'Verified' } : null);
@@ -255,9 +248,10 @@ const Members = () => {
 
     const isMember = addFormData.type === 'member';
 
-    addUser({
+    const result = addUser({
       name: addFormData.name.trim(),
       email: addFormData.email.trim().toLowerCase(),
+      password: addFormData.password?.trim() || undefined,
       phone: `+91 ${addFormData.phone.trim().replace(/\D/g, "")}`,
       age: parseInt(addFormData.age, 10),
       society: adminSociety,
@@ -277,11 +271,18 @@ const Members = () => {
       badges: isMember ? ['Committee Member'] : ['Verified Resident']
     });
 
+    if (result && !result.success) {
+      setFormErrors({ email: result.error });
+      return;
+    }
+
+    const createdPerson = result?.user;
     setIsAddModalOpen(false);
     setFormErrors({});
     setAddFormData({
       name: '',
       email: '',
+      password: '',
       phone: '',
       age: '',
       society: adminSociety,
@@ -292,6 +293,9 @@ const Members = () => {
       designation: 'Resident (Owner)',
       emergencyContact: ''
     });
+
+    setToastMessage(`${createdPerson?.name || addFormData.name} directly added to ${adminSociety} database as Verified ${isMember ? 'Committee Member' : 'Resident'}! (Auto Password: ${createdPerson?.password})`);
+    setTimeout(() => setToastMessage(null), 5000);
   };
 
   return (
@@ -340,7 +344,10 @@ const Members = () => {
       {/* TOAST MESSAGE */}
       {toastMessage && (
         <div className="p-4 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 flex items-center justify-between shadow-sm animate-in fade-in">
-          <span className="text-sm font-semibold">{toastMessage}</span>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+            <span className="text-sm font-semibold">{toastMessage}</span>
+          </div>
           <button onClick={() => setToastMessage(null)} className="text-emerald-700 dark:text-emerald-300 hover:opacity-80">
             <X size={16} />
           </button>
@@ -882,43 +889,49 @@ const Members = () => {
       </Modal>
 
       {/* =====================================================
-          ADD RESIDENT / MEMBER MODAL (WITH COMPLETE VALIDATION)
+          ADD RESIDENT / MEMBER MODAL (DIRECT ADMIN REGISTRATION)
       ===================================================== */}
       <Modal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         title="Register New Person to Society"
-        size="md"
+        size="lg"
       >
         <form onSubmit={handleAddSubmit} className="space-y-4" noValidate>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Add a verified resident, tenant, or council member to the society database with validation.
-          </p>
-
-          {/* NAME */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-              Full Name *
-            </label>
-            <input
-              type="text"
-              value={addFormData.name}
-              onChange={(e) => {
-                setAddFormData({ ...addFormData, name: e.target.value });
-                if (formErrors.name) setFormErrors({ ...formErrors, name: null });
-              }}
-              placeholder="e.g. Ramesh Chandra"
-              className={`w-full rounded-xl border p-2.5 text-sm outline-none transition ${
-                formErrors.name 
-                  ? "border-rose-500 bg-rose-50 dark:bg-rose-950/20" 
-                  : "border-slate-200 bg-slate-50 focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              }`}
-            />
-            {formErrors.name && <p className="mt-1 text-xs text-rose-500 font-semibold">{formErrors.name}</p>}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-800 dark:text-emerald-300">
+            <span className="font-semibold flex items-center gap-1.5">
+              <ShieldCheck size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+              Direct Admin Registration: Person is directly verified and enrolled in the society directory (no approval request required).
+            </span>
+            <span className="shrink-0 self-start sm:self-auto font-mono text-[11px] bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/30 font-bold">
+              {adminSociety} ({activeColonyObj?.code || 'GC-101'})
+            </span>
           </div>
 
-          {/* EMAIL & PHONE */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {/* NAME */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                Full Name *
+              </label>
+              <input
+                type="text"
+                value={addFormData.name}
+                onChange={(e) => {
+                  setAddFormData({ ...addFormData, name: e.target.value });
+                  if (formErrors.name) setFormErrors({ ...formErrors, name: null });
+                }}
+                placeholder="e.g. Ramesh Chandra"
+                className={`w-full rounded-xl border p-2.5 text-sm outline-none transition ${
+                  formErrors.name 
+                    ? "border-rose-500 bg-rose-50 dark:bg-rose-950/20" 
+                    : "border-slate-200 bg-slate-50 focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                }`}
+              />
+              {formErrors.name && <p className="mt-1 text-xs text-rose-500 font-semibold">{formErrors.name}</p>}
+            </div>
+
+            {/* EMAIL */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                 Email Address *
@@ -940,6 +953,7 @@ const Members = () => {
               {formErrors.email && <p className="mt-1 text-xs text-rose-500 font-semibold">{formErrors.email}</p>}
             </div>
 
+            {/* PHONE */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                 Phone (10 Digits) *
@@ -961,10 +975,8 @@ const Members = () => {
               />
               {formErrors.phone && <p className="mt-1 text-xs text-rose-500 font-semibold">{formErrors.phone}</p>}
             </div>
-          </div>
 
-          {/* AGE & OCCUPATION */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* AGE */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                 Age *
@@ -988,9 +1000,10 @@ const Members = () => {
               {formErrors.age && <p className="mt-1 text-xs text-rose-500 font-semibold">{formErrors.age}</p>}
             </div>
 
+            {/* OCCUPATION */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-                Occupation / Job *
+                Occupation / Profession *
               </label>
               <input
                 type="text"
@@ -1008,26 +1021,8 @@ const Members = () => {
               />
               {formErrors.occupation && <p className="mt-1 text-xs text-rose-500 font-semibold">{formErrors.occupation}</p>}
             </div>
-          </div>
 
-          {/* ASSIGNED SOCIETY (LOCKED TO ADMIN'S SOCIETY) */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-              Assigned Society (Locked to Your Community)
-            </label>
-            <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 p-2.5 text-sm font-bold text-emerald-800 dark:text-emerald-300">
-              <div className="flex items-center gap-2">
-                <Building2 size={16} className="text-emerald-500" />
-                <span>{adminSociety}</span>
-              </div>
-              <span className="font-mono text-xs bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">
-                {activeColonyObj?.code || 'GC-101'}
-              </span>
-            </div>
-          </div>
-
-          {/* BLOCK & HOUSE / FLAT NUMBER */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* BLOCK NUMBER */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                 Block Number *
@@ -1045,6 +1040,7 @@ const Members = () => {
               </select>
             </div>
 
+            {/* HOUSE / FLAT NUMBER */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                 House / Flat No *
@@ -1065,10 +1061,8 @@ const Members = () => {
               />
               {formErrors.houseOrFlatNo && <p className="mt-1 text-xs text-rose-500 font-semibold">{formErrors.houseOrFlatNo}</p>}
             </div>
-          </div>
 
-          {/* CATEGORY & DESIGNATION */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* ROLE CATEGORY */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                 Role Category *
@@ -1080,7 +1074,7 @@ const Members = () => {
                   setAddFormData({
                     ...addFormData,
                     type: t,
-                    designation: t === 'member' ? 'Committee Lead' : 'Resident (Owner)'
+                    designation: t === 'member' ? 'Committee Official' : 'Resident (Owner)'
                   });
                 }}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm outline-none focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 cursor-pointer"
@@ -1090,6 +1084,7 @@ const Members = () => {
               </select>
             </div>
 
+            {/* DESIGNATION */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                 Designation / Title
@@ -1102,27 +1097,42 @@ const Members = () => {
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm outline-none focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               />
             </div>
-          </div>
 
-          {/* EMERGENCY CONTACT */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-              Emergency Contact (Optional)
-            </label>
-            <input
-              type="text"
-              value={addFormData.emergencyContact}
-              onChange={(e) => setAddFormData({ ...addFormData, emergencyContact: e.target.value })}
-              placeholder="+91 98765 00000 (Gate Guard / Relative)"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm outline-none focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
+            {/* EMERGENCY CONTACT */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                Emergency Contact (Optional)
+              </label>
+              <input
+                type="text"
+                value={addFormData.emergencyContact}
+                onChange={(e) => setAddFormData({ ...addFormData, emergencyContact: e.target.value })}
+                placeholder="+91 98765 00000"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm outline-none focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              />
+            </div>
+
+            {/* CUSTOM PASSWORD (OPTIONAL) */}
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                Login Password (Optional - Auto-generated if left blank)
+              </label>
+              <input
+                type="text"
+                value={addFormData.password || ''}
+                onChange={(e) => setAddFormData({ ...addFormData, password: e.target.value })}
+                placeholder="Leave blank to auto-generate (e.g. Name@Age#)"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm outline-none focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 font-mono"
+              />
+            </div>
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
             <Button type="button" variant="secondary" onClick={() => setIsAddModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/20">
+              <UserCheck size={16} />
               Save to Database
             </Button>
           </div>

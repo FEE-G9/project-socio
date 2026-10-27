@@ -78,12 +78,15 @@ export default function CitizenSOSModal({ isOpen, onClose }) {
 
     const sosPayload = {
       senderName: user?.name || 'Resident',
-      senderPhone: user?.phone || '+91 98765 43210',
-      residence: user?.residence || 'Unit 402',
-      block: user?.block || 'Block B',
+      senderPhone: user?.phone || user?.emergencyContact || '+91 98765 43210',
+      phone: user?.phone || user?.emergencyContact || '+91 98765 43210',
+      residence: user?.houseOrFlatNo || user?.residence || 'Unit 402',
+      unit: user?.unitNumber || `${user?.blockNumber || user?.block || 'Block B'} - ${user?.houseOrFlatNo || user?.residence || 'Unit 402'}`,
+      block: user?.blockNumber || user?.block || 'Block B',
+      society: user?.society || user?.communityName || 'Gandhi Colony',
       type: selectedType,
-      note: customNote.trim() || `Urgent ${selectedType} reported at ${user?.residence || 'resident premises'}.`,
-      location: `${user?.block || 'Block B'}, ${user?.residence || 'Flat 402'}`
+      note: customNote.trim() || `Urgent ${selectedType} reported at ${user?.unitNumber || user?.residence || 'resident premises'}.`,
+      location: `${user?.blockNumber || user?.block || 'Block B'}, ${user?.houseOrFlatNo || user?.residence || 'Flat 402'}`
     };
 
     triggerCitizenSOS(sosPayload);

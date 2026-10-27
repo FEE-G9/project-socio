@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
   ShieldAlert, 
   Phone, 
@@ -12,19 +13,38 @@ import {
   CheckCircle2, 
   AlertTriangle,
   Radio,
-  ExternalLink
+  ExternalLink,
+  Shield
 } from 'lucide-react';
 import { useAlert } from '../../context/AlertContext';
 import soundAlarm from '../../utils/audioAlarm';
 
 export default function AdminSOSReceiver() {
-  const { citizenSOS, acknowledgeCitizenSOS, resolveCitizenSOS } = useAlert();
+  const { 
+    citizenSOS, 
+    silencedSOSIds, 
+    silenceCitizenSOS, 
+    acknowledgeCitizenSOS, 
+    resolveCitizenSOS 
+  } = useAlert();
+  
+  const navigate = useNavigate();
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [responderNote, setResponderNote] = useState('');
 
+  // The alert is silenced/dismissed from screen takeover if:
+  // 1. No citizenSOS
+  // 2. citizenSOS is RESOLVED
+  // 3. citizenSOS.silenced === true
+  // 4. citizenSOS.id is in silencedSOSIds
+  const isSilenced = !citizenSOS || 
+    citizenSOS.status === 'RESOLVED' || 
+    citizenSOS.silenced === true || 
+    (silencedSOSIds && Array.isArray(silencedSOSIds) && silencedSOSIds.includes(citizenSOS.id));
+
   useEffect(() => {
-    if (citizenSOS && citizenSOS.status !== 'RESOLVED') {
+    if (!isSilenced && citizenSOS) {
       // Start siren alarm sound on Admin screen
       soundAlarm.startSiren(0.18);
       setIsAudioPlaying(true);
@@ -44,9 +64,9 @@ export default function AdminSOSReceiver() {
       soundAlarm.stop();
       setIsAudioPlaying(false);
     }
-  }, [citizenSOS?.id]);
+  }, [citizenSOS?.id, isSilenced]);
 
-  if (!citizenSOS || citizenSOS.status === 'RESOLVED') return null;
+  if (isSilenced) return null;
 
   const toggleAudio = () => {
     if (isAudioPlaying) {
@@ -63,7 +83,20 @@ export default function AdminSOSReceiver() {
     acknowledgeCitizenSOS(citizenSOS.id, note);
   };
 
-  const isDispatched = citizenSOS.status === 'DISPATCHED';
+  const handleSilenceAlarm = () => {
+    soundAlarm.stop();
+    setIsAudioPlaying(false);
+    silenceCitizenSOS(citizenSOS.id);
+  };
+
+  const handleGoToEmergency = () => {
+    soundAlarm.stop();
+    setIsAudioPlaying(false);
+    silenceCitizenSOS(citizenSOS.id);
+    navigate('/authority/emergency');
+  };
+
+  const isDispatched = citizenSOS.status === 'DISPATCHED' || citizenSOS.status === 'Guards Dispatched';
 
   const formatElapsed = (sec) => {
     const m = Math.floor(sec / 60);
@@ -99,6 +132,7 @@ export default function AdminSOSReceiver() {
 
             {/* Siren Audio Toggle */}
             <button
+              type="button"
               onClick={toggleAudio}
               className="flex items-center gap-2 rounded-xl bg-black/30 hover:bg-black/40 px-3 py-2 text-xs font-bold text-white border border-white/20 transition-colors"
             >
@@ -126,22 +160,21 @@ export default function AdminSOSReceiver() {
               <span className="text-xs font-bold uppercase tracking-wider text-red-700 dark:text-red-400">
                 Incident Classification
               </span>
-              <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-red-600 text-white uppercase tracking-wider">
-                {citizenSOS.type}
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600 text-white text-xs font-black uppercase">
+                <Radio size={13} className="animate-pulse" />
+                {citizenSOS.type || 'Immediate Threat / SOS'}
               </span>
             </div>
 
             <div className="mt-3">
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
-                Citizen Distress Message:
-              </p>
-              <p className="text-base font-bold text-slate-900 dark:text-white mt-1">
-                "{citizenSOS.note}"
+              <p className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Resident Note / Description</p>
+              <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 p-3 rounded-xl border border-red-200 dark:border-red-900/40">
+                "{citizenSOS.note || 'Emergency assistance requested immediately.'}"
               </p>
             </div>
           </div>
 
-          {/* Resident Details Grid */}
+          {/* Resident & Location Details Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
               <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
@@ -149,7 +182,9 @@ export default function AdminSOSReceiver() {
               </div>
               <div className="min-w-0">
                 <p className="text-[10px] uppercase font-bold text-slate-400">Resident Name</p>
-                <p className="text-sm font-extrabold text-slate-900 dark:text-white truncate">{citizenSOS.senderName}</p>
+                <p className="text-sm font-extrabold text-slate-900 dark:text-white truncate">
+                  {citizenSOS.residentName || citizenSOS.senderName}
+                </p>
               </div>
             </div>
 
@@ -159,7 +194,9 @@ export default function AdminSOSReceiver() {
               </div>
               <div className="min-w-0">
                 <p className="text-[10px] uppercase font-bold text-slate-400">Apartment / Unit</p>
-                <p className="text-sm font-extrabold text-slate-900 dark:text-white truncate">{citizenSOS.block} • {citizenSOS.residence}</p>
+                <p className="text-sm font-extrabold text-slate-900 dark:text-white truncate">
+                  {citizenSOS.unit || `${citizenSOS.block} • ${citizenSOS.residence}`}
+                </p>
               </div>
             </div>
 
@@ -169,8 +206,11 @@ export default function AdminSOSReceiver() {
               </div>
               <div className="min-w-0">
                 <p className="text-[10px] uppercase font-bold text-slate-400">Direct Contact</p>
-                <a href={`tel:${citizenSOS.senderPhone}`} className="text-sm font-extrabold text-blue-600 dark:text-blue-400 hover:underline truncate block">
-                  {citizenSOS.senderPhone}
+                <a 
+                  href={`tel:${citizenSOS.senderPhone || citizenSOS.phone}`} 
+                  className="text-sm font-extrabold text-blue-600 dark:text-blue-400 hover:underline truncate block"
+                >
+                  {citizenSOS.senderPhone || citizenSOS.phone}
                 </a>
               </div>
             </div>
@@ -186,7 +226,7 @@ export default function AdminSOSReceiver() {
                 type="text"
                 value={responderNote}
                 onChange={(e) => setResponderNote(e.target.value)}
-                placeholder="e.g. Guard Sunil & Team dispatched to Flat 402 with First Aid kit."
+                placeholder="e.g. Guard Vikram & Quick Response Team dispatched to Unit with First Aid kit."
                 className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
               />
             </div>
@@ -201,34 +241,56 @@ export default function AdminSOSReceiver() {
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-            {!isDispatched ? (
-              <button
-                type="button"
-                onClick={handleDispatch}
-                className="w-full sm:flex-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-sm sm:text-base py-3.5 shadow-lg shadow-red-600/30 hover:scale-[1.01] active:scale-[0.99] transition-all"
-              >
-                <ShieldAlert className="h-5 w-5" />
-                DISPATCH SECURITY & ACKNOWLEDGE
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => resolveCitizenSOS(citizenSOS.id)}
-                className="w-full sm:flex-1 flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm sm:text-base py-3.5 shadow-lg shadow-emerald-600/30 transition-all"
-              >
-                <CheckCircle2 className="h-5 w-5" />
-                MARK RESOLVED & CLOSE ALARM
-              </button>
-            )}
+          <div className="space-y-3 pt-2">
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              {!isDispatched ? (
+                <button
+                  type="button"
+                  onClick={handleDispatch}
+                  className="w-full sm:flex-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-sm sm:text-base py-3.5 shadow-lg shadow-red-600/30 hover:scale-[1.01] active:scale-[0.99] transition-all"
+                >
+                  <ShieldAlert className="h-5 w-5" />
+                  DISPATCH SECURITY & ACKNOWLEDGE
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => resolveCitizenSOS(citizenSOS.id)}
+                  className="w-full sm:flex-1 flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm sm:text-base py-3.5 shadow-lg shadow-emerald-600/30 transition-all"
+                >
+                  <CheckCircle2 className="h-5 w-5" />
+                  MARK RESOLVED & REMOVE
+                </button>
+              )}
 
-            <button
-              type="button"
-              onClick={() => resolveCitizenSOS(citizenSOS.id)}
-              className="w-full sm:w-auto px-5 py-3.5 rounded-2xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-sm transition-colors"
-            >
-              Silence & Close
-            </button>
+              {/* SILENCE ALARM (Dismisses takeover modal, keeps in Active Distress Calls!) */}
+              <button
+                type="button"
+                onClick={handleSilenceAlarm}
+                className="w-full sm:w-auto px-5 py-3.5 rounded-2xl border border-amber-400 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-extrabold text-sm flex items-center justify-center gap-2 transition-colors shrink-0"
+                title="Silence siren audio and dismiss screen takeover. The distress call remains active in the Emergency Command page until marked handled."
+              >
+                <VolumeX size={17} />
+                Silence the Alarm
+              </button>
+            </div>
+
+            {/* Helper status text & direct link to Emergency Page */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-1 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+              <span className="flex items-center gap-1.5 text-[11px]">
+                <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                Silencing alarm dismisses this takeover; call stays in <strong>Active Distress Calls</strong> until handled.
+              </span>
+
+              <button
+                type="button"
+                onClick={handleGoToEmergency}
+                className="font-bold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 text-xs shrink-0"
+              >
+                <span>View in Emergency Page</span>
+                <ExternalLink size={13} />
+              </button>
+            </div>
           </div>
 
         </div>

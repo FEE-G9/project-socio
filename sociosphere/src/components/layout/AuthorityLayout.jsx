@@ -10,40 +10,48 @@ import {
   PhoneCall,
   Wallet,
   MapPin,
-  Megaphone
+  Megaphone,
+  Sun,
+  Cloud,
+  CloudRain,
+  CloudLightning,
+  Snowflake,
+  CloudFog,
+  CloudSun
 } from "lucide-react";
 
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
 import { useAuth } from "../../context/AuthContext";
+import { useAlert } from "../../context/AlertContext";
 import { useWeather } from "../../hooks/useWeather";
 import { getAnnouncements } from "../../data/mockAnnouncements";
 import { getUsers } from "../../data/mockUsers";
 import ScrollReveal from "../ui/ScrollReveal";
 import AdminSOSReceiver from "../ui/AdminSOSReceiver";
 
-const getWeatherEmoji = (condition) => {
-  switch (condition?.toLowerCase()) {
-    case "rain":
-    case "drizzle":
-      return "🌧️";
-    case "clouds":
-      return "☁️";
-    case "clear":
-      return "☀️";
-    case "thunderstorm":
-      return "⛈️";
-    case "snow":
-      return "❄️";
-    case "mist":
-    case "smoke":
-    case "haze":
-    case "fog":
-      return "🌫️";
-    default:
-      return "🌤️";
+const renderWeatherIcon = (condition) => {
+  const c = condition?.toLowerCase();
+  if (c === "rain" || c === "drizzle") {
+    return <CloudRain size={16} className="text-sky-500 shrink-0" />;
   }
+  if (c === "clouds") {
+    return <Cloud size={16} className="text-slate-400 shrink-0" />;
+  }
+  if (c === "clear") {
+    return <Sun size={16} className="text-amber-500 shrink-0" />;
+  }
+  if (c === "thunderstorm") {
+    return <CloudLightning size={16} className="text-purple-500 shrink-0" />;
+  }
+  if (c === "snow") {
+    return <Snowflake size={16} className="text-blue-300 shrink-0" />;
+  }
+  if (c === "mist" || c === "smoke" || c === "haze" || c === "fog") {
+    return <CloudFog size={16} className="text-slate-400 shrink-0" />;
+  }
+  return <CloudSun size={16} className="text-amber-500 shrink-0" />;
 };
 
 const AuthorityLayout = () => {
@@ -104,6 +112,15 @@ const AuthorityLayout = () => {
     ).length;
   }, [usersList, adminSociety]);
 
+  const { activeSOSList } = useAlert();
+  const activeSOSCount = useMemo(() => {
+    if (!activeSOSList || !Array.isArray(activeSOSList)) return 0;
+    return activeSOSList.filter(item => {
+      const s = (item.society || '').toLowerCase();
+      return !s || s === adminSociety.toLowerCase();
+    }).length;
+  }, [activeSOSList, adminSociety]);
+
   const latestNotice = useMemo(() => {
     const matching = announcements.filter(a => {
       if (!a) return false;
@@ -139,6 +156,7 @@ const AuthorityLayout = () => {
       label: "Emergency Dispatch",
       href: "/authority/emergency",
       icon: PhoneCall,
+      badge: activeSOSCount > 0 ? `${activeSOSCount} SOS` : null,
     },
     {
       label: "Finance & Accounts",
@@ -185,7 +203,7 @@ const AuthorityLayout = () => {
                   className="flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 font-bold text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60"
                   title={`Current weather in ${adminSociety}: ${weather.description || "Clear sky"}, ${weather.temp ?? 26}°C`}
                 >
-                  <span className="text-sm">{getWeatherEmoji(weather.condition)}</span>
+                  <span className="flex items-center">{renderWeatherIcon(weather.condition)}</span>
                   <span>{weather.temp != null ? `${weather.temp}°C` : "26°C"}</span>
                   <span className="text-slate-400 font-normal">({weather.description || weather.condition || "Clear sky"})</span>
                 </span>
