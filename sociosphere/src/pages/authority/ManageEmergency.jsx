@@ -101,13 +101,13 @@ const ManageEmergency = () => {
       }
       return item;
     }));
-    showToast(`✓ Rapid Response Team dispatched to ${unit} (${residentName})!`);
+    showToast(`Rapid Response Team dispatched to ${unit} (${residentName})!`);
   };
 
   // Handle Resolve SOS
   const handleResolveSOS = (sosId) => {
     setActiveSOSList(prev => prev.filter(item => item.id !== sosId));
-    showToast('✓ Situation marked as handled & resolved.');
+    showToast('Situation marked as handled & resolved.');
   };
 
   // Dispatch Red Alert
@@ -115,7 +115,7 @@ const ManageEmergency = () => {
     e.preventDefault();
     triggerAdminAlert(redAlertForm.category, redAlertForm.directive);
     setIsRedAlertModalOpen(false);
-    showToast(`🚨 High-Priority Red Alert broadcasted to all ${adminSociety} screens!`, 'error');
+    showToast(`High-Priority Red Alert broadcasted to all ${adminSociety} screens!`, 'error');
   };
 
   return (
@@ -153,7 +153,14 @@ const ManageEmergency = () => {
             ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-700 text-rose-900 dark:text-rose-200'
             : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200'
         }`}>
-          <span className="font-semibold text-sm">{toastMsg.text}</span>
+          <div className="flex items-center gap-2">
+            {toastMsg.type === 'error' ? (
+              <AlertTriangle size={18} className="text-rose-500 shrink-0" />
+            ) : (
+              <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+            )}
+            <span className="font-semibold text-sm">{toastMsg.text}</span>
+          </div>
           <button onClick={() => setToastMsg(null)} className="text-slate-400 hover:text-slate-600">
             <X size={16} />
           </button>
@@ -369,11 +376,11 @@ const ManageEmergency = () => {
               onChange={(e) => setRedAlertForm(prev => ({ ...prev, category: e.target.value }))}
               className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs outline-none focus:border-rose-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
             >
-              <option value="Fire">🔥 Fire Incident / Evacuation</option>
-              <option value="Robbery / Intruder">🦹 Security Breach / Intruder Alert</option>
-              <option value="Medical Emergency">🚑 Medical Emergency / Ambulance Entry</option>
-              <option value="Gas / Power Grid Failure">⚠️ LPG Gas Leak / Transformer Explosion</option>
-              <option value="Natural Disaster">🌪️ Earthquake / Severe Weather Alert</option>
+              <option value="Fire">Fire Incident / Evacuation</option>
+              <option value="Robbery / Intruder">Security Breach / Intruder Alert</option>
+              <option value="Medical Emergency">Medical Emergency / Ambulance Entry</option>
+              <option value="Gas / Power Grid Failure">LPG Gas Leak / Transformer Explosion</option>
+              <option value="Natural Disaster">Earthquake / Severe Weather Alert</option>
             </select>
           </div>
 

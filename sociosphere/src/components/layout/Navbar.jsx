@@ -6,6 +6,7 @@ import {
   User,
   LogOut,
   ChevronDown,
+  ChevronUp,
   Sun,
   Moon,
   Settings,
@@ -184,7 +185,7 @@ const Navbar = ({
                 {getLanguageLabel(currentLanguageObj)}
               </span>
               <span className="text-[10px] text-slate-700 dark:text-slate-300 select-none">
-                {languageMenuOpen ? "▲" : "▼"}
+                {languageMenuOpen ? <ChevronUp size={12} className="inline" /> : <ChevronDown size={12} className="inline" />}
               </span>
             </button>
 

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
+  TrendingUp,
+  TrendingDown,
   Users,
   ShieldCheck,
   UserCheck,
@@ -43,26 +45,16 @@ import { getColonies } from '../../data/mockColonies';
 ========================================================= */
 const TrendArrow = ({ direction = "up" }) => {
   const isUp = direction === "up";
-  return (
-    <svg
-      viewBox="0 0 90 60"
-      className={`h-10 w-14 ${isUp ? "text-emerald-400" : "text-rose-500"}`}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      {isUp ? (
-        <>
-          <polyline points="6,40 25,50 48,27 62,38 84,8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          <polyline points="69,8 84,8 84,23" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-        </>
-      ) : (
-        <>
-          <polyline points="6,15 27,7 47,30 61,20 84,48" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          <polyline points="69,48 84,48 84,33" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-        </>
-      )}
-    </svg>
+  return isUp ? (
+    <div className="flex items-center gap-1 text-emerald-500 font-bold text-xs bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
+      <TrendingUp size={15} className="shrink-0" />
+      <span>+</span>
+    </div>
+  ) : (
+    <div className="flex items-center gap-1 text-rose-500 font-bold text-xs bg-rose-500/10 px-2 py-1 rounded-full border border-rose-500/20">
+      <TrendingDown size={15} className="shrink-0" />
+      <span>-</span>
+    </div>
   );
 };
 
@@ -182,7 +174,7 @@ const Members = () => {
     const targetName = targetUser?.name || 'Resident';
     const isAuth = targetUser?.role === 'authority' || targetUser?.type === 'member';
     approveUser(userId);
-    setToastMessage(`✓ ${targetName} approved & admitted into ${adminSociety}! ${isAuth ? 'Authority administrative account is now active.' : 'Resident account is now active.'}`);
+    setToastMessage(`${targetName} approved & admitted into ${adminSociety}! ${isAuth ? 'Authority administrative account is now active.' : 'Resident account is now active.'}`);
     setTimeout(() => setToastMessage(null), 4000);
     if (selectedPerson && selectedPerson.id === userId) {
       setSelectedPerson(prev => prev ? { ...prev, status: 'Verified' } : null);
@@ -302,7 +294,7 @@ const Members = () => {
       emergencyContact: ''
     });
 
-    setToastMessage(`✓ ${createdPerson?.name || addFormData.name} directly added to ${adminSociety} database as Verified ${isMember ? 'Committee Member' : 'Resident'}! (Auto Password: ${createdPerson?.password})`);
+    setToastMessage(`${createdPerson?.name || addFormData.name} directly added to ${adminSociety} database as Verified ${isMember ? 'Committee Member' : 'Resident'}! (Auto Password: ${createdPerson?.password})`);
     setTimeout(() => setToastMessage(null), 5000);
   };
 
@@ -352,7 +344,10 @@ const Members = () => {
       {/* TOAST MESSAGE */}
       {toastMessage && (
         <div className="p-4 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 flex items-center justify-between shadow-sm animate-in fade-in">
-          <span className="text-sm font-semibold">{toastMessage}</span>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+            <span className="text-sm font-semibold">{toastMessage}</span>
+          </div>
           <button onClick={() => setToastMessage(null)} className="text-emerald-700 dark:text-emerald-300 hover:opacity-80">
             <X size={16} />
           </button>
