@@ -24,6 +24,7 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
 import { useAuth } from "../../context/AuthContext";
+import { useAlert } from "../../context/AlertContext";
 import { useWeather } from "../../hooks/useWeather";
 import { getAnnouncements } from "../../data/mockAnnouncements";
 import { getUsers } from "../../data/mockUsers";
@@ -111,6 +112,15 @@ const AuthorityLayout = () => {
     ).length;
   }, [usersList, adminSociety]);
 
+  const { activeSOSList } = useAlert();
+  const activeSOSCount = useMemo(() => {
+    if (!activeSOSList || !Array.isArray(activeSOSList)) return 0;
+    return activeSOSList.filter(item => {
+      const s = (item.society || '').toLowerCase();
+      return !s || s === adminSociety.toLowerCase();
+    }).length;
+  }, [activeSOSList, adminSociety]);
+
   const latestNotice = useMemo(() => {
     const matching = announcements.filter(a => {
       if (!a) return false;
@@ -146,6 +156,7 @@ const AuthorityLayout = () => {
       label: "Emergency Dispatch",
       href: "/authority/emergency",
       icon: PhoneCall,
+      badge: activeSOSCount > 0 ? `${activeSOSCount} SOS` : null,
     },
     {
       label: "Finance & Accounts",

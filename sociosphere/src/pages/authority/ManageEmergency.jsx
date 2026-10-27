@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   PhoneCall, 
   ShieldAlert, 
@@ -18,7 +18,8 @@ import {
   Send,
   Eye,
   X,
-  Volume2
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -26,8 +27,6 @@ import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
-
-const SOS_STORAGE_KEY = 'sociosphere_active_sos_alerts';
 
 const INITIAL_GUARD_POSTS = [
   { id: 'gp-1', post: 'Main Gate 1 Entrance', guard: 'Head Guard Vikram Singh', shift: 'Day Shift (08:00 - 20:00)', phone: '+91 98000 00001', status: 'Active on Post' },
@@ -48,7 +47,12 @@ const EMERGENCY_HOTLINES = [
 
 const ManageEmergency = () => {
   const { user } = useAuth();
-  const { triggerAdminAlert } = useAlert();
+  const { 
+    activeSOSList, 
+    acknowledgeCitizenSOS, 
+    resolveCitizenSOS, 
+    triggerAdminAlert 
+  } = useAlert();
 
   const adminSociety = user?.society || user?.communityName || 'Gandhi Colony';
   const adminSocietyCode = user?.societyCode || (
@@ -56,25 +60,15 @@ const ManageEmergency = () => {
     adminSociety === 'Shayam Nagar' ? 'SN-202' : 'DV-303'
   );
 
-  const [activeSOSList, setActiveSOSList] = useState(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem(SOS_STORAGE_KEY) || '[]');
-      if (stored.length > 0) return stored;
-    } catch { /* ignore */ }
-    // Initial sample alert for demonstration
-    return [
-      {
-        id: 'SOS-901',
-        residentName: 'Aarav Sharma',
-        unit: 'Block B - Flat 402',
-        phone: '+91 98765 43210',
-        timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-        type: 'Medical / Panic Call',
-        status: 'Guards Dispatched',
-        society: 'Gandhi Colony'
-      }
-    ];
-  });
+  // Filter active distress calls for current society
+  const societySOSList = useMemo(() => {
+    if (!activeSOSList || !Array.isArray(activeSOSList)) return [];
+    return activeSOSList.filter(item => {
+      if (!item) return false;
+      const s = (item.society || '').toLowerCase();
+      return !s || s === adminSociety.toLowerCase();
+    });
+  }, [activeSOSList, adminSociety]);
 
   const [isRedAlertModalOpen, setIsRedAlertModalOpen] = useState(false);
   const [redAlertForm, setRedAlertForm] = useState({
@@ -89,24 +83,15 @@ const ManageEmergency = () => {
     setTimeout(() => setToastMsg(null), 4000);
   };
 
-  useEffect(() => {
-    localStorage.setItem(SOS_STORAGE_KEY, JSON.stringify(activeSOSList));
-  }, [activeSOSList]);
-
   // Handle Dispatch Guard
   const handleDispatchGuard = (sosId, residentName, unit) => {
-    setActiveSOSList(prev => prev.map(item => {
-      if (item.id === sosId) {
-        return { ...item, status: 'Guards On Site' };
-      }
-      return item;
-    }));
+    acknowledgeCitizenSOS(sosId, `Security Response Guard dispatched to ${unit}.`);
     showToast(`Rapid Response Team dispatched to ${unit} (${residentName})!`);
   };
 
-  // Handle Resolve SOS
+  // Handle Resolve SOS (User marks handled)
   const handleResolveSOS = (sosId) => {
-    setActiveSOSList(prev => prev.filter(item => item.id !== sosId));
+    resolveCitizenSOS(sosId);
     showToast('Situation marked as handled & resolved.');
   };
 
@@ -139,9 +124,9 @@ const ManageEmergency = () => {
 
         <button
           onClick={() => setIsRedAlertModalOpen(true)}
-          className="group relative flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 px-5 py-2.5 text-xs font-black tracking-wider text-white shadow-lg shadow-red-600/30 transition-all duration-200 hover:scale-105 active:scale-95 animate-pulse"
+          className="group relative flex items-center gap-2 rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-red-600/30 transition-all duration-200 hover:scale-105 hover:shadow-red-600/50 active:scale-95 animate-pulse"
         >
-          <Radio size={16} className="text-white shrink-0" />
+          <AlertTriangle size={18} className="text-white shrink-0" />
           <span>BROADCAST RED ALERT</span>
         </button>
       </div>
@@ -170,7 +155,15 @@ const ManageEmergency = () => {
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Active Distress Calls", value: activeSOSList.length, desc: "Real-time resident alerts", icon: AlertTriangle, color: "text-rose-500", bg: "bg-rose-500/10", alert: activeSOSList.length > 0 },
+          { 
+            label: "Active Distress Calls", 
+            value: societySOSList.length, 
+            desc: "Unresolved resident emergencies", 
+            icon: AlertTriangle, 
+            color: "text-rose-500", 
+            bg: "bg-rose-500/10", 
+            alert: societySOSList.length > 0 
+          },
           { label: "On-Duty Guard Posts", value: guardPosts.length, desc: "Active checkpoints manned", icon: Shield, color: "text-blue-500", bg: "bg-blue-500/10" },
           { label: "Security Response Time", value: "< 3 Mins", desc: "Average campus dispatch", icon: Clock, color: "text-emerald-500", bg: "bg-emerald-500/10" },
           { label: "Emergency Hotlines", value: EMERGENCY_HOTLINES.length, desc: "Verified speed-dials", icon: PhoneCall, color: "text-purple-500", bg: "bg-purple-500/10" },
@@ -211,15 +204,15 @@ const ManageEmergency = () => {
           <div>
             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Radio size={20} className="text-rose-500 animate-pulse" />
-              Live Resident SOS Distress Monitor ({activeSOSList.length})
+              Live Resident SOS Distress Monitor ({societySOSList.length})
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Immediate distress calls triggered by residents within {adminSociety}.
+              Immediate distress calls triggered by residents within {adminSociety}. Remains active until marked handled.
             </p>
           </div>
         </div>
 
-        {activeSOSList.length === 0 ? (
+        {societySOSList.length === 0 ? (
           <Card className="p-8 text-center border-slate-200 dark:border-slate-800">
             <CheckCircle2 size={36} className="mx-auto text-emerald-500 mb-2" />
             <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">All Quiet on Society Campus</h4>
@@ -227,56 +220,117 @@ const ManageEmergency = () => {
           </Card>
         ) : (
           <div className="space-y-3">
-            {activeSOSList.map(sos => (
-              <div 
-                key={sos.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border-2 border-rose-400 bg-gradient-to-r from-rose-50/70 via-white to-rose-50/30 dark:from-rose-950/30 dark:via-[#0D1524] dark:to-rose-950/20 shadow-md gap-4"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-600 text-white shadow-md shadow-rose-600/30 shrink-0">
-                    <AlertTriangle size={22} className="animate-bounce" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-extrabold text-slate-900 dark:text-slate-100 text-base">{sos.residentName}</h3>
-                      <span className="font-bold text-xs px-2.5 py-0.5 rounded-full bg-rose-600 text-white">
-                        {sos.unit}
-                      </span>
-                      <span className="text-[11px] font-semibold text-rose-700 dark:text-rose-300">
-                        {sos.type}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1 flex-wrap">
-                      <span className="flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-200">
-                        <Phone size={12} className="text-rose-500" /> {sos.phone}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1">
-                        <Clock size={12} /> {new Date(sos.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                      </span>
-                      <span>•</span>
-                      <span className="font-mono text-slate-400">{sos.id}</span>
-                    </div>
-                  </div>
-                </div>
+            {societySOSList.map(sos => {
+              const residentName = sos.residentName || sos.senderName || 'Resident';
+              const unit = sos.unit || `${sos.block || 'Block'} - ${sos.residence || 'Unit'}`;
+              const phone = sos.phone || sos.senderPhone || 'N/A';
+              const isSilenced = sos.status === 'Alarm Silenced' || sos.silenced;
+              const isDispatched = sos.status === 'Guards Dispatched' || sos.status === 'Guards On Site';
 
-                <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                  <button
-                    onClick={() => handleDispatchGuard(sos.id, sos.residentName, sos.unit)}
-                    className="px-4 py-2 text-xs font-bold rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/30 transition-all flex items-center gap-1.5"
-                  >
-                    <Shield size={14} />
-                    Dispatch Guards
-                  </button>
-                  <button
-                    onClick={() => handleResolveSOS(sos.id)}
-                    className="px-3.5 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    Mark Handled
-                  </button>
+              return (
+                <div 
+                  key={sos.id}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-2xl border-2 shadow-md gap-4 transition-all ${
+                    isSilenced
+                      ? 'border-amber-400/80 bg-gradient-to-r from-amber-50/70 via-white to-amber-50/30 dark:from-amber-950/20 dark:via-[#0D1524] dark:to-amber-950/10'
+                      : isDispatched
+                      ? 'border-blue-400/80 bg-gradient-to-r from-blue-50/70 via-white to-blue-50/30 dark:from-blue-950/20 dark:via-[#0D1524] dark:to-blue-950/10'
+                      : 'border-rose-500 bg-gradient-to-r from-rose-50/80 via-white to-rose-50/40 dark:from-rose-950/30 dark:via-[#0D1524] dark:to-rose-950/20'
+                  }`}
+                >
+                  <div className="flex items-start gap-3.5">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-md shrink-0 ${
+                      isSilenced 
+                        ? 'bg-amber-500 shadow-amber-500/30' 
+                        : isDispatched 
+                        ? 'bg-blue-600 shadow-blue-600/30' 
+                        : 'bg-rose-600 shadow-rose-600/30 animate-pulse'
+                    }`}>
+                      {isSilenced ? (
+                        <VolumeX size={22} />
+                      ) : (
+                        <AlertTriangle size={22} className={!isDispatched ? "animate-bounce" : ""} />
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-extrabold text-slate-900 dark:text-slate-100 text-base">{residentName}</h3>
+                        <span className="font-bold text-xs px-2.5 py-0.5 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900">
+                          {unit}
+                        </span>
+                        <span className="text-[11px] font-semibold text-rose-700 dark:text-rose-300">
+                          {sos.type || 'Emergency SOS'}
+                        </span>
+
+                        {/* Status Badge */}
+                        {isSilenced ? (
+                          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 flex items-center gap-1">
+                            <VolumeX size={11} />
+                            Alarm Silenced (Active)
+                          </span>
+                        ) : isDispatched ? (
+                          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-500/40 flex items-center gap-1">
+                            <Shield size={11} />
+                            Guards Dispatched
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-600 text-white animate-pulse">
+                            Live Emergency
+                          </span>
+                        )}
+                      </div>
+
+                      {sos.note && (
+                        <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 italic bg-white/70 dark:bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-800">
+                          "{sos.note}"
+                        </p>
+                      )}
+
+                      <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-2 flex-wrap">
+                        <a 
+                          href={`tel:${phone}`} 
+                          className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          <Phone size={12} /> {phone}
+                        </a>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <Clock size={12} /> {new Date(sos.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </span>
+                        <span>•</span>
+                        <span className="font-mono text-slate-400 text-[11px]">{sos.id}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions on this distress call */}
+                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleDispatchGuard(sos.id, residentName, unit)}
+                      className={`px-4 py-2.5 text-xs font-bold rounded-xl text-white shadow-md transition-all flex items-center gap-1.5 ${
+                        isDispatched 
+                          ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/30' 
+                          : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/30'
+                      }`}
+                    >
+                      <Shield size={14} />
+                      {isDispatched ? 'Update Dispatch' : 'Dispatch Guards'}
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => handleResolveSOS(sos.id)}
+                      className="px-4 py-2.5 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5"
+                      title="Mark situation handled and remove from active list"
+                    >
+                      <CheckCircle2 size={14} />
+                      Mark Handled
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
@@ -313,35 +367,34 @@ const ManageEmergency = () => {
           </Card>
         </section>
 
-        {/* Emergency Speed Dials */}
+        {/* Emergency Hotlines Directory */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <PhoneCall size={18} className="text-rose-500" />
-              Emergency Services Speed-Dial
+              <PhoneCall size={18} className="text-purple-500" />
+              Emergency Hotlines & Speed-Dials
             </h2>
           </div>
 
           <Card className="p-0 overflow-hidden border-slate-200 dark:border-slate-800">
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
-              {EMERGENCY_HOTLINES.map(hotline => {
+              {EMERGENCY_HOTLINES.map((hotline, idx) => {
                 const Icon = hotline.icon;
                 return (
-                  <div key={hotline.name} className="p-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div key={idx} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${hotline.color}`}>
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${hotline.color}`}>
                         <Icon size={16} />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{hotline.name}</p>
+                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{hotline.name}</p>
                         <p className="text-[11px] text-slate-400">{hotline.category}</p>
                       </div>
                     </div>
                     <a
                       href={`tel:${hotline.number}`}
-                      className="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-100 hover:bg-emerald-100 hover:text-emerald-700 dark:bg-slate-800 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-400 transition-colors flex items-center gap-1"
+                      className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-extrabold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
                     >
-                      <Phone size={12} />
                       {hotline.number}
                     </a>
                   </div>
@@ -350,7 +403,6 @@ const ManageEmergency = () => {
             </div>
           </Card>
         </section>
-
       </div>
 
       {/* RED ALERT BROADCAST MODAL */}
@@ -358,13 +410,14 @@ const ManageEmergency = () => {
         isOpen={isRedAlertModalOpen}
         onClose={() => setIsRedAlertModalOpen(false)}
         title="Broadcast Emergency Red Alert"
+        size="md"
       >
         <form onSubmit={handleSendRedAlert} className="space-y-4">
-          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-800 dark:text-rose-300 text-xs leading-relaxed">
-            <p className="font-bold flex items-center gap-1.5 mb-1">
-              <AlertTriangle size={15} /> HIGH-PRIORITY EMERGENCY OVERRIDE
+          <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 flex items-start gap-2.5">
+            <AlertTriangle className="h-5 w-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+            <p className="text-xs text-rose-800 dark:text-rose-300 leading-relaxed">
+              <strong>Caution:</strong> This will trigger an immediate high-priority audio-visual alarm that will override resident screens across <strong>{adminSociety}</strong>.
             </p>
-            This siren alert immediately flashes on the screens of all residents logged into {adminSociety}. Use only for genuine critical emergencies.
           </div>
 
           <div>
@@ -398,12 +451,13 @@ const ManageEmergency = () => {
             />
           </div>
 
-          <div className="pt-2 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
             <Button type="button" variant="secondary" onClick={() => setIsRedAlertModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-rose-600 hover:bg-rose-700 text-white font-black tracking-wide">
-              DISPATCH RED ALERT NOW
+            <Button type="submit" className="bg-rose-600 hover:bg-rose-700 text-white font-extrabold flex items-center gap-1.5 shadow-md shadow-rose-600/30">
+              <Send size={15} />
+              Confirm & Blast Alarm
             </Button>
           </div>
         </form>
