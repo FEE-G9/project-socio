@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Wallet,
@@ -134,11 +133,11 @@ function FinancialBar({ amount, maxAmount, color, label }) {
 
   return (
     <div className="min-w-0 flex-1">
-      <div className="mb-2 text-center text-xs text-slate-300">
+      <div className="mb-2 text-center text-xs text-slate-600 dark:text-slate-300">
         {formatMoney(amount)}
       </div>
 
-      <div className="flex h-36 items-end rounded-t-md bg-slate-800/70 p-1 sm:h-44">
+      <div className="flex h-36 items-end rounded-t-md bg-slate-100 p-1 dark:bg-slate-800/70 sm:h-44">
         <div
           title={`${label}: ${formatMoney(amount)}`}
           style={{ height: `${height}%` }}
@@ -252,18 +251,18 @@ export default function Expenses() {
   );
 
   return (
-    <div className="min-h-screen space-y-8 bg-slate-950 p-4 text-white sm:p-6 lg:p-8">
+    <div className="min-h-screen space-y-8 bg-slate-50 p-4 text-slate-900 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100 sm:p-6 lg:p-8">
       {/* PAGE HEADING */}
       <header className="border-b-4 border-emerald-600 pb-5">
-        <h1 className="text-2xl font-bold sm:text-3xl">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
           Financial Transparency
         </h1>
 
-        <p className="mt-2 text-sm text-slate-400">
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
           Understand how society funds are collected, spent and saved.
         </p>
 
-        <p className="mt-3 text-xs text-amber-400">
+        <p className="mt-3 text-xs font-semibold text-amber-600 dark:text-amber-400">
           Demo dashboard — all amounts and records are illustrative.
         </p>
       </header>
@@ -277,29 +276,31 @@ export default function Expenses() {
               type="button"
               onClick={() => toggleCard(id)}
               aria-expanded={expandedCard === id}
-              className={`rounded-xl border bg-slate-900 p-5 text-left transition hover:border-emerald-500 ${
+              className={`rounded-xl border p-5 text-left transition hover:border-emerald-500 hover:shadow-md ${
                 expandedCard === id
-                  ? "border-emerald-500"
-                  : "border-slate-800"
+                  ? "border-emerald-500 bg-white ring-2 ring-emerald-500/20 dark:bg-slate-900 dark:border-emerald-500"
+                  : "border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <p className="text-sm text-slate-400">{title}</p>
-                <Icon size={23} className="text-emerald-400" />
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{title}</p>
+                <Icon size={23} className="text-emerald-600 dark:text-emerald-400" />
               </div>
 
-              <h2 className="mt-4 text-2xl font-bold">{value}</h2>
+              <h2 className="mt-4 text-2xl font-bold text-slate-900 dark:text-white">{value}</h2>
 
               <div className="mt-3 flex items-center justify-between gap-2">
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-slate-500 dark:text-slate-400">
                   {description}
                 </span>
 
-                {expandedCard === id ? (
-                  <ChevronUp size={18} />
-                ) : (
-                  <ChevronDown size={18} />
-                )}
+                <span className="text-slate-400 dark:text-slate-500">
+                  {expandedCard === id ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
+                </span>
               </div>
             </button>
           ))}
@@ -308,16 +309,16 @@ export default function Expenses() {
 
       {/* EXPANDED CARD DETAILS */}
       {expandedCard && (
-        <section className="rounded-xl border border-emerald-800 bg-slate-900 p-5 sm:p-6">
+        <section className="rounded-xl border border-emerald-500/40 bg-white p-5 shadow-sm dark:border-emerald-800 dark:bg-slate-900 sm:p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
-            <h2 className="text-xl font-bold">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
               {stats.find((item) => item.id === expandedCard)?.title}
             </h2>
 
             <button
               type="button"
               onClick={() => setExpandedCard(null)}
-              className="text-sm text-slate-400 hover:text-white"
+              className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
             >
               Close
             </button>
@@ -326,7 +327,7 @@ export default function Expenses() {
           {/* INCOME DETAILS */}
           {expandedCard === "received" && (
             <div className="space-y-3">
-              <p className="mb-4 text-sm text-slate-400">
+              <p className="mb-4 text-sm text-slate-600 dark:text-slate-400">
                 Income sources are shown separately. Individual residents'
                 names, flat numbers and payment histories are not displayed.
               </p>
@@ -334,21 +335,21 @@ export default function Expenses() {
               {incomeRecords.map((item) => (
                 <div
                   key={item.name}
-                  className="flex justify-between gap-4 rounded-lg bg-slate-800 p-4"
+                  className="flex justify-between gap-4 rounded-lg bg-slate-100 p-4 text-slate-900 dark:bg-slate-800 dark:text-slate-100"
                 >
-                  <span>{item.name}</span>
-                  <span className="font-semibold text-emerald-400">
+                  <span className="font-medium">{item.name}</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                     {formatMoney(item.amount)}
                   </span>
                 </div>
               ))}
 
-              <div className="flex justify-between border-t border-slate-700 pt-4 font-bold">
+              <div className="flex justify-between border-t border-slate-200 pt-4 font-bold text-slate-900 dark:border-slate-700 dark:text-white">
                 <span>Total received</span>
                 <span>{formatMoney(totalReceived)}</span>
               </div>
 
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Sample data only. Actual collection records must be verified.
               </p>
             </div>
@@ -357,7 +358,7 @@ export default function Expenses() {
           {/* EXPENSE DETAILS */}
           {expandedCard === "expenses" && (
             <div className="space-y-3">
-              <p className="mb-4 text-sm text-slate-400">
+              <p className="mb-4 text-sm text-slate-600 dark:text-slate-400">
                 Each expense includes its purpose, date, payee and payment
                 status. A receipt link appears only when provided.
               </p>
@@ -365,27 +366,27 @@ export default function Expenses() {
               {expenseRecords.map((item) => (
                 <div
                   key={item.category}
-                  className="rounded-lg bg-slate-800 p-4"
+                  className="rounded-lg bg-slate-100 p-4 dark:bg-slate-800"
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <h3 className="font-semibold">{item.category}</h3>
+                      <h3 className="font-semibold text-slate-900 dark:text-white">{item.category}</h3>
 
-                      <p className="mt-1 text-sm text-slate-300">
+                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
                         {item.description}
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         {item.date} · {item.vendor}
                       </p>
 
-                      <p className="mt-2 text-xs text-emerald-400">
+                      <p className="mt-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                         Payment status: {item.status}
                       </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="font-semibold text-rose-400">
+                      <span className="font-semibold text-rose-600 dark:text-rose-400">
                         {formatMoney(item.amount)}
                       </span>
 
@@ -394,13 +395,13 @@ export default function Expenses() {
                           href={item.receiptUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-2 rounded-lg border border-emerald-700 px-3 py-2 text-sm text-emerald-400 hover:bg-emerald-950"
+                          className="inline-flex items-center gap-2 rounded-lg border border-emerald-600 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-950"
                         >
                           <Receipt size={16} />
                           View receipt
                         </a>
                       ) : (
-                        <span className="text-xs text-amber-400">
+                        <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
                           Receipt not uploaded
                         </span>
                       )}
@@ -409,7 +410,7 @@ export default function Expenses() {
                 </div>
               ))}
 
-              <div className="flex justify-between border-t border-slate-700 pt-4 font-bold">
+              <div className="flex justify-between border-t border-slate-200 pt-4 font-bold text-slate-900 dark:border-slate-700 dark:text-white">
                 <span>Total expenses</span>
                 <span>{formatMoney(totalExpenses)}</span>
               </div>
@@ -419,26 +420,26 @@ export default function Expenses() {
           {/* CALCULATED BALANCE */}
           {expandedCard === "balance" && (
             <div className="space-y-3">
-              <div className="flex justify-between rounded-lg bg-slate-800 p-4">
+              <div className="flex justify-between rounded-lg bg-slate-100 p-4 font-medium text-slate-900 dark:bg-slate-800 dark:text-slate-100">
                 <span>Demo total received</span>
-                <span className="text-emerald-400">
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                   +{formatMoney(totalReceived)}
                 </span>
               </div>
 
-              <div className="flex justify-between rounded-lg bg-slate-800 p-4">
+              <div className="flex justify-between rounded-lg bg-slate-100 p-4 font-medium text-slate-900 dark:bg-slate-800 dark:text-slate-100">
                 <span>Demo total expenses</span>
-                <span className="text-rose-400">
+                <span className="font-semibold text-rose-600 dark:text-rose-400">
                   -{formatMoney(totalExpenses)}
                 </span>
               </div>
 
-              <div className="flex justify-between border-t border-slate-700 pt-4 font-bold">
+              <div className="flex justify-between border-t border-slate-200 pt-4 font-bold text-slate-900 dark:border-slate-700 dark:text-white">
                 <span>Calculated difference</span>
                 <span>{formatMoney(availableBalance)}</span>
               </div>
 
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 This is not a verified bank balance. A real balance must
                 include opening funds, pending payments, liabilities,
                 refunds and restrictions on reserve funds.
@@ -449,27 +450,27 @@ export default function Expenses() {
           {/* RESERVE FUND */}
           {expandedCard === "reserve" && (
             <div className="space-y-3">
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
                 Reserve funds may be set aside for major repairs and
                 unexpected future costs.
               </p>
 
-              <div className="rounded-lg bg-slate-800 p-4">
-                <p className="text-sm text-slate-400">
+              <div className="rounded-lg bg-slate-100 p-4 dark:bg-slate-800">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Illustrative reserve balance
                 </p>
 
-                <p className="mt-2 text-2xl font-bold text-emerald-400">
+                <p className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                   ₹5,00,000
                 </p>
               </div>
 
-              <p className="text-sm text-slate-300">
+              <p className="text-sm text-slate-600 dark:text-slate-300">
                 Possible uses include lift replacement, roof repairs and
                 major structural maintenance.
               </p>
 
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 This is a separate demo figure. It is not included in the
                 calculated balance above.
               </p>
@@ -479,13 +480,13 @@ export default function Expenses() {
       )}
 
       {/* NEW SIMPLIFIED GRAPH */}
-      <section className="rounded-xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
+      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
         <div>
-          <h2 className="text-xl font-bold">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
             Monthly Financial Overview
           </h2>
 
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Compare how much money came in and went out each month.
           </p>
         </div>
@@ -494,12 +495,12 @@ export default function Expenses() {
         <div className="mt-5 flex flex-wrap gap-5 text-sm">
           <div className="flex items-center gap-2">
             <span className="h-3 w-3 rounded-sm bg-emerald-500" />
-            <span className="text-slate-300">Income</span>
+            <span className="font-medium text-slate-700 dark:text-slate-300">Income</span>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="h-3 w-3 rounded-sm bg-rose-500" />
-            <span className="text-slate-300">Expenses</span>
+            <span className="font-medium text-slate-700 dark:text-slate-300">Expenses</span>
           </div>
         </div>
 
@@ -511,11 +512,11 @@ export default function Expenses() {
             return (
               <div key={item.name} className="space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="font-semibold">{item.name}</h3>
+                  <h3 className="font-semibold text-slate-900 dark:text-white">{item.name}</h3>
 
-                  <p className="text-xs text-slate-400 sm:text-sm">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 sm:text-sm">
                     Difference:{" "}
-                    <span className="font-semibold text-white">
+                    <span className="font-semibold text-slate-900 dark:text-white">
                       {formatMoney(difference)}
                     </span>
                   </p>
@@ -523,12 +524,12 @@ export default function Expenses() {
 
                 {/* INCOME ROW */}
                 <div className="grid grid-cols-[68px_minmax(0,1fr)] items-center gap-3 sm:grid-cols-[90px_minmax(0,1fr)]">
-                  <span className="text-xs text-slate-400 sm:text-sm">
+                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400 sm:text-sm">
                     Income
                   </span>
 
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className="h-4 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-800">
+                    <div className="h-4 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                       <div
                         style={{
                           width: `${
@@ -539,7 +540,7 @@ export default function Expenses() {
                       />
                     </div>
 
-                    <span className="w-24 shrink-0 text-right text-xs font-medium text-slate-200 sm:w-28 sm:text-sm">
+                    <span className="w-24 shrink-0 text-right text-xs font-semibold text-slate-700 dark:text-slate-200 sm:w-28 sm:text-sm">
                       {formatMoney(item.income)}
                     </span>
                   </div>
@@ -547,12 +548,12 @@ export default function Expenses() {
 
                 {/* EXPENSE ROW */}
                 <div className="grid grid-cols-[68px_minmax(0,1fr)] items-center gap-3 sm:grid-cols-[90px_minmax(0,1fr)]">
-                  <span className="text-xs text-slate-400 sm:text-sm">
+                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400 sm:text-sm">
                     Expenses
                   </span>
 
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className="h-4 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-800">
+                    <div className="h-4 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                       <div
                         style={{
                           width: `${
@@ -563,7 +564,7 @@ export default function Expenses() {
                       />
                     </div>
 
-                    <span className="w-24 shrink-0 text-right text-xs font-medium text-slate-200 sm:w-28 sm:text-sm">
+                    <span className="w-24 shrink-0 text-right text-xs font-semibold text-slate-700 dark:text-slate-200 sm:w-28 sm:text-sm">
                       {formatMoney(item.expenses)}
                     </span>
                   </div>
@@ -574,26 +575,26 @@ export default function Expenses() {
         </div>
 
         {/* OCTOBER SUMMARY */}
-        <div className="mt-7 grid grid-cols-1 gap-3 border-t border-slate-800 pt-5 sm:grid-cols-3">
-          <div className="rounded-lg bg-slate-800/70 p-4">
-            <p className="text-xs text-slate-400">October income</p>
-            <p className="mt-2 text-lg font-bold text-emerald-400">
+        <div className="mt-7 grid grid-cols-1 gap-3 border-t border-slate-200 pt-5 dark:border-slate-800 sm:grid-cols-3">
+          <div className="rounded-lg bg-slate-100 p-4 dark:bg-slate-800/70">
+            <p className="text-xs font-medium text-slate-600 dark:text-slate-400">October income</p>
+            <p className="mt-2 text-lg font-bold text-emerald-600 dark:text-emerald-400">
               {formatMoney(monthlyData[5].income)}
             </p>
           </div>
 
-          <div className="rounded-lg bg-slate-800/70 p-4">
-            <p className="text-xs text-slate-400">October expenses</p>
-            <p className="mt-2 text-lg font-bold text-rose-400">
+          <div className="rounded-lg bg-slate-100 p-4 dark:bg-slate-800/70">
+            <p className="text-xs font-medium text-slate-600 dark:text-slate-400">October expenses</p>
+            <p className="mt-2 text-lg font-bold text-rose-600 dark:text-rose-400">
               {formatMoney(monthlyData[5].expenses)}
             </p>
           </div>
 
-          <div className="rounded-lg bg-slate-800/70 p-4">
-            <p className="text-xs text-slate-400">
+          <div className="rounded-lg bg-slate-100 p-4 dark:bg-slate-800/70">
+            <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
               Difference for October
             </p>
-            <p className="mt-2 text-lg font-bold text-white">
+            <p className="mt-2 text-lg font-bold text-slate-900 dark:text-white">
               {formatMoney(
                 monthlyData[5].income - monthlyData[5].expenses
               )}
@@ -601,7 +602,7 @@ export default function Expenses() {
           </div>
         </div>
 
-        <p className="mt-5 rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs leading-5 text-slate-400">
+        <p className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
           How to read this graph: green represents income and red represents
           expenses. Longer bars represent larger amounts. The difference is
           income minus expenses; it is not necessarily the actual bank
@@ -611,12 +612,12 @@ export default function Expenses() {
       </section>
 
       {/* EXPENSE CATEGORY GRAPH */}
-      <section className="rounded-xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
-        <h2 className="text-xl font-bold">
+      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white">
           Where Is the Money Being Spent?
         </h2>
 
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           October demo expenses grouped by category.
         </p>
 
@@ -628,16 +629,16 @@ export default function Expenses() {
             return (
               <div key={item.category}>
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-sm">
-                  <span className="text-slate-200">
+                  <span className="font-medium text-slate-800 dark:text-slate-200">
                     {item.category}
                   </span>
 
-                  <span className="font-semibold text-rose-400">
+                  <span className="font-semibold text-rose-600 dark:text-rose-400">
                     {formatMoney(item.amount)}
                   </span>
                 </div>
 
-                <div className="h-3 overflow-hidden rounded-full bg-slate-800">
+                <div className="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                   <div
                     style={{ width: `${percentage}%` }}
                     className="h-full rounded-full bg-rose-500"
@@ -648,12 +649,12 @@ export default function Expenses() {
           })}
         </div>
 
-        <div className="mt-6 flex justify-between border-t border-slate-800 pt-4 text-sm font-semibold">
+        <div className="mt-6 flex justify-between border-t border-slate-200 pt-4 text-sm font-semibold text-slate-900 dark:border-slate-800 dark:text-white">
           <span>Total expenses shown</span>
           <span>{formatMoney(totalExpenses)}</span>
         </div>
 
-        <p className="mt-3 text-xs leading-5 text-slate-500">
+        <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">
           Longer bars represent larger expenses. Missing receipts should
           be clearly identified; payment status alone does not verify
           the supporting documentation.
@@ -661,32 +662,32 @@ export default function Expenses() {
       </section>
 
       {/* COMMUNITY CONTRIBUTIONS */}
-      <section className="space-y-5 rounded-xl border border-emerald-900 bg-slate-900 p-5 sm:p-6">
+      <section className="space-y-5 rounded-xl border border-emerald-500/30 bg-white p-5 shadow-sm dark:border-emerald-900 dark:bg-slate-900 sm:p-6">
         <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-emerald-950 p-3">
-            <HeartHandshake size={26} className="text-emerald-400" />
+          <div className="rounded-lg bg-emerald-100 p-3 dark:bg-emerald-950">
+            <HeartHandshake size={26} className="text-emerald-600 dark:text-emerald-400" />
           </div>
 
           <div>
-            <h2 className="text-xl font-bold sm:text-2xl">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white sm:text-2xl">
               Support Your Community
             </h2>
 
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
               Request to contribute towards a reserve fund or a
               community improvement project.
             </p>
           </div>
         </div>
 
-        <p className="rounded-lg border border-slate-700 bg-slate-800 p-3 text-xs leading-5 text-slate-300">
+        <p className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
           Contributions are optional. This demo does not accept payments.
           The progress figures are illustrative, not verified totals.
         </p>
 
         {/* SELECT GOAL */}
         <div>
-          <h3 className="mb-3 font-semibold">
+          <h3 className="mb-3 font-semibold text-slate-900 dark:text-white">
             1. Choose a contribution goal
           </h3>
 
@@ -708,34 +709,34 @@ export default function Expenses() {
                   }}
                   className={`rounded-xl border p-4 text-left transition ${
                     selectedGoal === item.id
-                      ? "border-emerald-500 bg-emerald-950/40"
-                      : "border-slate-700 bg-slate-800 hover:border-slate-500"
+                      ? "border-emerald-500 bg-emerald-50/80 ring-2 ring-emerald-500/20 dark:bg-emerald-950/40"
+                      : "border-slate-200 bg-slate-50 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-500"
                   }`}
                 >
-                  <h4 className="font-semibold">{item.name}</h4>
+                  <h4 className="font-semibold text-slate-900 dark:text-white">{item.name}</h4>
 
-                  <p className="mt-2 text-xs leading-5 text-slate-400">
+                  <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-400">
                     {item.description}
                   </p>
 
                   <div className="mt-4 flex justify-between gap-2 text-xs">
-                    <span className="text-slate-400">
+                    <span className="text-slate-500 dark:text-slate-400">
                       Demo progress
                     </span>
 
-                    <span className="text-emerald-400">
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                       {Math.round(progress)}%
                     </span>
                   </div>
 
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-700">
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                     <div
                       style={{ width: `${progress}%` }}
                       className="h-full rounded-full bg-emerald-500"
                     />
                   </div>
 
-                  <p className="mt-3 text-xs text-slate-400">
+                  <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                     {formatMoney(item.raised)} of{" "}
                     {formatMoney(item.target)}
                   </p>
@@ -748,21 +749,21 @@ export default function Expenses() {
         {/* CONTRIBUTION REQUEST FORM */}
         <form
           onSubmit={handleContributionRequest}
-          className="space-y-4 rounded-xl bg-slate-800 p-4 sm:p-5"
+          className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800 sm:p-5"
         >
-          <h3 className="font-semibold">
+          <h3 className="font-semibold text-slate-900 dark:text-white">
             2. Enter your contribution amount
           </h3>
 
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             Selected goal:{" "}
-            <span className="text-emerald-400">{goal.name}</span>
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">{goal.name}</span>
           </p>
 
           <div>
             <label
               htmlFor="contributionAmount"
-              className="mb-2 block text-sm text-slate-300"
+              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Amount (₹)
             </label>
@@ -781,20 +782,20 @@ export default function Expenses() {
                 setRequestMessage("");
               }}
               placeholder="Enter amount"
-              className="w-full rounded-lg border border-slate-600 bg-slate-950 px-4 py-3 text-white outline-none focus:border-emerald-500"
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-600 dark:bg-slate-950 dark:text-white"
             />
           </div>
 
-          <div className="rounded-lg border border-slate-700 p-4">
-            <p className="text-sm text-slate-400">
+          <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
               Your requested contribution
             </p>
 
-            <p className="mt-1 text-2xl font-bold">
+            <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">
               {formatMoney(Number(selectedAmount) || 0)}
             </p>
 
-            <p className="mt-2 text-xs leading-5 text-slate-500">
+            <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
               Contributor identities should not be displayed publicly.
               Authorised records may still be required for accounting
               and payment confirmation.
@@ -803,7 +804,7 @@ export default function Expenses() {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-emerald-600 px-4 py-3 font-semibold transition hover:bg-emerald-500"
+            className="w-full rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-500 active:scale-[0.99]"
           >
             Submit Contribution Request
           </button>
@@ -813,15 +814,15 @@ export default function Expenses() {
               role="status"
               className={`rounded-lg border p-3 text-sm leading-5 ${
                 requestSubmitted
-                  ? "border-amber-700 bg-amber-950/40 text-amber-200"
-                  : "border-rose-800 bg-rose-950/40 text-rose-200"
+                  ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+                  : "border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-200"
               }`}
             >
               {requestMessage}
             </p>
           )}
 
-          <p className="text-xs leading-5 text-slate-500">
+          <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
             Frontend demo only. A real version needs a backend to save
             requests securely and let admins review and contact residents.
             This button does not send a request to anyone.
@@ -830,7 +831,7 @@ export default function Expenses() {
       </section>
 
       {/* FOOTER */}
-      <p className="text-xs leading-5 text-slate-500">
+      <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
         SocioSphere financial transparency demonstration. Actual collections,
         expenses, balances, reserve funds, contribution totals and receipts
         must be connected to verified society records before real-world use.
