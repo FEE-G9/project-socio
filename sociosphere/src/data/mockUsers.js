@@ -770,10 +770,15 @@ export const registerUser = (userData) => {
 
   const id = `user-${Date.now().toString().slice(-6)}`;
   const isAuthority = userData.role === 'authority' || userData.type === 'member';
+  const isDirectVerified = userData.status === 'Verified';
+
+  const defaultBadges = isDirectVerified
+    ? (isAuthority ? ['Committee Member'] : ['Verified Resident'])
+    : (isAuthority ? ['Authority Request Pending'] : ['Verification In Progress']);
 
   const newUser = {
     ...userData,
-    id,
+    id: userData.id || id,
     email: emailLower,
     password: userData.password || `${(userData.name || 'User').split(' ')[0]}@${userData.age || '2026'}#`,
     age: parseInt(userData.age, 10) || 30,
@@ -781,8 +786,8 @@ export const registerUser = (userData) => {
     type: userData.type || (isAuthority ? 'member' : 'resident'),
     role: isAuthority ? 'authority' : 'citizen',
     unitNumber: userData.unitNumber || `${userData.blockNumber || 'Block A'} - ${userData.houseOrFlatNo || 'Unit 1'}`,
-    joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-    badges: isAuthority ? ['Authority Request Pending'] : ['Verification In Progress']
+    joinedDate: userData.joinedDate || new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+    badges: (userData.badges && userData.badges.length > 0) ? userData.badges : defaultBadges
   };
 
   const updated = [newUser, ...users];
@@ -795,11 +800,12 @@ export const registerUser = (userData) => {
 };
 
 export const addUser = (newUser) => {
-  const result = registerUser({
+  const isMember = newUser.type === 'member' || newUser.role === 'authority';
+  return registerUser({
     ...newUser,
-    status: 'Verified'
+    status: 'Verified',
+    badges: newUser.badges || (isMember ? ['Committee Member'] : ['Verified Resident'])
   });
-  return result.user || newUser;
 };
 
 export const approveUser = (userId) => {
