@@ -37,7 +37,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
   selectProfile,
-  selectProfileStats,
   updateProfile,
   setAvatarStyle
 } from "../../store/slices/profileSlice";
@@ -56,7 +55,6 @@ const Profile = () => {
 
   // Redux Toolkit Profile State
   const reduxProfile = useSelector(selectProfile);
-  const profileStats = useSelector(selectProfileStats);
 
   // Active profile fallback
   const profile = reduxProfile || authUser || {};
@@ -655,7 +653,7 @@ const Profile = () => {
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="grid grid-cols-2 gap-3 mb-4 sm:grid-cols-3">
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
               <span className="text-xs text-slate-500 dark:text-slate-400 font-medium block">Issues Reported</span>
               <span className="text-2xl font-extrabold text-slate-900 dark:text-slate-50">{ownIssues.length}</span>
@@ -666,19 +664,13 @@ const Profile = () => {
               <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{resolvedIssues.length}</span>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
+            <div className="col-span-2 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 sm:col-span-1">
               <span className="text-xs text-slate-500 dark:text-slate-400 font-medium block">Resolution Rate</span>
               <span className="text-2xl font-extrabold text-blue-600 dark:text-blue-400">
                 {ownIssues.length ? `${getActivityPercentage(resolvedIssues.length)}%` : "100%"}
               </span>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
-              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium block">Civic Points</span>
-              <span className="text-2xl font-extrabold text-amber-500">
-                {profileStats?.communityPoints || 120} pts
-              </span>
-            </div>
           </div>
 
           <div>
