@@ -65,7 +65,6 @@ const initialState = {
   stats: {
     issuesReported: 0,
     issuesResolved: 0,
-    communityPoints: 120,
     resolutionRate: 100
   }
 };

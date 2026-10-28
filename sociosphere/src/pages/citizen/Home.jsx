@@ -11,9 +11,8 @@ import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
 import { getIssues, saveIssues } from "../../data/mockIssues";
-import { getCrimes } from "../../data/mockCrimes";
+import { deleteCrime, getCrimes } from "../../data/mockCrimes";
 import { getAnnouncements } from "../../data/mockAnnouncements";
-// import Map from "./Map";
 
 import {
   Shield,
@@ -29,6 +28,9 @@ import {
   Clock,
   CheckCircle2,
   ChevronRight,
+  ChevronDown,
+  Search,
+  SlidersHorizontal,
   Sparkles,
   X,
   Calendar,
@@ -44,14 +46,14 @@ import {
 
 function getWeatherEmoji(condition) {
   const c = (condition || "").toLowerCase();
-  if (c.includes("thunder")) return "â›ˆï¸";
-  if (c.includes("drizzle") || c.includes("rain")) return "ðŸŒ§ï¸";
-  if (c.includes("snow")) return "â„ï¸";
-  if (c.includes("mist") || c.includes("fog") || c.includes("haze")) return "ðŸŒ«ï¸";
-  if (c.includes("few") || c.includes("partly") || c.includes("scatter")) return "ðŸŒ¤ï¸";
-  if (c.includes("cloud") || c.includes("overcast")) return "â›…";
-  if (c.includes("clear") || c.includes("sun")) return "â˜€ï¸";
-  return "â˜€ï¸";
+  if (c.includes("thunder")) return "⛈️";
+  if (c.includes("drizzle") || c.includes("rain")) return "🌧️";
+  if (c.includes("snow")) return "❄️";
+  if (c.includes("mist") || c.includes("fog") || c.includes("haze")) return "🌫️";
+  if (c.includes("few") || c.includes("partly") || c.includes("scatter")) return "🌤️";
+  if (c.includes("cloud") || c.includes("overcast")) return "⛅";
+  if (c.includes("clear") || c.includes("sun")) return "☀️";
+  return "☀️";
 }
 
 const quickActions = [
@@ -73,12 +75,6 @@ const quickActions = [
     icon: PackageSearch,
     className: "action-blue",
   },
-  // {
-  //   title: "View Map",
-  //   description: "Live community problem heatmap",
-  //   icon: MapPin,
-  //   className: "action-blue",
-  // },
   {
     title: "Emergency",
     description: "Police, ambulance, fire helplines",
@@ -99,6 +95,17 @@ const quickActions = [
   },
 ];
 
+const isCrimeReport = (report) => {
+  const category = (report?.category || "").toLowerCase();
+  return (
+    report?.reportType === "crime" ||
+    /^(CRM|CRIME)-/i.test(report?.id || "") ||
+    ["crime", "theft", "security", "vandalism", "harassment", "cyber", "suspicious"].some((term) =>
+      category.includes(term)
+    )
+  );
+};
+
 export default function Home() {
   const navigate = useNavigate();
   const [activeCivicTab, setActiveCivicTab] = useState("all");
@@ -109,6 +116,9 @@ export default function Home() {
   const [userReports, setUserReports] = useState([]);
   const [comingSoonFeature, setComingSoonFeature] = useState(null);
   const [showAllIssues, setShowAllIssues] = useState(false);
+  const [showReportFilters, setShowReportFilters] = useState(false);
+  const [reportSearch, setReportSearch] = useState("");
+  const [reportTypeFilter, setReportTypeFilter] = useState("all");
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueTimeline, setShowIssueTimeline] = useState(false);
   const { theme } = useTheme();
@@ -222,7 +232,7 @@ export default function Home() {
       });
 
       const normalized = societyReports.map((report) => {
-        const isCrime = report?.reportType === "crime" || report?.id?.startsWith("CRM-");
+        const isCrime = isCrimeReport(report);
         return {
           ...report,
           priority: report.priority || (report.severity ? `${report.severity} Priority` : isCrime ? "High Priority" : "Medium Priority"),
@@ -300,7 +310,7 @@ export default function Home() {
   const isOwnReport = (report) => {
     const currentEmail = user?.email?.trim().toLowerCase();
     return Boolean(
-      report?.reportedById === user?.id ||
+      (user?.id && report?.reportedById === user.id) ||
       (currentEmail &&
         report?.reportedByEmail?.trim().toLowerCase() === currentEmail)
     );
@@ -318,6 +328,9 @@ export default function Home() {
 
     const remainingIssues = getIssues().filter((issue) => issue.id !== report.id);
     saveIssues(remainingIssues);
+    if (isCrimeReport(report)) {
+      deleteCrime(report.id);
+    }
 
     const storedReports = JSON.parse(
       localStorage.getItem("sociosphere_user_reports") || "[]"
@@ -335,18 +348,31 @@ export default function Home() {
   ========================================================= */
 
   const userCivicReports = userReports.filter(
-    (item) =>
-      item?.id &&
-      !item.id.startsWith("CRM-")
+    (item) => item?.id && !isCrimeReport(item)
   );
 
   const userCrimeReports = userReports.filter(
-    (item) =>
-      item?.id &&
-      item.id.startsWith("CRM-")
+    (item) => item?.id && isCrimeReport(item)
   );
 
-  const atGlanceIssues = showAllIssues ? userReports : userReports.slice(0, 3);
+  const mixedReports = [];
+  for (let index = 0; index < Math.max(userCivicReports.length, userCrimeReports.length); index += 1) {
+    if (userCivicReports[index]) mixedReports.push(userCivicReports[index]);
+    if (userCrimeReports[index]) mixedReports.push(userCrimeReports[index]);
+  }
+  const filteredReports = mixedReports.filter((report) => {
+    const isCrime = isCrimeReport(report);
+    if (reportTypeFilter === "crime" && !isCrime) return false;
+    if (reportTypeFilter === "civic" && isCrime) return false;
+
+    const query = reportSearch.trim().toLowerCase();
+    return (
+      !query ||
+      [report.title, report.category, report.description, report.location]
+        .some((value) => value?.toLowerCase().includes(query))
+    );
+  });
+  const atGlanceIssues = showAllIssues ? filteredReports : filteredReports.slice(0, 3);
 
   const displayedCivicIssues = userCivicReports;
   const displayedCrimeIssues = userCrimeReports;
@@ -574,14 +600,14 @@ export default function Home() {
         <div className="navbar-inner">
 <div
             className="location-section"
-            title={`Current weather in ${userSociety}: ${weather.description || weather.condition || "Clear sky"}, ${weather.temp ?? 26}Â°C`}
+            title={`Current weather in ${userSociety}: ${weather.description || weather.condition || "Clear sky"}, ${weather.temp ?? 26}°C`}
           >
             <span className="weather-inline-chip">
               <span className="weather-inline-icon" role="img" aria-label={weather.condition || "weather"}>
                 {getWeatherEmoji(weather.condition)}
               </span>
               <span className="weather-inline-temp">
-                {weather.temp != null ? `${weather.temp}Â°C` : "26Â°C"}
+                {weather.temp != null ? `${weather.temp}°C` : "26°C"}
               </span>
             </span>
             <span className="location-divider" aria-hidden="true">|</span>
@@ -636,9 +662,9 @@ export default function Home() {
                 <span className="ticker-category">[{ann.category || "Notice"}]</span>
                 <strong className="ticker-title">{ann.title}</strong>
                 {ann.content && (
-                  <span className="ticker-desc">â€” {ann.content}</span>
+                  <span className="ticker-desc">— {ann.content}</span>
                 )}
-                <span className="ticker-sep">âœ¦</span>
+                <span className="ticker-sep">✦</span>
               </span>
             ))}
           </marquee>
@@ -739,48 +765,242 @@ export default function Home() {
           })}
         </section>
 
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-[#0D1524]">
-          <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-4 dark:border-slate-800 sm:px-6">
+        {/* ── Issues at a Glance — card grid ── */}
+        <section className="mt-8">
+          {/* Section header */}
+          <div className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">Issues at a glance</h2>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Your latest civic and safety reports</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">Your Reports</p>
+              <h2 className="mt-1 text-xl font-extrabold text-slate-900 dark:text-white">Issues at a glance</h2>
             </div>
-            {userReports.length > 2 && (
-              <button
-                type="button"
-                onClick={() => setShowAllIssues((show) => !show)}
-                className="inline-flex shrink-0 items-center gap-1 text-sm font-bold text-emerald-600 transition hover:text-emerald-500 dark:text-emerald-400"
-              >
-                {showAllIssues ? "Show less" : "View more"}
-                <ChevronRight size={16} className={showAllIssues ? "rotate-90" : ""} />
-              </button>
+            {userReports.length > 0 && (
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowReportFilters((show) => !show)}
+                    aria-expanded={showReportFilters}
+                    aria-haspopup="true"
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-500"
+                  >
+                    <SlidersHorizontal size={14} />
+                    Search & filter
+                    <ChevronDown size={14} className={showReportFilters ? "rotate-180 transition-transform" : "transition-transform"} />
+                  </button>
+                  {showReportFilters && (
+                    <div className="absolute right-0 top-full z-30 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl dark:border-slate-700 dark:bg-[#0D1524]">
+                      <label className="mb-3 block">
+                        <span className="mb-1.5 block text-[11px] font-bold text-slate-500 dark:text-slate-400">Search reports</span>
+                        <span className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 dark:border-slate-700 dark:bg-slate-900">
+                          <Search size={14} className="shrink-0 text-slate-400" />
+                          <input
+                            type="search"
+                            value={reportSearch}
+                            onChange={(event) => setReportSearch(event.target.value)}
+                            placeholder="Title, category, location..."
+                            className="w-full bg-transparent py-2 text-xs text-slate-800 outline-none placeholder:text-slate-400 dark:text-slate-100"
+                          />
+                        </span>
+                      </label>
+                      <label className="block">
+                        <span className="mb-1.5 block text-[11px] font-bold text-slate-500 dark:text-slate-400">Report type</span>
+                        <select
+                          value={reportTypeFilter}
+                          onChange={(event) => setReportTypeFilter(event.target.value)}
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                        >
+                          <option value="all">All reports</option>
+                          <option value="civic">Community issues</option>
+                          <option value="crime">Crime & safety</option>
+                        </select>
+                      </label>
+                    </div>
+                  )}
+                </div>
+                {filteredReports.length > 3 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllIssues((show) => !show)}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
+                  >
+                    {showAllIssues ? "Show less" : "View all"}
+                    <ChevronRight size={13} className={showAllIssues ? "rotate-90 transition-transform" : "transition-transform"} />
+                  </button>
+                )}
+              </div>
             )}
           </div>
 
-          <div className="divide-y divide-slate-200 dark:divide-slate-800">
-            {atGlanceIssues.length ? atGlanceIssues.map((issue) => {
-              const Icon = getIssueIcon(issue);
-              return (
-                <article key={issue.id} className="flex items-center gap-3 px-5 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/60 sm:px-6">
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${issue.reportType === "crime" ? "bg-rose-500/10 text-rose-600 dark:text-rose-400" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"}`}>
-                    <Icon size={19} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">{issue.title}</h3>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{issue.category} Ã‚Â· {issue.status}</p>
-                  </div>
+          {atGlanceIssues.length ? (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {atGlanceIssues.map((issue) => {
+                const Icon = getIssueIcon(issue);
+                const isCrime = isCrimeReport(issue);
+
+                // Status chip styles
+                const statusStyle =
+                  issue.status === "Resolved"
+                    ? { bg: "bg-emerald-100 dark:bg-emerald-500/15", text: "text-emerald-700 dark:text-emerald-400", dot: "bg-emerald-500" }
+                    : issue.status === "In Progress"
+                    ? { bg: "bg-blue-100 dark:bg-blue-500/15", text: "text-blue-700 dark:text-blue-400", dot: "bg-blue-500" }
+                    : issue.status === "Pending Dispatch"
+                    ? { bg: "bg-amber-100 dark:bg-amber-500/15", text: "text-amber-700 dark:text-amber-400", dot: "bg-amber-500" }
+                    : { bg: "bg-slate-100 dark:bg-slate-800", text: "text-slate-600 dark:text-slate-400", dot: "bg-slate-400" };
+
+                // Card accent colours based on category
+                const cat = (issue.category || "").toLowerCase();
+                const accentMap = isCrime
+                  ? { from: "from-rose-500", via: "via-rose-400", iconBg: "bg-rose-500/15 dark:bg-rose-500/20", iconText: "text-rose-600 dark:text-rose-400", border: "border-rose-100 dark:border-rose-500/20" }
+                  : cat.includes("water") || cat.includes("drain") || cat.includes("leak")
+                  ? { from: "from-blue-500", via: "via-cyan-400", iconBg: "bg-blue-500/15 dark:bg-blue-500/20", iconText: "text-blue-600 dark:text-blue-400", border: "border-blue-100 dark:border-blue-500/20" }
+                  : cat.includes("light") || cat.includes("electric")
+                  ? { from: "from-amber-400", via: "via-yellow-300", iconBg: "bg-amber-500/15 dark:bg-amber-500/20", iconText: "text-amber-600 dark:text-amber-400", border: "border-amber-100 dark:border-amber-500/20" }
+                  : cat.includes("waste") || cat.includes("garbage")
+                  ? { from: "from-lime-500", via: "via-green-400", iconBg: "bg-lime-500/15 dark:bg-lime-500/20", iconText: "text-lime-700 dark:text-lime-400", border: "border-lime-100 dark:border-lime-500/20" }
+                  : { from: "from-emerald-500", via: "via-teal-400", iconBg: "bg-emerald-500/15 dark:bg-emerald-500/20", iconText: "text-emerald-600 dark:text-emerald-400", border: "border-emerald-100 dark:border-emerald-500/20" };
+
+                return (
+                  <article
+                    key={issue.id}
+                    className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl dark:bg-[#0D1524] ${accentMap.border}`}
+                  >
+                    {/* ── Image banner ── */}
+                    {(() => {
+                      const cat = (issue.category || "").toLowerCase();
+                      const hasReporterPhoto =
+                        typeof issue.image === "string" &&
+                        (issue.image.startsWith("data:image/") ||
+                          issue.image.startsWith("blob:") ||
+                          Boolean(issue.photoName));
+                      const imgSrc = hasReporterPhoto || (isCrime && issue.image)
+                        ? issue.image
+                        : isCrime
+                        ? "/crime-report.png"
+                        : cat.includes("drain")
+                        ? "/drain-overflow.png"
+                        : cat.includes("water") || cat.includes("plumb") || cat.includes("leak")
+                        ? "/water-leakage.png"
+                        : cat.includes("electric") || cat.includes("light")
+                        ? "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=600&q=80"
+                        : cat.includes("waste") || cat.includes("sanit") || cat.includes("garbage")
+                        ? "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=600&q=80"
+                        : cat.includes("road") || cat.includes("pavement") || cat.includes("pathway") || cat.includes("pothole")
+                        ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmEI1a3MbcihRTmVvck3WhEVfmasBa-ctRKSRIHAKJaa1b-zl4MlBX36xl&s=10"
+                        : cat.includes("park") || cat.includes("recreation") || cat.includes("playground") || cat.includes("swing")
+                        ? "https://images.unsplash.com/photo-1678801675345-7af0e20207c2?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D"
+                        : issue.image || "https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=600&q=80";
+
+                      return (
+                        <div className="relative h-[140px] overflow-hidden rounded-t-2xl">
+                          <img
+                            src={imgSrc}
+                            alt={issue.title || issue.category || "Issue"}
+                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            onError={(e) => { e.target.style.display = "none"; }}
+                          />
+                          {/* Dark overlay for legibility */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+                          {/* Type badge — bottom-left over image */}
+                          <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow ${isCrime ? "bg-rose-600/90" : "bg-emerald-600/90"}`}>
+                              <Icon size={10} />
+                              {isCrime ? "Crime" : issue.category || "Civic"}
+                            </span>
+                          </div>
+
+                          {/* Status badge — bottom-right over image */}
+                          <div className="absolute bottom-3 right-3">
+                            <span className={`inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold text-white shadow backdrop-blur-sm`}>
+                              <span className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`} />
+                              {issue.status}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Card body */}
+                    <div className="flex flex-1 flex-col gap-2 p-4">
+                      <h3 className="line-clamp-2 text-sm font-extrabold leading-snug text-slate-800 dark:text-slate-100">
+                        {issue.title}
+                      </h3>
+                      <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                        {issue.category}
+                      </p>
+
+                      {/* Footer */}
+                      <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+                        {issue.date ? (
+                          <span className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500">
+                            <Clock size={11} />
+                            {issue.date}
+                          </span>
+                        ) : (
+                          <span />
+                        )}
+                        <div className="flex items-center gap-2">
+                          {isOwnReport(issue) && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteReport(issue)}
+                              aria-label={`Delete your report: ${issue.title}`}
+                              className="inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold text-rose-600 transition hover:bg-rose-500/10 dark:text-rose-400"
+                            >
+                              <Trash2 size={13} />
+                              Delete
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => { setSelectedIssue(issue); setShowIssueTimeline(false); }}
+                            className={`inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-bold transition ${accentMap.iconText} ${accentMap.iconBg} hover:opacity-80`}
+                          >
+                            Details
+                            <ChevronRight size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center dark:border-slate-800 dark:bg-[#0D1524]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
+                <FileText size={26} />
+              </div>
+              {filteredReports.length === 0 && userReports.length > 0 ? (
+                <>
+                  <p className="mt-4 text-sm font-bold text-slate-700 dark:text-slate-300">No matching reports</p>
+                  <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Try another search or report type.</p>
                   <button
                     type="button"
-                    onClick={() => { setSelectedIssue(issue); setShowIssueTimeline(false); }}
-                    className="shrink-0 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400"
+                    onClick={() => { setReportSearch(""); setReportTypeFilter("all"); }}
+                    className="mt-4 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 transition hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:text-slate-300"
                   >
-                    View details
+                    Clear filters
                   </button>
-                </article>
-              );
-            }) : <div className="px-5 py-10 text-center text-sm text-slate-500 dark:text-slate-400">No reports to show yet.</div>}
-          </div>
+                </>
+              ) : (
+                <>
+                  <p className="mt-4 text-sm font-bold text-slate-700 dark:text-slate-300">No reports yet</p>
+                  <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Reports you submit will appear here</p>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/citizen/report")}
+                    className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-emerald-500"
+                  >
+                    <Plus size={14} /> Report an issue
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </section>
+
+
 
         <div className="hidden">
         {/* ===================================================
@@ -951,7 +1171,7 @@ export default function Home() {
                       <div className="issue-time">
                         <span>{issue.date}</span>
 
-                        <span>Ã¢â‚¬Â¢</span>
+                        <span>•</span>
 
                         <strong>
                           ETA: {issue.eta || "Pending"}
@@ -1161,7 +1381,7 @@ export default function Home() {
                       <div className="issue-time">
                         <span>{crime.date}</span>
 
-                        <span>Ã¢â‚¬Â¢</span>
+                        <span>•</span>
 
                         <strong className="text-rose-300">
                           Status:{" "}
@@ -1209,40 +1429,69 @@ export default function Home() {
             COMMUNITY OVERVIEW
         =================================================== */}
 
-        <section className="community-overview mt-10">
-          <div className="overview-card">
+<section className="community-overview mt-10">
+          <div
+            className="overview-card"
+            onClick={() => navigate("/citizen/events")}
+            title="View Upcoming Colony Events"
+          >
             <div className="overview-icon">
               <Calendar size={20} />
             </div>
 
             <div>
-              <span>UPCOMING</span>
+              <span>UPCOMING EVENTS</span>
 
               <strong>
                 Holi Milan & Spring Carnival
               </strong>
 
               <p>
-                Tomorrow Ã¢â‚¬Â¢ 10:00 AM Ã¢â‚¬Â¢ Open Amphitheatre
+                Tomorrow • 10:00 AM • Open Amphitheatre
               </p>
             </div>
           </div>
 
-          <div className="overview-card">
-            <div className="overview-icon">
-              <MessageSquare size={20} />
+          <div
+            className="overview-card"
+            onClick={() => navigate("/citizen/community")}
+            title="Open Community Hub"
+          >
+            <div className="overview-icon icon-purple">
+              <Users size={20} />
             </div>
 
             <div>
-              <span>COMMUNITY ACTIVITY</span>
+              <span>COMMUNITY HUB</span>
 
               <strong>
-                24 new discussions
+                Resident Polls & Clubs
               </strong>
 
               <p>
-                Residents are actively discussing local
-                issues
+                Vote on colony proposals & connect with neighbours
+              </p>
+            </div>
+          </div>
+
+          <div
+            className="overview-card"
+            onClick={() => navigate("/citizen/expenses")}
+            title="View Society Expenses & Finances"
+          >
+            <div className="overview-icon icon-yellow">
+              <CreditCard size={20} />
+            </div>
+
+            <div>
+              <span>SOCIETY FINANCES</span>
+
+              <strong>
+                Monthly Expense Ledger
+              </strong>
+
+              <p>
+                100% transparent society funds & collections
               </p>
             </div>
           </div>
@@ -1434,73 +1683,6 @@ export default function Home() {
                   "Crime report logged & security notified!"
                 );
               }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* =====================================================
-          MAP MODAL
-      ===================================================== */}
-
-      {/* {activeModal === "map" && (
-        <div
-          className="modal-overlay"
-          onClick={() => setActiveModal(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 100,
-            backgroundColor: "rgba(3, 7, 18, 0.85)",
-            backdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "16px",
-          }}
-        >
-          <div
-            onClick={(event) =>
-              event.stopPropagation()
-            }
-            style={{
-              position: "relative",
-              width: "100%",
-              maxWidth: "1140px",
-              maxHeight: "92vh",
-              overflowY: "auto",
-              borderRadius: "20px",
-              backgroundColor: "#070B14",
-              border: "1px solid #1E293B",
-              boxShadow:
-                "0 25px 50px -12px rgba(0, 0, 0, 0.6)",
-            }}
-          >
-            <button
-              onClick={() => setActiveModal(null)}
-              style={{
-                position: "absolute",
-                top: "16px",
-                right: "16px",
-                zIndex: 30,
-                padding: "8px",
-                borderRadius: "12px",
-                backgroundColor: "#1E293B",
-                color: "#94A3B8",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              aria-label="Close modal"
-            >
-              <X size={20} />
-            </button>
-
-            <Map
-              onClose={() => setActiveModal(null)}
-              isEmbedded={true}
             />
           </div>
         </div>
