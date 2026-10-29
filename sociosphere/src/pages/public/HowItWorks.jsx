@@ -49,7 +49,7 @@ const tutorials = [
     number: "04",
     title: "Expenses & Finance",
     description:
-      "Explore colony expenses, understand financial information, and learn about contribution requests.",
+      "Explore society expenses, understand financial information, and learn about contribution requests.",
     icon: Wallet,
     label: "Financial Transparency",
     video: "/expenses.mp4",
@@ -64,7 +64,6 @@ function HowItWorks() {
   const openTutorial = (tutorial) => {
     setSelectedTutorial(tutorial);
 
-    // Scroll to the video after selecting a category.
     setTimeout(() => {
       videoSectionRef.current?.scrollIntoView({
         behavior: "smooth",
@@ -105,10 +104,7 @@ function HowItWorks() {
         {/* Introduction */}
         <section className="mb-20 max-w-4xl">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[0.07] px-4 py-2">
-            <GraduationCap
-              size={16}
-              className="text-emerald-400"
-            />
+            <GraduationCap size={16} className="text-emerald-400" />
             <span className="text-xs font-semibold tracking-widest text-emerald-300">
               SOCIOSPHERE TUTORIAL CENTER
             </span>
@@ -120,9 +116,9 @@ function HowItWorks() {
           </h1>
 
           <p className="mt-6 max-w-3xl text-base leading-8 text-gray-400 md:text-lg">
-            New to SocioSphere? Explore tutorials to learn how to
-            create your account, report community issues, use safety
-            features, and understand society finances.
+            New to SocioSphere? Explore our tutorials to learn how
+            to create your account, report community issues, use
+            safety features, and understand society finances.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-4">
@@ -135,16 +131,11 @@ function HowItWorks() {
             </a>
 
             <a
-              href="#tutorial-video"
-              onClick={() => {
-                if (!selectedTutorial) {
-                  setSelectedTutorial(tutorials[0]);
-                }
-              }}
+              href="#website-walkthrough"
               className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-gray-300 transition hover:border-emerald-400/30 hover:bg-emerald-400/[0.06] hover:text-white"
             >
               <Play size={16} />
-              Watch Tutorial
+              Full Website Walkthrough
             </a>
           </div>
         </section>
@@ -195,7 +186,6 @@ function HowItWorks() {
                       : "border-white/[0.07] bg-[#0b1c14]/90 hover:border-emerald-400/30"
                   }`}
                 >
-                  {/* Card Header */}
                   <div className="flex w-full items-center justify-between">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-400 transition group-hover:bg-emerald-400/15">
                       <Icon size={22} strokeWidth={1.7} />
@@ -233,7 +223,7 @@ function HowItWorks() {
           </div>
         </section>
 
-        {/* Selected Tutorial Video */}
+        {/* Selected Category Video */}
         <section
           id="tutorial-video"
           ref={videoSectionRef}
@@ -248,9 +238,7 @@ function HowItWorks() {
 
             <h2 className="mt-3 text-3xl font-bold sm:text-4xl">
               {selectedTutorial ? (
-                <>
-                  {selectedTutorial.title}
-                </>
+                selectedTutorial.title
               ) : (
                 <>
                   Choose a{" "}
@@ -339,7 +327,10 @@ function HowItWorks() {
         </section>
 
         {/* Complete Website Walkthrough */}
-        <section id="website-walkthrough" className="scroll-mt-10">
+        <section
+          id="website-walkthrough"
+          className="mb-24 scroll-mt-10"
+        >
           <div className="mb-8">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[0.07] px-4 py-2">
               <Play size={14} className="text-emerald-400" />
@@ -349,54 +340,49 @@ function HowItWorks() {
             </div>
 
             <h2 className="text-3xl font-bold sm:text-4xl">
-              The Complete{" "}
-              <span className="text-emerald-400">Walkthrough</span>
+              Explore the Complete{" "}
+              <span className="text-emerald-400">
+                SocioSphere Workflow
+              </span>
             </h2>
 
             <p className="mt-4 max-w-3xl text-sm leading-7 text-gray-400 md:text-base">
-              Explore the complete SocioSphere platform through
-              step-by-step tutorials covering community services,
-              safety features, and financial transparency.
+              Discover how SocioSphere works from start to finish,
+              including community services, safety features, and
+              financial transparency.
             </p>
           </div>
 
-          <div className="rounded-3xl border border-emerald-400/15 bg-gradient-to-br from-[#10291b] via-[#0b1c14] to-[#08140e] p-5 sm:p-8">
-            <div className="flex aspect-video flex-col items-center justify-center rounded-2xl border border-white/[0.07] bg-[#071510] px-5 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-400">
-                <Play size={26} fill="currentColor" />
-              </div>
-
-              <p className="mt-6 text-xl font-semibold sm:text-2xl">
-                Full Website Walkthrough
-              </p>
-
-              <p className="mt-3 max-w-md text-sm leading-6 text-gray-400">
-                Select a category above to explore individual features
-                through their dedicated video tutorials.
-              </p>
-
-              <a
-                href="#tutorial-categories"
-                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-[#04130d] transition hover:bg-emerald-400"
+          <div className="overflow-hidden rounded-3xl border border-emerald-400/15 bg-gradient-to-br from-[#10291b] via-[#0b1c14] to-[#08140e] p-4 sm:p-8">
+            <div className="overflow-hidden rounded-2xl border border-white/[0.07] bg-black">
+              <video
+                key="/walkthrough.mp4"
+                className="aspect-video w-full bg-black"
+                controls
+                preload="metadata"
+                playsInline
               >
-                Browse Tutorials
-                <ArrowRight size={15} />
-              </a>
+                <source
+                  src="/walkthrough.mp4"
+                  type="video/mp4"
+                />
+                Your browser does not support HTML video.
+              </video>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-6">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
                 ONE COMMUNITY. EVERYTHING CONNECTED.
               </p>
 
               <h3 className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">
-                Discover the Complete SocioSphere Experience
+                Your Complete Guide to SocioSphere
               </h3>
 
               <p className="mt-4 max-w-3xl text-sm leading-7 text-gray-400">
-                Learn how citizens and authorities can use SocioSphere
-                to connect, report community issues, access safety
-                features, and explore colony finances.
+                Watch the complete website demonstration to understand
+                how residents can access community features, report
+                issues, explore safety tools, and track society finances.
               </p>
             </div>
           </div>
@@ -434,7 +420,9 @@ function HowItWorks() {
 
         {/* Footer */}
         <footer className="mt-16 flex flex-col items-center justify-between gap-5 border-t border-white/[0.07] pt-7 sm:flex-row">
-          <p className="text-xs text-gray-500">© SocioSphere</p>
+          <p className="text-xs text-gray-500">
+            © SocioSphere
+          </p>
 
           <p className="text-center text-xs font-medium tracking-[0.15em] text-emerald-400">
             ONE COMMUNITY. EVERYTHING CONNECTED.

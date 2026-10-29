@@ -768,22 +768,24 @@ export default function Expenses() {
               Amount (₹)
             </label>
 
-            <input
-              id="contributionAmount"
-              type="number"
-              min="100"
-              max="1000000000"
-              step="500"
-              required
-              value={selectedAmount}
-              onChange={(event) => {
-                setSelectedAmount(event.target.value);
-                setRequestSubmitted(false);
-                setRequestMessage("");
-              }}
-              placeholder="Enter amount"
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-600 dark:bg-slate-950 dark:text-white"
-            />
+            
+<input
+  id="contributionAmount"
+  type="number"
+  min="100"
+  max="1000000000"
+  step="100"
+  required
+  value={selectedAmount}
+  onChange={(event) => {
+    setSelectedAmount(event.target.value);
+    setRequestSubmitted(false);
+    setRequestMessage("");
+  }}
+  placeholder="Enter amount"
+  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-600 dark:bg-slate-950 dark:text-white"
+/>
+
           </div>
 
           <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
