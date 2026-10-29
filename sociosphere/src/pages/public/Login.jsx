@@ -14,17 +14,14 @@ function Login() {
   const [pendingNotice, setPendingNotice] = useState(null);
 
   const navigate = useNavigate();
-  const { user, isAuthenticated, login } = useAuth();
+  const { login, logout } = useAuth();
 
+  // Always clear any existing session when the login page loads,
+  // so returning users must re-authenticate instead of being auto-redirected.
   useEffect(() => {
-    if (user && isAuthenticated) {
-      if (user.role === "authority" || user.type === "member") {
-        navigate("/authority/home", { replace: true });
-      } else {
-        navigate("/citizen/home", { replace: true });
-      }
-    }
-  }, [user, isAuthenticated, navigate]);
+    logout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogin = (e) => {
     e.preventDefault();

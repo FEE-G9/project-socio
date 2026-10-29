@@ -28,17 +28,14 @@ import {
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated, login } = useAuth();
+  const { login, logout } = useAuth();
 
+  // Clear any existing session when the sign-up page loads,
+  // so the user sees the form rather than being auto-redirected.
   useEffect(() => {
-    if (user && isAuthenticated) {
-      if (user.role === "authority" || user.type === "member") {
-        navigate("/authority/home", { replace: true });
-      } else {
-        navigate("/citizen/home", { replace: true });
-      }
-    }
-  }, [user, isAuthenticated, navigate]);
+    logout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const colonies = getColonies();
 
   const [role, setRole] = useState("citizen");
